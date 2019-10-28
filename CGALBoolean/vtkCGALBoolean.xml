@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<ServerManagerConfiguration>
+  <!-- This is the server manager configuration XML. It defines the interface to
+  our new filter. As a rule of thumb, try to locate the configuration for
+  a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
+  that matches your filter and then model your xml on it -->
+  <ProxyGroup name="filters">
+    <SourceProxy name="CGALBoolean" class="vtkCGALBoolean" label="CGAL Boolean">
+      <Documentation long_help="long help" short_help="short help"> </Documentation>
+
+      <InputProperty name="InputMeshA" port_index="0" command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources"/>
+          <Group name="filters"/>
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkDataSet"/>
+        </DataTypeDomain>
+        <Documentation>
+          Set the source data set.
+        </Documentation>
+      </InputProperty>
+
+      <InputProperty name="InputMeshB" port_index="1" command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources"/>
+          <Group name="filters"/>
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkDataSet"/>
+        </DataTypeDomain>
+        <Documentation>
+          Set the source data set
+        </Documentation>
+      </InputProperty>
+
+
+      <IntVectorProperty name="Mode"
+          command="SetMode"
+          number_of_elements="1"
+          default_values="0">
+        <EnumerationDomain name="enum">
+          <Entry value="0" text="Union"/>
+          <Entry value="1" text="Intersection"/>
+          <Entry value="2" text="Difference"/>
+          <Entry value="3" text="Difference2"/>
+        </EnumerationDomain>
+        <Documentation>
+          This property indicates which mode will be used.
+        </Documentation>
+      </IntVectorProperty>
+
+
+      <Hints> 
+        <!-- possibly other hints -->
+        <ShowInMenu category="CGAL"/>
+      </Hints>
+    </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>
