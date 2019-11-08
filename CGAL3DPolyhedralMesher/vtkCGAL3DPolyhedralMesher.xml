@@ -1,0 +1,213 @@
+<ServerManagerConfiguration>
+    <ProxyGroup name="filters">
+        <SourceProxy name="CGAL3DPolyhedralMesher"
+                     class="vtkCGAL3DPolyhedralMesher"
+                     label="CGAL 3D Polyhedral Mesher">
+            <Documentation
+                    short_help="Generates a polyhedral mesh inside a bounding polyhedron domain."
+                    long_help="Generates a polyhedral mesh inside a bounding polyhedron domain under a set of features given by a polyhedral surface.">
+            </Documentation>
+            <!-- Dialog to choose the input -->
+
+            <!-- Elements of configuration of the filter -->
+            <InputProperty
+                    name="Interior Surfaces"
+                    port_index="0"
+                    command="SetInputConnection">
+                <Documentation>
+                    Interior surface part of the bounding domain.
+                </Documentation>
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData"/>
+                </DataTypeDomain>
+            </InputProperty>
+
+            <InputProperty
+                    name="Bounding Domain"
+                    port_index="1"
+                    command="SetInputConnection">
+                <Documentation>
+                    Bounding box defining the polyhedral domain.
+                </Documentation>
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData"/>
+                </DataTypeDomain>
+            </InputProperty>
+
+            <DoubleVectorProperty name="EdgeSize"
+                                  command="SetEdgeSize"
+                                  label="Edge Size"
+                                  number_of_elements="1"
+                                  default_values="0.025">
+                <Documentation>
+                    This constant is used as an upper bound for the distance between two protecting 
+                    ball centers that are consecutive on a 1-feature. This parameter has to be set 
+                    to a positive value when 1-dimensional features protection is used.
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <DoubleVectorProperty name="FacetAngle"
+                                  command="SetFacetAngle"
+                                  label="Facet Angle"
+                                  number_of_elements="1"
+                                  default_values="25">
+                <Documentation>
+                    This parameter controls the shape of surface facets. Specifically, it is a lower bound 
+                    for the angle (in degrees) of surface facets. When boundary surfaces are smooth, 
+                    the termination of the meshing process is guaranteed if this angular bound is at most 30 degrees.
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <DoubleVectorProperty name="FacetSize"
+                                  command="SetFacetSize"
+                                  label="Facet Size"
+                                  number_of_elements="1"
+                                  default_values="0.05">
+                <Documentation>
+                    This parameter controls the size of surface facets. Each surface facet has a surface Delaunay ball 
+                    which is a ball circumscribing the surface facet and centered on the surface patch. 
+                    The parameter facet_size is providing an upper bound for the radii of surface Delaunay balls.
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <DoubleVectorProperty name="FacetDistance"
+                                  command="SetFacetDistance"
+                                  label="Facet Distance"
+                                  number_of_elements="1"
+                                  default_values="0.005">
+                <Documentation>
+                    This parameter controls the approximation error of boundary and subdivision surfaces. It provides 
+                    an upper bound for the distance between the circumcenter of a surface facet and the center of a 
+                    surface Delaunay ball of this facet.
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <DoubleVectorProperty name="CellRadiusEdgeRatio"
+                                  command="SetCellRadiusEdgeRatio"
+                                  label="Cell Radius to Edge Ratio"
+                                  number_of_elements="1"
+                                  default_values="3">
+                <Documentation>
+                    This parameter controls the shape of mesh cells (but can't filter slivers, as we discussed earlier). 
+                    It is an upper bound for the ratio between the circumradius of a mesh tetrahedron and its shortest edge. 
+                    There is a theoretical bound for this parameter: the Delaunay refinement process is guaranteed to terminate 
+                    for values of cell_radius_edge_ratio bigger than 2.
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <DoubleVectorProperty name="CellSize"
+                                  command="SetCellSize"
+                                  label="Cell Size"
+                                  number_of_elements="1"
+                                  default_values="0.05">
+                <Documentation>
+                    This scalar parameter controls the size of mesh tetrahedra. 
+                    It provides an upper bound on the circumradii of the mesh tetrahedra.
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <PropertyGroup label="Mesh Element Criteria">
+                <Property name="EdgeSize" />
+                <Property name="FacetAngle" />
+                <Property name="FacetSize" />
+                <Property name="FacetDistance" />
+                <Property name="CellRadiusEdgeRatio" />
+                <Property name="CellSize" />
+            </PropertyGroup>
+
+            <IntVectorProperty name="Lloyd"
+                               command="SetLloyd"
+                               label="Lloyd"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    Activates/deactivates the Lloyd smoother.
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="Odt"
+                               command="SetOdt"
+                               label="ODT"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    Activates/deactivates the ODT smoother.
+                </Documentation>
+            </IntVectorProperty>
+            
+            <IntVectorProperty name="Perturb"
+                               command="SetPerturb"
+                               label="Perturbate"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    Activates/deactivates the perturber.
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="Exude"
+                               command="SetExude"
+                               label="Exude"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    Activates/deactivates the exuder.
+                </Documentation>
+            </IntVectorProperty>
+
+            <PropertyGroup label="Optimizers">
+                <Property name="Lloyd" />
+                <Property name="Odt" />
+                <Property name="Perturb" />
+                <Property name="Exude" />
+            </PropertyGroup>
+            
+			<IntVectorProperty  name="TopologicalStructure"
+                                command="SetTopologicalStructure"
+                                label="Topological Structure"
+			                    default_values="3"
+			                    number_of_elements="1">
+				<EnumerationDomain name="enum">
+					<Entry text="Manifold"
+					       value="1" />
+					<Entry text="Manifold with Boundary"
+					       value="2" />
+					<Entry text="Non-Manifold"
+					       value="3" />
+				</EnumerationDomain>
+				<Documentation>
+                    Specifies the manifold of the interior surfaces
+                </Documentation>
+			</IntVectorProperty>
+            
+            <IntVectorProperty name="ConfineSurfacePoints"
+                               command="SetConfineSurfacePoints"
+                               label="Confine Surface Points"
+                               number_of_elements="1"
+                               default_values="1">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, every point of the interior surface will be part of the tetrahedral mesh output.
+                    If false, the default behavior is applied.
+                </Documentation>
+            </IntVectorProperty>
+            
+            <!-- Show in the Filters menu under "CGAL"-->
+            <Hints>
+                <ShowInMenu category="CGAL" />
+            </Hints>
+        </SourceProxy>
+    </ProxyGroup>
+</ServerManagerConfiguration>
