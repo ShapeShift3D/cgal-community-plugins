@@ -8,12 +8,12 @@ endif(CGAL_FOUND)
 #in the UI
 if(ParaView_FOUND AND PARAVIEW_USE_FILE)
   ## ParaView 5.6
-  add_paraview_plugin(CGALFilter "1.0"
-    SERVER_MANAGER_XML vtkCGALFilters.xml
+  add_paraview_plugin(CGALPlugins "1.0"
+    SERVER_MANAGER_XML vtkCGALPlugins.xml
     SERVER_MANAGER_SOURCES vtkCGAL3DPolyhedralMesher.cxx
                            vtkCGALBoolean.cxx)
   
-  target_link_libraries(CGALFilter PRIVATE CGAL::CGAL)
+  target_link_libraries(CGALPlugins PRIVATE CGAL::CGAL)
 
 else()
   ## ParaView 6.0 or later
@@ -21,13 +21,13 @@ else()
     vtkCGAL3DPolyhedralMesher
     vtkCGALBoolean)
 
-  vtk_module_add_module(CGALFilters
+  vtk_module_add_module(vtkCGAL
     CLASSES ${classes})
 
   paraview_add_server_manager_xmls(
-    XMLS  vtkCGALFilters.xml)
+    XMLS  vtkCGALPlugins.xml)
 
   # Link with CGAL
-  target_link_libraries(CGALFilters PRIVATE CGAL::CGAL)
+  target_link_libraries(vtkCGAL PRIVATE CGAL::CGAL)
 
 endif()

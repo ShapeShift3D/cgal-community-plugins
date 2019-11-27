@@ -5,17 +5,17 @@ set(BUILD_SHARED_LIBS TRUE)
 #in the UI
 if(ParaView_FOUND AND PARAVIEW_USE_FILE)
   ## ParaView 5.6
-    add_subdirectory(CGALFilters)
+    add_subdirectory(vtkCGAL)
 else()
   ## ParaView 6.x
   vtk_module_scan(
-    MODULE_FILES      "${CMAKE_CURRENT_SOURCE_DIR}/CGALFilters/vtk.module"
-    REQUEST_MODULES   CGALFilters
+    MODULE_FILES      "${CMAKE_CURRENT_SOURCE_DIR}/vtkCGAL/vtk.module"
+    REQUEST_MODULES   vtkCGAL
     PROVIDES_MODULES  provided_modules)
   
   vtk_module_build(MODULES ${provided_modules})
   
-  paraview_add_plugin(CGALFilter
+  paraview_add_plugin(CGALPlugins
     VERSION "1.0"
-    MODULES CGALFilters)
+    MODULES vtkCGAL)
 endif()

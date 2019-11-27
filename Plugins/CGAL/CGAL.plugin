@@ -1,8 +1,9 @@
 NAME
-  CGALFilter
+  CGALPlugins
 DESCRIPTION
   Set of CGAL plugins
 CONDITION
 REQUIRES_MODULES
   VTK::FiltersCore
+  VTK::CommonDataModel
   VTK::CommonExecutionModel
