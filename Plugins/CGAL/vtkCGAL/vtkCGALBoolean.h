@@ -4,14 +4,14 @@
 #include "vtkPolyDataAlgorithm.h" 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Surface_mesh.h>
-#include <CGALFiltersModule.h>
+#include <vtkCGALModule.h>
 
 class vtkPolyData;
 class vtkUnstructuredGrid;
 
 
 // Inherit from the desired filter
-class CGALFILTERS_EXPORT vtkCGALBoolean : public vtkPolyDataAlgorithm
+class VTKCGAL_EXPORT vtkCGALBoolean : public vtkPolyDataAlgorithm
 {
 public:
   // VTK requirements

@@ -2,11 +2,11 @@
 #define vtkCGAL3DPolyhedralMesher_h
 
 #include "vtkPolyDataAlgorithm.h"
-#include <CGALFiltersModule.h>
+#include <vtkCGALModule.h>
 
 class vtkPointSet;
 
-class CGALFILTERS_EXPORT vtkCGAL3DPolyhedralMesher : public vtkPolyDataAlgorithm
+class VTKCGAL_EXPORT vtkCGAL3DPolyhedralMesher : public vtkPolyDataAlgorithm
 {
 public:
   static vtkCGAL3DPolyhedralMesher* New();
