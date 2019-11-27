@@ -144,7 +144,7 @@
                     Activates/deactivates the ODT smoother.
                 </Documentation>
             </IntVectorProperty>
-            
+
             <IntVectorProperty name="Perturb"
                                command="SetPerturb"
                                label="Perturbate"
@@ -173,25 +173,25 @@
                 <Property name="Perturb" />
                 <Property name="Exude" />
             </PropertyGroup>
-            
-			<IntVectorProperty  name="TopologicalStructure"
+
+            <IntVectorProperty  name="TopologicalStructure"
                                 command="SetTopologicalStructure"
                                 label="Topological Structure"
-			                    default_values="3"
-			                    number_of_elements="1">
-				<EnumerationDomain name="enum">
-					<Entry text="Manifold"
-					       value="1" />
-					<Entry text="Manifold with Boundary"
-					       value="2" />
-					<Entry text="Non-Manifold"
-					       value="3" />
-				</EnumerationDomain>
-				<Documentation>
+                                default_values="3"
+                                number_of_elements="1">
+                <EnumerationDomain name="enum">
+                    <Entry text="Manifold"
+                           value="1" />
+                    <Entry text="Manifold with Boundary"
+                           value="2" />
+                    <Entry text="Non-Manifold"
+                           value="3" />
+                </EnumerationDomain>
+                <Documentation>
                     Specifies the manifold of the interior surfaces
                 </Documentation>
-			</IntVectorProperty>
-            
+            </IntVectorProperty>
+
             <IntVectorProperty name="ConfineSurfacePoints"
                                command="SetConfineSurfacePoints"
                                label="Confine Surface Points"
@@ -203,10 +203,73 @@
                     If false, the default behavior is applied.
                 </Documentation>
             </IntVectorProperty>
-            
+
             <!-- Show in the Filters menu under "CGAL"-->
             <Hints>
                 <ShowInMenu category="CGAL" />
+            </Hints>
+        </SourceProxy>
+
+        <SourceProxy name="CGALBoolean"
+                     class="vtkCGALBoolean"
+                     label="CGAL Boolean">
+            <Documentation long_help="Applies a boolean operation on two PolyData inputs."
+                           short_help="Applies a boolean operation on two PolyData inputs."> </Documentation>
+
+            <InputProperty name="InputMeshA"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source data set.
+                </Documentation>
+            </InputProperty>
+
+            <InputProperty name="InputMeshB"
+                           port_index="1"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source data set
+                </Documentation>
+            </InputProperty>
+
+
+            <IntVectorProperty name="Mode"
+                               command="SetMode"
+                               number_of_elements="1"
+                               default_values="0">
+                <EnumerationDomain name="enum">
+                    <Entry value="0"
+                           text="Union"/>
+                    <Entry value="1"
+                           text="Intersection"/>
+                    <Entry value="2"
+                           text="Difference"/>
+                    <Entry value="3"
+                           text="Difference2"/>
+                </EnumerationDomain>
+                <Documentation>
+                    This property indicates which mode will be used.
+                </Documentation>
+            </IntVectorProperty>
+
+
+            <Hints> 
+                <!-- possibly other hints -->
+                <ShowInMenu category="CGAL"/>
             </Hints>
         </SourceProxy>
     </ProxyGroup>

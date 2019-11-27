@@ -1,0 +1,8 @@
+NAME
+  CGALFilters
+DEPENDS
+  VTK::FiltersCore
+  VTK::FiltersGeometry
+  VTK::CommonSystem
+PRIVATE_DEPENDS
+  VTK::CommonCore
