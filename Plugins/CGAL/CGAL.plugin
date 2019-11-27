@@ -1,0 +1,8 @@
+NAME
+  CGALFilter
+DESCRIPTION
+  Set of CGAL plugins
+CONDITION
+REQUIRES_MODULES
+  VTK::FiltersCore
+  VTK::CommonExecutionModel

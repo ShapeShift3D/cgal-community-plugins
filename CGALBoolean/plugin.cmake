@@ -1,4 +1,0 @@
-pv_plugin(CGALBoolean
-  DESCRIPTION "CGAL Boolean"
-  AUTOLOAD
-  DEFAULT_ENABLED)
