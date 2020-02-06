@@ -21,13 +21,13 @@ else()
     vtkCGAL3DPolyhedralMesher
     vtkCGALBoolean)
 
-  vtk_module_add_module(vtkCGAL
+  vtk_module_add_module(CGAL::vtkCGAL
     CLASSES ${classes})
 
   paraview_add_server_manager_xmls(
     XMLS  vtkCGALPlugins.xml)
 
   # Link with CGAL
-  target_link_libraries(vtkCGAL PRIVATE CGAL::CGAL)
+  vtk_module_link(CGAL::vtkCGAL PRIVATE CGAL::CGAL)
 
 endif()

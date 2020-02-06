@@ -7,15 +7,12 @@ if(ParaView_FOUND AND PARAVIEW_USE_FILE)
   ## ParaView 5.6
     add_subdirectory(vtkCGAL)
 else()
-  ## ParaView 6.x
-  vtk_module_scan(
-    MODULE_FILES      "${CMAKE_CURRENT_SOURCE_DIR}/vtkCGAL/vtk.module"
-    REQUEST_MODULES   vtkCGAL
-    PROVIDES_MODULES  provided_modules)
-  
-  vtk_module_build(MODULES ${provided_modules})
-  
+  ## ParaView 5.7.x  
   paraview_add_plugin(CGALPlugins
     VERSION "1.0"
-    MODULES vtkCGAL)
+    MODULE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/vtkCGAL/vtk.module"
+    MODULES CGAL::vtkCGAL
+    XML_DOCUMENTATION OFF 
+	
+)
 endif()

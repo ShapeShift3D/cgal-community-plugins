@@ -1,4 +1,6 @@
 NAME
+  CGAL::vtkCGAL
+LIBRARY_NAME
   vtkCGAL
 DEPENDS
   VTK::FiltersCore
