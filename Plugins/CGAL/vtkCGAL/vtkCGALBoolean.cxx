@@ -201,7 +201,7 @@ bool vtkCGALBoolean::vtkPointSet_to_polygon_mesh(vtkPointSet* poly_data,
 // Converts a CGAL Polygon Mesh to a vtkUnstructuredGrid
 template<typename PM>
 vtkUnstructuredGrid* vtkCGALBoolean::polygon_mesh_to_vtkUnstructured(const PM& pmesh,//PolygonMesh
-	vtkUnstructuredGrid* usg=0)
+	vtkUnstructuredGrid* usg)
 {
 	typedef typename boost::graph_traits<PM>::vertex_descriptor   vertex_descriptor;
 	typedef typename boost::graph_traits<PM>::face_descriptor     face_descriptor;
