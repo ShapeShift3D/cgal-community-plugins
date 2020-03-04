@@ -7,9 +7,7 @@
                     short_help="Generates a polyhedral mesh inside a bounding polyhedron domain."
                     long_help="Generates a polyhedral mesh inside a bounding polyhedron domain under a set of features given by a polyhedral surface.">
             </Documentation>
-            <!-- Dialog to choose the input -->
 
-            <!-- Elements of configuration of the filter -->
             <InputProperty
                     name="Interior Surfaces"
                     port_index="0"
@@ -40,6 +38,26 @@
                 <DataTypeDomain name="input_type">
                     <DataType value="vtkPolyData"/>
                 </DataTypeDomain>
+            </InputProperty>
+            
+            <InputProperty
+                    name="Sizing Field (Optional)"
+                    port_index="2"
+                    command="SetInputConnection"
+                    optional="1">
+                <Documentation>
+                    Point cloud with scalar values
+                </Documentation>
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPointSet"/>
+                </DataTypeDomain>
+                <InputArrayDomain name="SizingFieldArray"
+                                  attribute_type="point"
+                                  number_of_components="1"/>
             </InputProperty>
 
             <DoubleVectorProperty name="EdgeSize"
@@ -114,7 +132,7 @@
                 </Documentation>
             </DoubleVectorProperty>
 
-            <PropertyGroup label="Mesh Element Criteria">
+            <PropertyGroup label="Element Criteria">
                 <Property name="EdgeSize" />
                 <Property name="FacetAngle" />
                 <Property name="FacetSize" />
@@ -123,6 +141,80 @@
                 <Property name="CellSize" />
             </PropertyGroup>
 
+            <IntVectorProperty  name="TopologicalStructure"
+                                command="SetTopologicalStructure"
+                                label="Topological Structure"
+                                default_values="3"
+                                number_of_elements="1">
+                <EnumerationDomain name="enum">
+                    <Entry text="Manifold"
+                           value="1" />
+                    <Entry text="Manifold with Boundary"
+                           value="2" />
+                    <Entry text="Non-Manifold"
+                           value="3" />
+                </EnumerationDomain>
+                <Documentation>
+                    Specifies the manifold of the interior surfaces
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="ConfineSurfacePoints"
+                               command="SetConfineSurfacePoints"
+                               label="Confine Surface Points"
+                               number_of_elements="1"
+                               default_values="1">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, every point of the interior surface will be part of the tetrahedral mesh output.
+                    If false, the default behavior is applied.
+                </Documentation>
+            </IntVectorProperty>
+            
+            <IntVectorProperty name="UseCustomSizingField"
+                               command="SetUseCustomSizingField"
+                               label="Use Custom Sizing Field"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, a sizing field is used for very precise meshing definition 
+                </Documentation>
+            </IntVectorProperty>
+            
+            <StringVectorProperty name="CustomSizingFieldArrayName"
+                                  command="SetCustomSizingFieldArrayName"
+                                  label="Custom Sizing Field Array"
+                                  number_of_elements="1"
+                                  animateable="0"
+                                  default_values="">
+                <ArrayListDomain name="array_list"
+                                 none_string="None"
+                                 input_domain_name="SizingFieldArray">
+                    <RequiredProperties>
+                        <Property name="Sizing Field (Optional)"
+                                  function="Input" />
+                    </RequiredProperties>
+                </ArrayListDomain>
+                <Documentation>
+                    Specifies the custom sizing field
+                </Documentation>
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="UseCustomSizingField"
+                                             value="1">
+                    </PropertyWidgetDecorator>
+                </Hints>
+            </StringVectorProperty>
+
+            <PropertyGroup label="Constraints">
+                <Property name="TopologicalStructure" />
+                <Property name="ConfineSurfacePoints" />
+                <Property name="UseCustomSizingField" />
+                <Property name="CustomSizingFieldArrayName" />
+            </PropertyGroup>
+            
             <IntVectorProperty name="Lloyd"
                                command="SetLloyd"
                                label="Lloyd"
@@ -173,37 +265,7 @@
                 <Property name="Perturb" />
                 <Property name="Exude" />
             </PropertyGroup>
-
-            <IntVectorProperty  name="TopologicalStructure"
-                                command="SetTopologicalStructure"
-                                label="Topological Structure"
-                                default_values="3"
-                                number_of_elements="1">
-                <EnumerationDomain name="enum">
-                    <Entry text="Manifold"
-                           value="1" />
-                    <Entry text="Manifold with Boundary"
-                           value="2" />
-                    <Entry text="Non-Manifold"
-                           value="3" />
-                </EnumerationDomain>
-                <Documentation>
-                    Specifies the manifold of the interior surfaces
-                </Documentation>
-            </IntVectorProperty>
-
-            <IntVectorProperty name="ConfineSurfacePoints"
-                               command="SetConfineSurfacePoints"
-                               label="Confine Surface Points"
-                               number_of_elements="1"
-                               default_values="1">
-                <BooleanDomain name="bool" />
-                <Documentation>
-                    If true, every point of the interior surface will be part of the tetrahedral mesh output.
-                    If false, the default behavior is applied.
-                </Documentation>
-            </IntVectorProperty>
-
+            
             <!-- Show in the Filters menu under "CGAL"-->
             <Hints>
                 <ShowInMenu category="CGAL" />

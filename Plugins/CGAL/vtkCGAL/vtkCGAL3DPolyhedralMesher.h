@@ -74,6 +74,62 @@ public:
   vtkGetMacro(CellSize, double);
   //@}
 
+  typedef enum {
+      MANIFOLD = 1,
+      MANIFOLD_WITH_BOUNDARY,
+      NON_MANIFOLD
+  } TopologicalStructures;
+
+  //@{
+  /**
+  * Specifies the manifold of the interior surfaces
+  */
+  vtkGetMacro(TopologicalStructure, int);
+  vtkSetMacro(TopologicalStructure, int);
+  //@}
+
+  virtual void SetTopologicalStructureToManifold(void)
+  {
+      this->SetTopologicalStructure(vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD);
+  }
+
+  virtual void SetTopologicalStructureToManifoldWithBoundary(void)
+  {
+      this->SetTopologicalStructure(vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD_WITH_BOUNDARY);
+  }
+
+  virtual void SetTopologicalStructureToNonManifold(void)
+  {
+      this->SetTopologicalStructure(vtkCGAL3DPolyhedralMesher::TopologicalStructures::NON_MANIFOLD);
+  }
+
+  //@{
+  /**
+  * If true, every point of the interior surface will be part of the tetrahedral mesh output.
+  * If false, the default behavior is applied.
+  */
+  vtkSetMacro(ConfineSurfacePoints, bool);
+  vtkGetMacro(ConfineSurfacePoints, bool);
+  vtkBooleanMacro(ConfineSurfacePoints, bool);
+  //@}
+
+  //@{
+  /**
+  * If true, a sizing field is used for very precise meshing definition 
+  */
+  vtkGetMacro(UseCustomSizingField, bool);
+  vtkSetMacro(UseCustomSizingField, bool);
+  vtkBooleanMacro(UseCustomSizingField, bool);
+  //@}
+
+  //@{
+  /**
+  * If true, a sizing field is used for very precise meshing definition
+  */
+  vtkGetMacro(CustomSizingFieldArrayName, std::string);
+  vtkSetMacro(CustomSizingFieldArrayName, std::string);
+  //@}
+
   //@{
   /**
   * Activates/deactivates the Lloyd smoother.
@@ -109,42 +165,10 @@ public:
   vtkGetMacro(Exude, bool);
   vtkBooleanMacro(Exude, bool);
   //@}
-  
-  typedef enum {
-    MANIFOLD = 1,
-    MANIFOLD_WITH_BOUNDARY,
-    NON_MANIFOLD
-  } TopologicalStructures;
-
-  //@{
-  /**
-  * Specifies the manifold of the interior surfaces
-  */
-  vtkGetMacro(TopologicalStructure, int);
-  vtkSetMacro(TopologicalStructure, int);
-  //@}
-
-  virtual void SetTopologicalStructureToManifold(void) 
-    { this->SetTopologicalStructure(vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD); }
-
-  virtual void SetTopologicalStructureToManifoldWithBoundary(void) 
-    { this->SetTopologicalStructure(vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD_WITH_BOUNDARY); }
-
-  virtual void SetTopologicalStructureToNonManifold(void) 
-    { this->SetTopologicalStructure(vtkCGAL3DPolyhedralMesher::TopologicalStructures::NON_MANIFOLD); }
-
-  //@{
-  /**
-  * If true, every point of the interior surface will be part of the tetrahedral mesh output.
-  * If false, the default behavior is applied.
-  */
-  vtkSetMacro(ConfineSurfacePoints, bool);
-  vtkGetMacro(ConfineSurfacePoints, bool);
-  vtkBooleanMacro(ConfineSurfacePoints, bool);
-  //@}
 
   vtkPolyData* GetInteriorSurfaces();
   vtkPolyData* GetBoundingDomain();
+  vtkPointSet* GetSizingField();
 
 protected:
   vtkCGAL3DPolyhedralMesher();
@@ -152,6 +176,7 @@ protected:
   
   virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   virtual int FillOutputPortInformation(int, vtkInformation *info) override;
+  virtual int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
   vtkCGAL3DPolyhedralMesher(const vtkCGAL3DPolyhedralMesher&) = delete;
@@ -168,13 +193,17 @@ private:
   double CellRadiusEdgeRatio;
   double CellSize;
 
+  // Constraint flags
+  int TopologicalStructure;
+  bool ConfineSurfacePoints;
+  bool UseCustomSizingField;
+  std::string CustomSizingFieldArrayName;
+
   // Optimizer flags
   bool Lloyd;
   bool Odt;
   bool Perturb;
   bool Exude;
 
-  int TopologicalStructure;
-  bool ConfineSurfacePoints;
 };
 #endif
