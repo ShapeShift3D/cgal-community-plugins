@@ -12,7 +12,7 @@
 * 
 */
 
-//---------vtk----------------------------------
+//---------VTK----------------------------------
 #include "vtkCGALBoolean.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
@@ -31,9 +31,13 @@
 #include <CGAL/property_map.h>
 #include <CGAL/IO/Complex_3_in_triangulation_3_to_vtk.h>
 #include <CGAL/boost/graph/io.h>
+
 //---------Boost--------------------------------------------------
 #include <boost/graph/graph_traits.hpp>
 #include <boost/unordered_map.hpp>
+
+//---------Module--------------------------------------------------
+#include <vtkCGALUtilities.h>
 
 //----------
 // Declare the plugin
@@ -48,8 +52,8 @@ typedef CGAL::Surface_mesh<K::Point_3> Surface_Mesh;
 // Initializes the members that need it.
 vtkCGALBoolean::vtkCGALBoolean()
 {
-  SetNumberOfInputPorts(2);
-  SetNumberOfOutputPorts(1);
+  this->SetNumberOfInputPorts(2);
+  this->SetNumberOfOutputPorts(1);
 
   this->Mode = UNION;
 }
@@ -110,14 +114,14 @@ void vtkCGALBoolean::SetModeToDifference2()
 // ----------------------------------------------------------------------------
 // Gets the input
 // Creates CGAL::Surface_mesh from vtkPolydata
-// Calls the CGAL::run_boolean_operations
+// Calls the CGAL::RunBooleanOperations
 // Fills the output vtkUnstructuredGrid from the result.
 int vtkCGALBoolean::RequestData(vtkInformation *,
-                                             vtkInformationVector **inputVector,
-                                             vtkInformationVector *outputVector)
+                                vtkInformationVector **inputVector,
+                                vtkInformationVector *outputVector)
 {
-  //  Get the input and output data objects.
-  //  Get the info objects
+	//  Get the input and output data objects.
+	//  Get the info objects
 	vtkPolyData* inputMeshA = this->GetInputMeshA();
 	vtkPolyData* inputMeshB = this->GetInputMeshB();
 
@@ -137,120 +141,28 @@ int vtkCGALBoolean::RequestData(vtkInformation *,
 	auto output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
 	Surface_Mesh input1, input2;
-	vtkPointSet_to_polygon_mesh(inputMeshA, input1);
-	vtkPointSet_to_polygon_mesh(inputMeshB, input2);	
+	vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputMeshA, input1);
+	vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputMeshB, input2);
 	Surface_Mesh boolean_op;
 	std::size_t id = 1;
 	//Result_checking rc;
-	run_boolean_operations(input1, input2, boolean_op, Mode);
-	polygon_mesh_to_vtkUnstructured(boolean_op, output);
-
-  return 1;
-}
-
-//----------------------------------------------------
-// Converts a vtkPointSet to a CGAL Polygon Mesh Class
-template <typename TM>
-bool vtkCGALBoolean::vtkPointSet_to_polygon_mesh(vtkPointSet* poly_data,
-	TM& tmesh)
-{
-	typedef typename boost::property_map<TM, CGAL::vertex_point_t>::type VPMap;
-	typedef typename boost::property_map_value<TM, CGAL::vertex_point_t>::type Point_3;
-	typedef typename boost::graph_traits<TM>::vertex_descriptor vertex_descriptor;
-
-	VPMap vpmap = get(CGAL::vertex_point, tmesh);
-
-	// get nb of points and cells
-	vtkIdType nb_points = poly_data->GetNumberOfPoints();
-	vtkIdType nb_cells = poly_data->GetNumberOfCells();
-
-	//extract points
-	std::vector<vertex_descriptor> vertex_map(nb_points);
-	for (vtkIdType i = 0; i < nb_points; ++i)
+	try
 	{
-		double coords[3];
-		poly_data->GetPoint(i, coords);
-
-		vertex_descriptor v = add_vertex(tmesh);
-		put(vpmap, v, Point_3(coords[0], coords[1], coords[2]));
-		vertex_map[i] = v;
+		RunBooleanOperations(input1, input2, boolean_op, Mode);
+	}
+	catch (const std::exception& e)
+	{
+		vtkErrorMacro(<< "Error caught : " << e.what());
+		return 0;
 	}
 
-	//extract cells
-	for (vtkIdType i = 0; i < nb_cells; ++i)
-	{
-		if (poly_data->GetCellType(i) != 5
-			&& poly_data->GetCellType(i) != 7
-			&& poly_data->GetCellType(i) != 9) //only supported cells are triangles, quads and polygons
-			continue;
-		vtkCell* cell_ptr = poly_data->GetCell(i);
+	vtkCGALUtilities::PolygonMeshToVtkUnstructuredGrid(boolean_op, output);
 
-		vtkIdType nb_vertices = cell_ptr->GetNumberOfPoints();
-		if (nb_vertices < 3)
-			return false;
-		std::vector<vertex_descriptor> vr(nb_vertices);
-		for (vtkIdType k = 0; k < nb_vertices; ++k)
-			vr[k] = vertex_map[cell_ptr->GetPointId(k)];
-
-		CGAL::Euler::add_face(vr, tmesh);
-	}
-	return true;
-}
-
-//----------------------------------------------------------------------------------------------------------
-// Converts a CGAL Polygon Mesh to a vtkUnstructuredGrid
-template<typename PM>
-vtkUnstructuredGrid* vtkCGALBoolean::polygon_mesh_to_vtkUnstructured(const PM& pmesh,//PolygonMesh
-	vtkUnstructuredGrid* usg)
-{
-	typedef typename boost::graph_traits<PM>::vertex_descriptor   vertex_descriptor;
-	typedef typename boost::graph_traits<PM>::face_descriptor     face_descriptor;
-	typedef typename boost::graph_traits<PM>::halfedge_descriptor halfedge_descriptor;
-
-	typedef typename boost::property_map<PM, CGAL::vertex_point_t>::const_type VPMap;
-	typedef typename boost::property_map_value<PM, CGAL::vertex_point_t>::type Point_3;
-	VPMap vpmap = get(CGAL::vertex_point, pmesh);
-
-	vtkPoints* const vtk_points = vtkPoints::New();
-	vtkCellArray* const vtk_cells = vtkCellArray::New();
-
-	vtk_points->Allocate(num_vertices(pmesh));
-	vtk_cells->Allocate(num_faces(pmesh));
-
-	std::map<vertex_descriptor, vtkIdType> Vids;
-	vtkIdType inum = 0;
-
-	for (vertex_descriptor v : vertices(pmesh))
-	{
-		const Point_3& p = get(vpmap, v);
-		vtk_points->InsertNextPoint(CGAL::to_double(p.x()),
-			CGAL::to_double(p.y()),
-			CGAL::to_double(p.z()));
-		Vids[v] = inum++;
-	}
-
-	for (face_descriptor f : faces(pmesh))
-	{
-		vtkIdList* cell = vtkIdList::New();
-		for (halfedge_descriptor h :
-		halfedges_around_face(halfedge(f, pmesh), pmesh))
-		{
-			cell->InsertNextId(Vids[target(h, pmesh)]);
-		}
-		vtk_cells->InsertNextCell(cell);
-		cell->Delete();
-	}
-
-	usg->SetPoints(vtk_points);
-	vtk_points->Delete();
-
-	usg->SetCells(5, vtk_cells);
-	vtk_cells->Delete();
-	return usg;
+	return 1;
 }
 
 //---------------------------------------------------------------------------------------
-Surface_Mesh* vtkCGALBoolean::run_boolean_operations(
+Surface_Mesh* vtkCGALBoolean::RunBooleanOperations(
 	Surface_Mesh& tm1,
 	Surface_Mesh& tm2,
 	Surface_Mesh& operation,

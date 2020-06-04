@@ -11,7 +11,7 @@
 
 #include "vtkCGAL3DPolyhedralMesher.h"
 
-// VTK
+//---------VTK----------------------------------
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkPolyDataAlgorithm.h>
@@ -24,9 +24,7 @@
 
 #include <vtkTimerLog.h>
 
-#include <vtkPointCloudScalarSizingField.h>
-
-// CGAL
+//---------CGAL---------------------------------
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Mesh_polyhedron_3.h>
 #include <CGAL/Polyhedral_mesh_domain_with_features_3.h>
@@ -38,6 +36,10 @@
 #include <CGAL/make_mesh_3.h>
 #include <CGAL/refine_mesh_3.h>
 #include <CGAL/IO/Complex_3_in_triangulation_3_to_vtk.h>
+
+//---------Module-------------------------------
+#include <vtkCGALUtilities.h>
+#include <vtkPointCloudScalarSizingField.h>
 
 #ifdef CGAL_LINKED_WITH_TBB
 typedef CGAL::Parallel_tag Concurrency_tag;
@@ -219,8 +221,8 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   typedef CGAL::Mesh_polyhedron_3<K>::type Polyhedron;
   Polyhedron* interiorSurfaces = new Polyhedron();
   Polyhedron* boundingDomain = new Polyhedron();
-  this->vtkPolyDataToPolygonMesh(inputInteriorSurfaces, *interiorSurfaces);
-  this->vtkPolyDataToPolygonMesh(inputBoundingDomain, *boundingDomain);
+  vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputInteriorSurfaces, *interiorSurfaces);
+  vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputBoundingDomain, *boundingDomain);
   
   vtkTimerLog::MarkEndEvent("VTK To CGAL conversion");
   this->UpdateProgress(0.1);
@@ -238,14 +240,9 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
 
   if (this->UseCustomSizingField)
   {
-    //vtkNew<vtkPointLocator> pointLocator;
-    //pointLocator->SetDataSet(inputSizingField);
-    //pointLocator->BuildLocator();
-
     vtkDataArray* sizingFieldArray = vtkArrayDownCast<vtkDataArray>(inputSizingField->GetPointData()->GetAbstractArray(this->CustomSizingFieldArrayName.c_str()));
 
     size.SetUseDefaultCellSize(false);
-    //size.SetPointLocator(pointLocator);
     size.SetPointCloud(inputSizingField);
     size.SetSizingFieldArray(sizingFieldArray);
   }
@@ -362,61 +359,4 @@ int vtkCGAL3DPolyhedralMesher::FillOutputPortInformation(int, vtkInformation *in
 {
   info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkUnstructuredGrid");
   return 1;
-}
-
-//----------------------------------------------------------------------------
-
-/** @brief Converts a vtkPolyData (VTK) into a Polygonal Mesh (CGAL). Code taken from the
-*          Polyhedron demo located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them.
-*
-*  @param polyData The input PolyData
-*  @param tmesh The resulting Polygon Mesh
-*  @return bool Success (true) or failure (false)
-*/
-template <typename TM>
-bool vtkCGAL3DPolyhedralMesher::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, TM& tmesh)
-{
-  typedef typename boost::property_map<TM, CGAL::vertex_point_t>::type VPMap;
-  typedef typename boost::property_map_value<TM, CGAL::vertex_point_t>::type Point_3;
-  typedef typename boost::graph_traits<TM>::vertex_descriptor vertex_descriptor;
-
-  VPMap vpmap = get(CGAL::vertex_point, tmesh);
-
-  // get nb of points and cells
-  vtkIdType nb_points = polyData->GetNumberOfPoints();
-  vtkIdType nb_cells = polyData->GetNumberOfCells();
-
-  //extract points
-  std::vector<vertex_descriptor> vertex_map(nb_points);
-  for (vtkIdType i = 0; i < nb_points; ++i)
-  {
-    double coords[3];
-    polyData->GetPoint(i, coords);
-
-    vertex_descriptor v = add_vertex(tmesh);
-    put(vpmap, v, Point_3(coords[0], coords[1], coords[2]));
-    vertex_map[i] = v;
-  }
-
-  //extract cells
-  for (vtkIdType i = 0; i < nb_cells; ++i)
-  {
-    if (polyData->GetCellType(i) != 5
-      && polyData->GetCellType(i) != 7
-      && polyData->GetCellType(i) != 9) //only supported cells are triangles, quads and polygons
-      continue;
-    vtkCell* cell_ptr = polyData->GetCell(i);
-
-    vtkIdType nb_vertices = cell_ptr->GetNumberOfPoints();
-    if (nb_vertices < 3)
-      return false;
-    std::vector<vertex_descriptor> vr(nb_vertices);
-    for (vtkIdType k = 0; k < nb_vertices; ++k)
-      vr[k] = vertex_map[cell_ptr->GetPointId(k)];
-
-    CGAL::Euler::add_face(vr, tmesh);
-  }
-
-  return true;
 }
