@@ -4,8 +4,6 @@
 #include "vtkPolyDataAlgorithm.h"
 #include <vtkCGALModule.h>
 
-class vtkPointSet;
-
 class VTKCGAL_EXPORT vtkCGAL3DPolyhedralMesher : public vtkPolyDataAlgorithm
 {
 public:
@@ -181,9 +179,6 @@ protected:
 private:
   vtkCGAL3DPolyhedralMesher(const vtkCGAL3DPolyhedralMesher&) = delete;
   void operator=(const vtkCGAL3DPolyhedralMesher&) = delete;
-
-  template <typename TM>
-  bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, TM& tmesh);
 
   // Mesh Criteria
   double EdgeSize;
