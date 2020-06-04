@@ -24,6 +24,7 @@ if(ParaView_FOUND AND PARAVIEW_USE_FILE)
     SERVER_MANAGER_XML vtkCGALPlugins.xml
     SERVER_MANAGER_SOURCES vtkCGAL3DPolyhedralMesher.cxx
                            vtkCGALBoolean.cxx
+                           vtkCGALSelfIntersectionMeasurer.cxx
                            vtkCGALUtilities.cxx)
   
   target_link_libraries(CGALPlugins PRIVATE CGAL::CGAL)
@@ -38,6 +39,7 @@ else()
   set(classes
     vtkCGAL3DPolyhedralMesher
     vtkCGALBoolean
+    vtkCGALSelfIntersectionMeasurer
     vtkCGALUtilities)
     
   set(headers

@@ -334,5 +334,52 @@
                 <ShowInMenu category="CGAL"/>
             </Hints>
         </SourceProxy>
+        <SourceProxy name="CGALSelfIntersectionMeasurer"
+                     class="vtkCGALSelfIntersectionMeasurer"
+                     label="CGAL Self Intersection Measurer">
+            <Documentation long_help="Applies a boolean operation on two PolyData inputs."
+                           short_help="Applies a boolean operation on two PolyData inputs."> </Documentation>
+
+            <InputProperty name="InputMesh"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source data set.
+                </Documentation>
+            </InputProperty>
+
+            <StringVectorProperty name="SelfIntersectionsArrayName"
+                                  command="SetSelfIntersectionsArrayName"
+                                  number_of_elements="1"
+                                  animateable="0"
+                                  default_values="Self-Intersections"
+                                  panel_visibility="advanced">
+                <Documentation>
+                    Name of the Self-Intersections array.
+                </Documentation>
+            </StringVectorProperty>
+
+            <IntVectorProperty name="PrintSelfIntersectingPairs"
+                               command="SetPrintSelfIntersectingPairs"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool"/>
+                <Documentation>
+                    Print pairs of triangles self-intersecting themselves to the console output.
+                </Documentation>
+            </IntVectorProperty>
+
+            <Hints> 
+                <!-- possibly other hints -->
+                <ShowInMenu category="CGAL"/>
+            </Hints>
+        </SourceProxy>
     </ProxyGroup>
 </ServerManagerConfiguration>
