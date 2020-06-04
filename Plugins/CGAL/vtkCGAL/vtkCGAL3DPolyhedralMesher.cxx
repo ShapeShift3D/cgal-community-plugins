@@ -287,7 +287,7 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   else
   {
     domain.detect_features();
-    c3t3 = CGAL::make_mesh_3<C3t3>(domain, criteria);
+    c3t3 = CGAL::make_mesh_3<C3t3, Mesh_domain, Mesh_criteria>(domain, criteria);
   }
 
   CGAL::parameters::internal::Manifold_options manifoldOption;
@@ -314,12 +314,12 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   }
   }
 
-  CGAL::refine_mesh_3<C3t3>(c3t3, domain, criteria,
+  CGAL::refine_mesh_3<C3t3, Mesh_domain, Mesh_criteria>(c3t3, domain, criteria,
             CGAL::parameters::internal::Lloyd_options(this->Lloyd),
             CGAL::parameters::internal::Odt_options(this->Odt),
             CGAL::parameters::internal::Perturb_options(this->Perturb), 
             CGAL::parameters::internal::Exude_options(this->Exude),
-            CGAL::parameters::internal::Manifold_options(manifoldOption) // or manifold_with_boundary() or non_manifold()
+            CGAL::parameters::internal::Manifold_options(manifoldOption)
   );
 
   vtkTimerLog::MarkEndEvent("Mesh Generation");
