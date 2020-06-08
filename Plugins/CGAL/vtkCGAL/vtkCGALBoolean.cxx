@@ -157,6 +157,7 @@ int vtkCGALBoolean::RequestData(vtkInformation *,
 	}
 
 	vtkCGALUtilities::PolygonMeshToVtkUnstructuredGrid(boolean_op, output);
+	output->Squeeze();
 
 	return 1;
 }
