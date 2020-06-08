@@ -27,6 +27,16 @@ public:
 
     //@{
     /**
+     * Checks self-intersections independently for every geometrically non-connected mesh of the polydata.
+     * Fixes some issues where you have multiple disjoint zones.
+     */
+    vtkSetMacro(IterateByConnectivity, bool);
+    vtkGetMacro(IterateByConnectivity, bool);
+    vtkBooleanMacro(IterateByConnectivity, bool);
+    //@}
+
+    //@{
+    /**
      * Print pairs of triangles self-intersecting themselves to the console output.
      */
     vtkSetMacro(PrintSelfIntersectingPairs, bool);
@@ -45,7 +55,10 @@ private:
     vtkCGALSelfIntersectionMeasurer(const vtkCGALSelfIntersectionMeasurer&) = delete;
     void operator=(const vtkCGALSelfIntersectionMeasurer&) = delete;
 
+    int ExecuteSelfIntersect(vtkPolyData* polyDataIn, vtkPolyData* polyDataOut);
+
     std::string SelfIntersectionsArrayName;
+    bool IterateByConnectivity;
     bool PrintSelfIntersectingPairs;
 };
 #endif

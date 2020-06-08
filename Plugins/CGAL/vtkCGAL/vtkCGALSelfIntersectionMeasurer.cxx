@@ -37,12 +37,6 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Surface_mesh<K::Point_3> Surface_Mesh;
 typedef boost::graph_traits<Surface_Mesh>::face_descriptor face_descriptor;
 
-#ifdef CGAL_LINKED_WITH_TBB
-typedef CGAL::Parallel_tag Concurrency_tag;
-#else
-typedef CGAL::Sequential_tag Concurrency_tag;
-#endif
-
 vtkStandardNewMacro(vtkCGALSelfIntersectionMeasurer);
 
 // -----------------------------------------------------------------------------
@@ -52,6 +46,7 @@ vtkCGALSelfIntersectionMeasurer::vtkCGALSelfIntersectionMeasurer()
 	this->SetNumberOfOutputPorts(1);
 
 	this->SelfIntersectionsArrayName = "Self-Intersections";
+	this->IterateByConnectivity = true;
 	this->PrintSelfIntersectingPairs = false;
 }
 
@@ -89,91 +84,106 @@ int vtkCGALSelfIntersectionMeasurer::RequestData(vtkInformation *,
 
 	vtkPolyData* output = vtkPolyData::GetData(outputVector->GetInformationObject(0));
 
-	// Iterate over polygon meshes by connectivity
-	vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
-	connectivityFilter->SetInputData(inputMesh);
-	connectivityFilter->SetExtractionModeToAllRegions();
-	connectivityFilter->Update();
-
-	vtkNew<vtkCleanPolyData> cleanPolyData;
-	cleanPolyData->SetInputConnection(connectivityFilter->GetOutputPort());
-
-	int numberOfRegions = connectivityFilter->GetNumberOfExtractedRegions();
-
-	vtkNew<vtkAppendPolyData> appendFinal;
-	namespace PMP = CGAL::Polygon_mesh_processing;
-
-	for (vtkIdType i = 0; i < numberOfRegions; ++i)
+	if (this->IterateByConnectivity)
 	{
-		connectivityFilter->SetExtractionModeToSpecifiedRegions();
-		connectivityFilter->InitializeSpecifiedRegionList();
-		connectivityFilter->AddSpecifiedRegion(i);
-		cleanPolyData->Update();
+		// Iterate over polygon meshes by connectivity
+		vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
+		connectivityFilter->SetInputData(inputMesh);
+		connectivityFilter->SetExtractionModeToAllRegions();
+		connectivityFilter->Update();
 
-		vtkPolyData* polyData = cleanPolyData->GetOutput();
+		vtkNew<vtkCleanPolyData> cleanPolyData;
+		cleanPolyData->SetInputConnection(connectivityFilter->GetOutputPort());
 
-		if (polyData->GetNumberOfCells() == 0)
-			continue;
+		int numberOfRegions = connectivityFilter->GetNumberOfExtractedRegions();
 
-		Surface_Mesh surfaceMesh;
-		vtkCGALUtilities::vtkPolyDataToPolygonMesh(polyData, surfaceMesh);
+		vtkNew<vtkAppendPolyData> appendFinal;
 
-		if (!CGAL::is_triangle_mesh(surfaceMesh))
+		for (vtkIdType i = 0; i < numberOfRegions; ++i)
 		{
-			vtkErrorMacro("Mesh is not triangular.");
-			return 0;
-		}
+			connectivityFilter->SetExtractionModeToSpecifiedRegions();
+			connectivityFilter->InitializeSpecifiedRegionList();
+			connectivityFilter->AddSpecifiedRegion(i);
+			cleanPolyData->Update();
 
-		bool intersecting = PMP::does_self_intersect(surfaceMesh,
-			PMP::parameters::vertex_point_map(get(CGAL::vertex_point, surfaceMesh)));
+			vtkPolyData* polyData = cleanPolyData->GetOutput();
 
-		std::vector<std::pair<face_descriptor, face_descriptor>> intersected_tris;
-		PMP::self_intersections(surfaceMesh, std::back_inserter(intersected_tris));
+			if (polyData->GetNumberOfCells() == 0)
+				continue;
 
-		if (intersecting)
-		{
-			vtkErrorMacro("Self-Intersections were found in the mesh (region " << i << "). " <<
-				intersected_tris.size() << " pairs of triangles intersect.");
-		}
-
-		vtkNew<vtkIntArray> intersectingTrisArray;
-		intersectingTrisArray->SetName(this->SelfIntersectionsArrayName.c_str());
-		intersectingTrisArray->SetNumberOfComponents(1);
-		intersectingTrisArray->SetNumberOfTuples(polyData->GetNumberOfCells());
-		intersectingTrisArray->Fill(0);
-
-		int currentTuple = 0;
-
-		for (vtkIdType i = 0; i < intersected_tris.size(); ++i)
-		{
-			currentTuple = intersectingTrisArray->GetTuple1(intersected_tris[i].first.idx());
-			intersectingTrisArray->SetTuple1(intersected_tris[i].first.idx(), currentTuple + 1);
-
-			currentTuple = intersectingTrisArray->GetTuple1(intersected_tris[i].second.idx());
-			intersectingTrisArray->SetTuple1(intersected_tris[i].second.idx(), currentTuple + 1);
-		}
-
-		if (this->PrintSelfIntersectingPairs)
-		{
 			std::cout << "====== Region " << i << " ======" << std::endl;
-			for (vtkIdType i = 0; i < intersected_tris.size(); ++i)
-			{
-				vtkWarningMacro("Triangle " << intersected_tris[i].first.idx() << " is intersecting with "
-					<< intersected_tris[i].second.idx() << ".");
-			}
+
+			vtkNew<vtkPolyData> singlePoly;
+			this->ExecuteSelfIntersect(polyData, singlePoly);
+			appendFinal->AddInputData(singlePoly);
 		}
 
-		vtkNew<vtkPolyData> singlePoly;
-		singlePoly->DeepCopy(polyData);
-		singlePoly->GetCellData()->AddArray(intersectingTrisArray);
+		appendFinal->Update();
 
-		appendFinal->AddInputData(singlePoly);
+		// Copy to output
+		output->ShallowCopy(appendFinal->GetOutput());
 	}
+	else
+	{
+		vtkNew<vtkPolyData> outPoly;
+		this->ExecuteSelfIntersect(inputMesh, outPoly);
 
-	appendFinal->Update();
-
-	// Copy to output
-	output->DeepCopy(appendFinal->GetOutput());
+		// Copy to output
+		output->ShallowCopy(outPoly);
+	}
 	
 	return 1;
+}
+
+//---------------------------------------------------
+int vtkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(vtkPolyData* polyDataIn, vtkPolyData* polyDataOut)
+{
+	namespace PMP = CGAL::Polygon_mesh_processing;
+
+	Surface_Mesh surfaceMesh;
+	vtkCGALUtilities::vtkPolyDataToPolygonMesh(polyDataIn, surfaceMesh);
+
+	if (!CGAL::is_triangle_mesh(surfaceMesh))
+	{
+		vtkErrorMacro("Mesh is not triangular.");
+		return 0;
+	}
+
+	bool intersecting = PMP::does_self_intersect(surfaceMesh,
+		PMP::parameters::vertex_point_map(get(CGAL::vertex_point, surfaceMesh)));
+
+	std::vector<std::pair<face_descriptor, face_descriptor>> intersected_tris;
+	PMP::self_intersections(surfaceMesh, std::back_inserter(intersected_tris));
+
+	vtkNew<vtkIntArray> intersectingTrisArray;
+	intersectingTrisArray->SetName(this->SelfIntersectionsArrayName.c_str());
+	intersectingTrisArray->SetNumberOfComponents(1);
+	intersectingTrisArray->SetNumberOfTuples(polyDataIn->GetNumberOfCells());
+	intersectingTrisArray->Fill(0);
+
+	int currentTuple = 0;
+
+	for (vtkIdType i = 0; i < intersected_tris.size(); ++i)
+	{
+		currentTuple = intersectingTrisArray->GetTuple1(intersected_tris[i].first.idx());
+		intersectingTrisArray->SetTuple1(intersected_tris[i].first.idx(), currentTuple + 1);
+
+		currentTuple = intersectingTrisArray->GetTuple1(intersected_tris[i].second.idx());
+		intersectingTrisArray->SetTuple1(intersected_tris[i].second.idx(), currentTuple + 1);
+	}
+
+	vtkWarningMacro("Self-Intersections were found in the mesh. " <<
+		intersected_tris.size() << " pairs of triangles intersect.");
+
+	if (this->PrintSelfIntersectingPairs)
+	{
+		for (vtkIdType i = 0; i < intersected_tris.size(); ++i)
+		{
+			vtkWarningMacro("Triangle " << intersected_tris[i].first.idx() << " is intersecting with "
+				<< intersected_tris[i].second.idx() << ".");
+		}
+	}
+
+	polyDataOut->DeepCopy(polyDataIn);
+	polyDataOut->GetCellData()->AddArray(intersectingTrisArray);
 }

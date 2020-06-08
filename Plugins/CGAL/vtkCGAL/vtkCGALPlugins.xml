@@ -366,6 +366,18 @@
                 </Documentation>
             </StringVectorProperty>
 
+            <IntVectorProperty name="IterateByConnectivity"
+                               command="SetIterateByConnectivity"
+                               label="Iterate By Connectivity"
+                               number_of_elements="1"
+                               default_values="1">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    Checks self-intersections independently for every geometrically non-connected mesh of the polydata.
+                    Fixes some issues where you have multiple disjoint zones.
+                </Documentation>
+            </IntVectorProperty>
+
             <IntVectorProperty name="PrintSelfIntersectingPairs"
                                command="SetPrintSelfIntersectingPairs"
                                number_of_elements="1"
