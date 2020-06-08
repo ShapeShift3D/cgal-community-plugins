@@ -24,12 +24,12 @@ vtkCGALUtilities::~vtkCGALUtilities()
 
 //----------------------------------------------------------------------------
 
-/** @brief Converts a vtkPolyData (VTK) into a Polygonal Mesh (CGAL). Code taken from the
-*          Polyhedron demo located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them.
+/** @brief Converts a vtkPolyData (VTK) into a Surface Mesh (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
 *
 *  @param polyData The input PolyData
-*  @param tmesh The resulting Polygon Mesh
+*  @param tmesh The resulting Surface Mesh
 *  @return bool Success (true) or failure (false)
 */
 bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Surface_Mesh& tmesh)
@@ -80,9 +80,9 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Surface_M
 
 //----------------------------------------------------------------------------
 
-/** @brief Converts a vtkPolyData (VTK) into a Polygonal Mesh (CGAL). Code taken from the
-*          Polyhedron demo located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them.
+/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
 *
 *  @param polyData The input PolyData
 *  @param tmesh The resulting Polygon Mesh
