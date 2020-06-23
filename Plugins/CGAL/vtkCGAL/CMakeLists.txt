@@ -23,9 +23,11 @@ if(ParaView_FOUND AND PARAVIEW_USE_FILE)
   add_paraview_plugin(CGALPlugins "1.0"
     SERVER_MANAGER_XML vtkCGALPlugins.xml
     SERVER_MANAGER_SOURCES vtkCGAL3DPolyhedralMesher.cxx
-                           vtkCGALBoolean.cxx
+                           vtkCGAL2DBoolean.cxx
+						   vtkCGALBoolean.cxx
                            vtkCGALSelfIntersectionMeasurer.cxx
-                           vtkCGALUtilities.cxx)
+                           vtkCGALUtilities.cxx
+						   )
   
   target_link_libraries(CGALPlugins PRIVATE CGAL::CGAL)
 
@@ -38,9 +40,11 @@ else()
   ## ParaView 6.0 or later
   set(classes
     vtkCGAL3DPolyhedralMesher
+    vtkCGAL2DBoolean
     vtkCGALBoolean
-    vtkCGALSelfIntersectionMeasurer
-    vtkCGALUtilities)
+	vtkCGALSelfIntersectionMeasurer
+    vtkCGALUtilities
+	)
     
   set(headers
     vtkPointCloudScalarSizingField.h)
