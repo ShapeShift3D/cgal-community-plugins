@@ -1,4 +1,7 @@
-find_package(CGAL REQUIRED)
+#find_package(CGAL REQUIRED)
+
+vtk_module_find_package(PACKAGE CGAL PRIVATE)
+
 if(CGAL_FOUND)
   include( ${CGAL_USE_FILE} )
   
@@ -15,51 +18,40 @@ if(CGAL_FOUND)
   endif(CGAL_ACTIVATE_CONCURRENCY)
 endif(CGAL_FOUND)
 
-#Paraview's macro to add the plugin. It takes care of all the vtk
-#and paraview parts of the process, like link and integration
-#in the UI
-if(ParaView_FOUND AND PARAVIEW_USE_FILE)
-  ## ParaView 5.6
-  add_paraview_plugin(CGALPlugins "1.0"
-    SERVER_MANAGER_XML vtkCGALPlugins.xml
-    SERVER_MANAGER_SOURCES vtkCGAL3DPolyhedralMesher.cxx
-                           vtkCGALBoolean.cxx
-                           vtkCGALSelfIntersectionMeasurer.cxx
-                           vtkCGALUtilities.cxx)
-  
-  target_link_libraries(CGALPlugins PRIVATE CGAL::CGAL)
+vtk_module_find_package(PACKAGE Eigen3 VERSION 3.3 CONFIG_MODE PRIVATE)
 
-  if(TBB_FOUND)
-    message("TBB_FOUND: " ${TBB_FOUND})
-    target_link_libraries(CGALPlugins PRIVATE TBB::tbbmalloc TBB::tbb)
-  endif(TBB_FOUND)
-  
-else()
-  ## ParaView 6.0 or later
-  set(classes
-    vtkCGAL3DPolyhedralMesher
-    vtkCGALBoolean
-    vtkCGALSelfIntersectionMeasurer
-    vtkCGALUtilities)
-    
-  set(headers
-    vtkPointCloudScalarSizingField.h)
+# ParaView 6.0 or later
+set(classes
+  vtkCGAL3DPolyhedralMesher
+  vtkCGALARAPParametrization
+  vtkCGALBoolean
+  vtkCGALSelfIntersectionMeasurer
+  vtkCGALUtilities)
 
-  vtk_module_add_module(CGAL::vtkCGAL
-    CLASSES ${classes}
-    PRIVATE_HEADERS ${headers})
 
-  #vtk_module_definitions(CGAL::vtkCGAL PRIVATE CGAL_LINKED_WITH_TBB)
-    
-  paraview_add_server_manager_xmls(
-    XMLS  vtkCGALPlugins.xml)
+set(headers
+  vtkPointCloudScalarSizingField.h)
 
-  # Link with CGAL
-  vtk_module_link(CGAL::vtkCGAL PRIVATE CGAL::CGAL)
 
-  if(TBB_FOUND)
-    message("TBB_FOUND: " ${TBB_FOUND})
-    vtk_module_link(CGAL::vtkCGAL PRIVATE TBB::tbbmalloc TBB::tbb)
-  endif(TBB_FOUND)
-  
-endif()
+vtk_module_add_module(CGAL::vtkCGAL
+  CLASSES ${classes}
+  PRIVATE_HEADERS ${headers})
+
+
+#vtk_module_definitions(CGAL::vtkCGAL PRIVATE CGAL_LINKED_WITH_TBB)
+
+
+paraview_add_server_manager_xmls(
+  XMLS  vtkCGALPlugins.xml)
+
+
+# Link with CGAL
+vtk_module_link(CGAL::vtkCGAL PRIVATE CGAL::CGAL)
+
+vtk_module_link(CGAL::vtkCGAL PUBLIC Eigen3::Eigen)
+
+
+if(TBB_FOUND)
+  message("TBB_FOUND: " ${TBB_FOUND})
+  vtk_module_link(CGAL::vtkCGAL PRIVATE TBB::tbbmalloc TBB::tbb)
+endif(TBB_FOUND)

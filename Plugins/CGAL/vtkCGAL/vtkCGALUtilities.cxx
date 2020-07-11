@@ -32,50 +32,13 @@ vtkCGALUtilities::~vtkCGALUtilities()
 *  @param tmesh The resulting Surface Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Surface_Mesh& tmesh)
+bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh0& tmesh)
 {
-    typedef typename boost::property_map<Surface_Mesh, CGAL::vertex_point_t>::type VPMap;
-    typedef typename boost::property_map_value<Surface_Mesh, CGAL::vertex_point_t>::type Point_3;
-    typedef typename boost::graph_traits<Surface_Mesh>::vertex_descriptor vertex_descriptor;
+    typedef typename boost::property_map<SurfaceMesh0, CGAL::vertex_point_t>::type VPMap;
+    typedef typename boost::property_map_value<SurfaceMesh0, CGAL::vertex_point_t>::type Point_3;
+    typedef typename boost::graph_traits<SurfaceMesh0>::vertex_descriptor vertex_descriptor;
 
-    VPMap vpmap = get(CGAL::vertex_point, tmesh);
-
-    // get nb of points and cells
-    vtkIdType nb_points = polyData->GetNumberOfPoints();
-    vtkIdType nb_cells = polyData->GetNumberOfCells();
-
-    //extract points
-    std::vector<vertex_descriptor> vertex_map(nb_points);
-    for (vtkIdType i = 0; i < nb_points; ++i)
-    {
-        double coords[3];
-        polyData->GetPoint(i, coords);
-
-        vertex_descriptor v = add_vertex(tmesh);
-        put(vpmap, v, Point_3(coords[0], coords[1], coords[2]));
-        vertex_map[i] = v;
-    }
-
-    //extract cells
-    for (vtkIdType i = 0; i < nb_cells; ++i)
-    {
-        if (polyData->GetCellType(i) != 5
-            && polyData->GetCellType(i) != 7
-            && polyData->GetCellType(i) != 9) //only supported cells are triangles, quads and polygons
-            continue;
-        vtkCell* cell_ptr = polyData->GetCell(i);
-
-        vtkIdType nb_vertices = cell_ptr->GetNumberOfPoints();
-        if (nb_vertices < 3)
-            return false;
-        std::vector<vertex_descriptor> vr(nb_vertices);
-        for (vtkIdType k = 0; k < nb_vertices; ++k)
-            vr[k] = vertex_map[cell_ptr->GetPointId(k)];
-
-        CGAL::Euler::add_face(vr, tmesh);
-    }
-
-    return true;
+    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh0>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -88,27 +51,101 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Surface_M
 *  @param tmesh The resulting Polygon Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron& tmesh)
+bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron0& tmesh)
 {
-    typedef typename boost::property_map<Polyhedron, CGAL::vertex_point_t>::type VPMap;
-    typedef typename boost::property_map_value<Polyhedron, CGAL::vertex_point_t>::type Point_3;
-    typedef typename boost::graph_traits<Polyhedron>::vertex_descriptor vertex_descriptor;
+    typedef typename boost::property_map<Polyhedron0, CGAL::vertex_point_t>::type VPMap;
+    typedef typename boost::property_map_value<Polyhedron0, CGAL::vertex_point_t>::type Point_3;
+    typedef typename boost::graph_traits<Polyhedron0>::vertex_descriptor vertex_descriptor;
 
-    VPMap vpmap = get(CGAL::vertex_point, tmesh);
+    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron0>(polyData, tmesh);
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a vtkPolyData (VTK) into a Surface Mesh (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
+*
+*  @param polyData The input PolyData
+*  @param tmesh The resulting Surface Mesh
+*  @return bool Success (true) or failure (false)
+*/
+bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh1& tmesh)
+{
+    typedef typename boost::property_map<SurfaceMesh1, CGAL::vertex_point_t>::type VPMap;
+    typedef typename boost::property_map_value<SurfaceMesh1, CGAL::vertex_point_t>::type Point_3;
+    typedef typename boost::graph_traits<SurfaceMesh1>::vertex_descriptor vertex_descriptor;
+
+    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh1>(polyData, tmesh);
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
+*
+*  @param polyData The input PolyData
+*  @param tmesh The resulting Polygon Mesh
+*  @return bool Success (true) or failure (false)
+*/
+//bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron1& tmesh)
+//{
+//    typedef typename boost::property_map<Polyhedron1, CGAL::vertex_point_t>::type VPMap;
+//    typedef typename boost::property_map_value<Polyhedron1, CGAL::vertex_point_t>::type Point_3;
+//    typedef typename boost::graph_traits<Polyhedron1>::vertex_descriptor vertex_descriptor;
+//
+//    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron1>(polyData, tmesh);
+//}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
+*
+*  @param polyData The input PolyData
+*  @param tmesh The resulting Polygon Mesh
+*  @return bool Success (true) or failure (false)
+*/
+template <typename KernelType, typename MeshType>
+bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType& tmesh)
+{
+    typedef typename boost::property_map<MeshType, CGAL::vertex_point_t>::type VPMap;
+    typedef typename boost::property_map_value<MeshType, CGAL::vertex_point_t>::type Point_3;
+    typedef typename boost::graph_traits<MeshType>::vertex_descriptor vertex_descriptor;
+
+    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, MeshType >(polyData, tmesh);
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
+*
+*  @param polyData The input PolyData
+*  @param tmesh The resulting Polygon Mesh
+*  @return bool Success (true) or failure (false)
+*/
+template <typename VPMapType, typename PointType, typename VertexDescriptor, typename MeshType>
+bool vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh)
+{
+    VPMapType vpmap = get(CGAL::vertex_point, tmesh);
 
     // get nb of points and cells
     vtkIdType nb_points = polyData->GetNumberOfPoints();
     vtkIdType nb_cells = polyData->GetNumberOfCells();
 
     //extract points
-    std::vector<vertex_descriptor> vertex_map(nb_points);
+    std::vector<VertexDescriptor> vertex_map(nb_points);
     for (vtkIdType i = 0; i < nb_points; ++i)
     {
         double coords[3];
         polyData->GetPoint(i, coords);
 
-        vertex_descriptor v = add_vertex(tmesh);
-        put(vpmap, v, Point_3(coords[0], coords[1], coords[2]));
+        VertexDescriptor v = add_vertex(tmesh);
+        put(vpmap, v, PointType(coords[0], coords[1], coords[2]));
         vertex_map[i] = v;
     }
 
@@ -124,7 +161,7 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
         vtkIdType nb_vertices = cell_ptr->GetNumberOfPoints();
         if (nb_vertices < 3)
             return false;
-        std::vector<vertex_descriptor> vr(nb_vertices);
+        std::vector<VertexDescriptor> vr(nb_vertices);
         for (vtkIdType k = 0; k < nb_vertices; ++k)
             vr[k] = vertex_map[cell_ptr->GetPointId(k)];
 
@@ -134,7 +171,6 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
     return true;
 }
 
-
 //----------------------------------------------------------------------------
 
 /** @brief Converts a Polygonal Mesh (CGAL) into an Unstructured Grid (VTK).
@@ -143,19 +179,19 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
 *  @param usg The output Unstructured Grid
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::PolygonMeshToVtkUnstructuredGrid(const Surface_Mesh& pmesh, vtkUnstructuredGrid* usg)
+bool vtkCGALUtilities::PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmesh, vtkUnstructuredGrid* usg)
 {
-	typedef typename boost::graph_traits<Surface_Mesh>::vertex_descriptor   vertex_descriptor;
-	typedef typename boost::graph_traits<Surface_Mesh>::face_descriptor     face_descriptor;
-	typedef typename boost::graph_traits<Surface_Mesh>::halfedge_descriptor halfedge_descriptor;
+	typedef typename boost::graph_traits<SurfaceMesh0>::vertex_descriptor   vertex_descriptor;
+	typedef typename boost::graph_traits<SurfaceMesh0>::face_descriptor     face_descriptor;
+	typedef typename boost::graph_traits<SurfaceMesh0>::halfedge_descriptor halfedge_descriptor;
 
-	typedef typename boost::property_map<Surface_Mesh, CGAL::vertex_point_t>::const_type VPMap;
-	typedef typename boost::property_map_value<Surface_Mesh, CGAL::vertex_point_t>::type Point_3;
+	typedef typename boost::property_map<SurfaceMesh0, CGAL::vertex_point_t>::const_type VPMap;
+	typedef typename boost::property_map_value<SurfaceMesh0, CGAL::vertex_point_t>::type Point_3;
 
 	VPMap vpmap = get(CGAL::vertex_point, pmesh);
 
-	vtkPoints* const vtk_points = vtkPoints::New();
-	vtkCellArray* const vtk_cells = vtkCellArray::New();
+    vtkNew<vtkPoints> vtk_points;
+    vtkNew<vtkCellArray> vtk_cells;
 
 	vtk_points->Allocate(num_vertices(pmesh));
 	vtk_cells->Allocate(num_faces(pmesh));
@@ -185,9 +221,7 @@ bool vtkCGALUtilities::PolygonMeshToVtkUnstructuredGrid(const Surface_Mesh& pmes
 	}
 
 	usg->SetPoints(vtk_points);
-	vtk_points->Delete();
-
 	usg->SetCells(5, vtk_cells);
-	vtk_cells->Delete();
+
 	return true;
 }
