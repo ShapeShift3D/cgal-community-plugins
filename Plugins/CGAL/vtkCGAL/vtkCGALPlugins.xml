@@ -1,4 +1,136 @@
 <ServerManagerConfiguration>
+    <ProxyGroup name="uv_parametrizations">
+        <Proxy  name="CGALAbstractUVParametrization"
+                class="vtkCGALAbstractUVParametrization">
+            <Documentation>
+                Abstract class that should not be used directly.
+            </Documentation>
+
+            <InputProperty name="Mesh"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the input mesh.
+                </Documentation>
+            </InputProperty>
+
+            <IntVectorProperty name="ScalingMode" command="SetScalingMode" number_of_elements="1" default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry text="Manual" value="1" />
+                    <Entry text="Auto" value="2" />
+                </EnumerationDomain>
+                <Documentation>
+					A manual scaling mode will give you the option to scale the surface according to a multiplier. 
+                    Automatic scaling will force the surface area of the output to match the surface area of the input.
+                </Documentation>
+            </IntVectorProperty>
+
+            <DoubleVectorProperty command="SetUVScaling"
+                                  default_values="1.0"
+                                  name="UVScaling"
+                                  label="UV Scaling"
+                                  number_of_elements="1">
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator" 
+                                             mode="visibility" 
+                                             property="ScalingMode" 
+                                             value="1">
+                    </PropertyWidgetDecorator>
+                </Hints>
+                <Documentation>
+                    Scaling of UV map
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <Hints> 
+                <ShowInMenu category="CGAL"/>
+            </Hints>
+        </Proxy>
+        <!-- ==================================================================== -->
+        <Proxy name="CGALARAPUVParametrization"
+                 class="vtkCGALARAPUVParametrization"
+                 label="ARAP #2"
+                 base_proxygroup="uv_parametrizations"
+                 base_proxyname="CGALAbstractUVParametrization">
+        <Documentation long_help="Applies an ARAP UV Parametrization on a polygonal mesh."
+                       short_help="Applies an ARAP UV Parametrization on a polygonal mesh."> </Documentation>
+
+        <DoubleVectorProperty name="Lambda"
+                              command="SetLambda"
+                              number_of_elements="1"
+                              animateable="0"
+                              default_values="1000">
+            <Documentation>
+                Parameter to give importance to shape or angle preservation.
+            </Documentation>
+        </DoubleVectorProperty>
+
+        <DoubleVectorProperty name="Tolerance"
+                           command="SetTolerance"
+                           number_of_elements="1"
+                           default_values="1e-6">
+            <Documentation>
+                Minimal energy difference between two iterations for the minimization process to continue.
+            </Documentation>
+        </DoubleVectorProperty>
+
+        <IntVectorProperty name="MaximumNumberOfIterations"
+                           command="SetMaximumNumberOfIterations"
+                           label="Maximum Number Of Iterations"
+                           number_of_elements="1"
+                           default_values="50">
+            <Documentation>
+                Maximal number of iterations in the energy minimization process.
+            </Documentation>
+        </IntVectorProperty>
+        </Proxy>
+        <!-- ==================================================================== -->
+        <Proxy name="CGALLSCMUVParametrization"
+                 class="vtkCGALLSCMUVParametrization"
+                 label="LSCM #2"
+                 base_proxygroup="uv_parametrizations"
+                 base_proxyname="CGALAbstractUVParametrization">
+        <Documentation long_help="Applies a LSCM UV Parametrization on a polygonal mesh."
+                       short_help="Applies a LSCM UV Parametrization on a polygonal mesh."> </Documentation>
+
+        <DoubleVectorProperty name="Lambda"
+                              command="SetLambda"
+                              number_of_elements="1"
+                              animateable="0"
+                              default_values="1000">
+            <Documentation>
+                Parameter to give importance to shape or angle preservation.
+            </Documentation>
+        </DoubleVectorProperty>
+
+        <DoubleVectorProperty name="Tolerance"
+                           command="SetTolerance"
+                           number_of_elements="1"
+                           default_values="1e-6">
+            <Documentation>
+                Minimal energy difference between two iterations for the minimization process to continue.
+            </Documentation>
+        </DoubleVectorProperty>
+
+        <IntVectorProperty name="MaximumNumberOfIterations"
+                           command="SetMaximumNumberOfIterations"
+                           label="Maximum Number Of Iterations"
+                           number_of_elements="1"
+                           default_values="50">
+            <Documentation>
+                Maximal number of iterations in the energy minimization process.
+            </Documentation>
+        </IntVectorProperty>
+        </Proxy>
+    </ProxyGroup>
+    <!-- ==================================================================== -->
     <ProxyGroup name="filters">
         <SourceProxy name="CGAL3DPolyhedralMesher"
                      class="vtkCGAL3DPolyhedralMesher"
@@ -266,70 +398,21 @@
                 <Property name="Exude" />
             </PropertyGroup>
             
-            <!-- Show in the Filters menu under "CGAL"-->
             <Hints>
                 <ShowInMenu category="CGAL" />
             </Hints>
         </SourceProxy>
-        <SourceProxy name="CGALARAPParametrization"
-                     class="vtkCGALARAPParametrization"
-                     label="ARAP #2">
-            <Documentation long_help="Applies a boolean operation on two PolyData inputs."
-                           short_help="Applies a boolean operation on two PolyData inputs."> </Documentation>
-
-            <InputProperty name="InputMesh"
-                           port_index="0"
-                           command="SetInputConnection">
-                <ProxyGroupDomain name="groups">
-                    <Group name="sources"/>
-                    <Group name="filters"/>
-                </ProxyGroupDomain>
-                <DataTypeDomain name="input_type">
-                    <DataType value="vtkDataSet"/>
-                </DataTypeDomain>
-                <Documentation>
-                    Set the source data set.
-                </Documentation>
-            </InputProperty>
-
-            <StringVectorProperty name="SelfIntersectionsArrayName"
-                                  command="SetSelfIntersectionsArrayName"
-                                  number_of_elements="1"
-                                  animateable="0"
-                                  default_values="Self-Intersections"
-                                  panel_visibility="advanced">
-                <Documentation>
-                    Name of the Self-Intersections array.
-                </Documentation>
-            </StringVectorProperty>
-
-            <IntVectorProperty name="IterateByConnectivity"
-                               command="SetIterateByConnectivity"
-                               label="Iterate By Connectivity"
-                               number_of_elements="1"
-                               default_values="1">
-                <BooleanDomain name="bool" />
-                <Documentation>
-                    Checks self-intersections independently for every geometrically non-connected mesh of the polydata.
-                    Fixes some issues where you have multiple disjoint zones.
-                </Documentation>
-            </IntVectorProperty>
-
-            <IntVectorProperty name="PrintSelfIntersectingPairs"
-                               command="SetPrintSelfIntersectingPairs"
-                               number_of_elements="1"
-                               default_values="0">
-                <BooleanDomain name="bool"/>
-                <Documentation>
-                    Print pairs of triangles self-intersecting themselves to the console output.
-                </Documentation>
-            </IntVectorProperty>
-
-            <Hints> 
-                <!-- possibly other hints -->
-                <ShowInMenu category="CGAL"/>
-            </Hints>
+        <!-- ==================================================================== -->
+        <SourceProxy name="CGALARAPUVParametrization"
+                     class="vtkCGALARAPUVParametrization"
+                     label="CGAL ARAP UV Parametrization"
+                     base_proxygroup="uv_parametrizations"
+                     base_proxyname="CGALARAPUVParametrization">
+            <Documentation>
+                Applies an ARAP UV Parametrization on a polygonal mesh.
+            </Documentation>
         </SourceProxy>
+        <!-- ==================================================================== -->
         <SourceProxy name="CGALBoolean"
                      class="vtkCGALBoolean"
                      label="CGAL Boolean">
@@ -386,12 +469,11 @@
                 </Documentation>
             </IntVectorProperty>
 
-
             <Hints> 
-                <!-- possibly other hints -->
                 <ShowInMenu category="CGAL"/>
             </Hints>
         </SourceProxy>
+        <!-- ==================================================================== -->
         <SourceProxy name="CGALSelfIntersectionMeasurer"
                      class="vtkCGALSelfIntersectionMeasurer"
                      label="CGAL Self Intersection Measurer">
@@ -447,9 +529,9 @@
             </IntVectorProperty>
 
             <Hints> 
-                <!-- possibly other hints -->
                 <ShowInMenu category="CGAL"/>
             </Hints>
         </SourceProxy>
+        <!-- ==================================================================== -->
     </ProxyGroup>
 </ServerManagerConfiguration>

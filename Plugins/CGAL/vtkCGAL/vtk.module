@@ -8,3 +8,4 @@ DEPENDS
 PRIVATE_DEPENDS
   VTK::CommonCore
   VTK::CommonSystem
+  VTK::FiltersGeneral

@@ -23,7 +23,9 @@ vtk_module_find_package(PACKAGE Eigen3 VERSION 3.3 CONFIG_MODE PRIVATE)
 # ParaView 6.0 or later
 set(classes
   vtkCGAL3DPolyhedralMesher
-  vtkCGALARAPParametrization
+  vtkCGALAbstractUVParametrization
+  vtkCGALARAPUVParametrization
+  vtkCGALLSCMUVParametrization
   vtkCGALBoolean
   vtkCGALSelfIntersectionMeasurer
   vtkCGALUtilities)

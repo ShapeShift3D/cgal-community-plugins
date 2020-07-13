@@ -28,19 +28,9 @@ public:
 
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh0& tmesh);
 
-    
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron0& tmesh);
     
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh1& tmesh);
-
-    
-    //static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron1& tmesh);
-
-    template <typename KernelType, typename MeshType>
-    static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, MeshType& tmesh);
-
-    template <typename VPMapType, typename PointType, typename VertexDescriptor, typename MeshType>
-    static bool vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh);
 
     static bool PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmesh, vtkUnstructuredGrid* usg);
 
@@ -51,6 +41,11 @@ protected:
 private:
     vtkCGALUtilities(const vtkCGALUtilities&) = delete;
     void operator=(const vtkCGALUtilities&) = delete;
+    
+    template <typename KernelType, typename MeshType>
+    static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, MeshType& tmesh);
 
+    template <typename VPMapType, typename PointType, typename VertexDescriptor, typename MeshType>
+    static bool vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh);
 };
 #endif

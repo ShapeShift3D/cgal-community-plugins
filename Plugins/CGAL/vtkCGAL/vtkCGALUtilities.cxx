@@ -89,25 +89,6 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
 *  @param tmesh The resulting Polygon Mesh
 *  @return bool Success (true) or failure (false)
 */
-//bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron1& tmesh)
-//{
-//    typedef typename boost::property_map<Polyhedron1, CGAL::vertex_point_t>::type VPMap;
-//    typedef typename boost::property_map_value<Polyhedron1, CGAL::vertex_point_t>::type Point_3;
-//    typedef typename boost::graph_traits<Polyhedron1>::vertex_descriptor vertex_descriptor;
-//
-//    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron1>(polyData, tmesh);
-//}
-
-//----------------------------------------------------------------------------
-
-/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
-*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
-*
-*  @param polyData The input PolyData
-*  @param tmesh The resulting Polygon Mesh
-*  @return bool Success (true) or failure (false)
-*/
 template <typename KernelType, typename MeshType>
 bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType& tmesh)
 {
