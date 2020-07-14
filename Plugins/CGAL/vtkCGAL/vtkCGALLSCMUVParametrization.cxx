@@ -97,12 +97,9 @@ int vtkCGALLSCMUVParametrization::RequestData(vtkInformation*,
 	UV_pmap uv_map = surfaceMesh.add_property_map<vertex_descriptor, Point_2>("h:uv").first;
 	
 	typedef SMP::Two_vertices_parameterizer_3<Surface_Mesh> Border_Parameterizer;
+	typedef SMP::LSCM_parameterizer_3<Surface_Mesh, Border_Parameterizer>  Parameterizer;
 
-	SMP::LSCM_parameterizer_3<Surface_Mesh, Border_Parameterizer> parametrizer(
-		Border_Parameterizer(),
-		CGAL::Eigen_solver_traits<Eigen::SparseLU<CGAL::Eigen_sparse_matrix<double>::EigenType>>());
-
-	SMP::Error_code err = SMP::parameterize(surfaceMesh, parametrizer, bhd, uv_map);
+	SMP::Error_code err = SMP::parameterize(surfaceMesh, Parameterizer(), bhd, uv_map);
 
 
 	if (err != SMP::OK) {

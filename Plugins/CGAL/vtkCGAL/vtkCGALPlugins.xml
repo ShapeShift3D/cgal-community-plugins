@@ -99,35 +99,6 @@
                  base_proxyname="CGALAbstractUVParametrization">
         <Documentation long_help="Applies a LSCM UV Parametrization on a polygonal mesh."
                        short_help="Applies a LSCM UV Parametrization on a polygonal mesh."> </Documentation>
-
-        <DoubleVectorProperty name="Lambda"
-                              command="SetLambda"
-                              number_of_elements="1"
-                              animateable="0"
-                              default_values="1000">
-            <Documentation>
-                Parameter to give importance to shape or angle preservation.
-            </Documentation>
-        </DoubleVectorProperty>
-
-        <DoubleVectorProperty name="Tolerance"
-                           command="SetTolerance"
-                           number_of_elements="1"
-                           default_values="1e-6">
-            <Documentation>
-                Minimal energy difference between two iterations for the minimization process to continue.
-            </Documentation>
-        </DoubleVectorProperty>
-
-        <IntVectorProperty name="MaximumNumberOfIterations"
-                           command="SetMaximumNumberOfIterations"
-                           label="Maximum Number Of Iterations"
-                           number_of_elements="1"
-                           default_values="50">
-            <Documentation>
-                Maximal number of iterations in the energy minimization process.
-            </Documentation>
-        </IntVectorProperty>
         </Proxy>
     </ProxyGroup>
     <!-- ==================================================================== -->
@@ -410,6 +381,16 @@
                      base_proxyname="CGALARAPUVParametrization">
             <Documentation>
                 Applies an ARAP UV Parametrization on a polygonal mesh.
+            </Documentation>
+        </SourceProxy>
+        <!-- ==================================================================== -->
+        <SourceProxy name="CGALLSCMUVParametrization"
+                     class="vtkCGALLSCMUVParametrization"
+                     label="CGAL LSCM UV Parametrization"
+                     base_proxygroup="uv_parametrizations"
+                     base_proxyname="CGALLSCMUVParametrization">
+            <Documentation>
+                Applies a LSCM UV Parametrization on a polygonal mesh.
             </Documentation>
         </SourceProxy>
         <!-- ==================================================================== -->
