@@ -23,7 +23,7 @@ else()
   # --------------------
   #  `paraview_plugin_build` uses `add_subdirectory` so it has to be in a sub-directory
   paraview_plugin_scan(
-    PLUGIN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Plugins/CGAL/CGAL.plugin"
+    PLUGIN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Plugins/CGAL/paraview.plugin"
     ENABLE_BY_DEFAULT ON
     HIDE_PLUGINS_FROM_CACHE ON
     PROVIDES_PLUGINS  plugins

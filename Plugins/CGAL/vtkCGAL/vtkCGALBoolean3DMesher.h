@@ -25,7 +25,10 @@ public:
 	  Surface_Mesh& tm2,
 	  Surface_Mesh& operation);
 
-  enum Modes { UNION, INTERSECTION, TM1_MINUS_TM2, TM2_MINUS_TM1};
+  enum Modes { UNION = 1, 
+               INTERSECTION, 
+               TM1_MINUS_TM2, 
+               TM2_MINUS_TM1};
 
   vtkGetMacro(Mode, int);
   vtkSetMacro(Mode, int);
