@@ -206,3 +206,58 @@ bool vtkCGALUtilities::PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmes
 
 	return true;
 }
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a Surface Mesh (CGAL) into a PolyData (VTK).
+*
+*  @param pmesh The input Surface Mesh
+*  @param usg The output Unstructured Grid
+*  @return bool Success (true) or failure (false)
+*/
+bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh0& pmesh, vtkPolyData* poly)
+{
+	typedef typename boost::graph_traits<SurfaceMesh0>::vertex_descriptor   vertex_descriptor;
+	typedef typename boost::graph_traits<SurfaceMesh0>::face_descriptor     face_descriptor;
+	typedef typename boost::graph_traits<SurfaceMesh0>::halfedge_descriptor halfedge_descriptor;
+
+	typedef typename boost::property_map<SurfaceMesh0, CGAL::vertex_point_t>::const_type VPMap;
+	typedef typename boost::property_map_value<SurfaceMesh0, CGAL::vertex_point_t>::type Point_3;
+
+	VPMap vpmap = get(CGAL::vertex_point, pmesh);
+
+	vtkNew<vtkPoints> vtk_points;
+	vtkNew<vtkCellArray> vtk_cells;
+
+	vtk_points->Allocate(num_vertices(pmesh));
+	vtk_cells->Allocate(num_faces(pmesh));
+
+	std::map<vertex_descriptor, vtkIdType> Vids;
+	vtkIdType inum = 0;
+
+	for (vertex_descriptor v : vertices(pmesh))
+	{
+		const Point_3& p = get(vpmap, v);
+		vtk_points->InsertNextPoint(CGAL::to_double(p.x()),
+			CGAL::to_double(p.y()),
+			CGAL::to_double(p.z()));
+		Vids[v] = inum++;
+	}
+
+	for (face_descriptor f : faces(pmesh))
+	{
+		vtkIdList* cell = vtkIdList::New();
+		for (halfedge_descriptor h :
+		halfedges_around_face(halfedge(f, pmesh), pmesh))
+		{
+			cell->InsertNextId(Vids[target(h, pmesh)]);
+		}
+		vtk_cells->InsertNextCell(cell);
+		cell->Delete();
+	}
+
+	poly->SetPoints(vtk_points);
+	poly->SetPolys(vtk_cells);
+
+	return true;
+}

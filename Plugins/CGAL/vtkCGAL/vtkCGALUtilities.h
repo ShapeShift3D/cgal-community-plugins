@@ -11,6 +11,7 @@
 
 class vtkPointSet;
 class vtkUnstructuredGrid;
+class vtkPolyData;
 
 class VTKCGAL_EXPORT vtkCGALUtilities : public vtkObject
 {
@@ -33,6 +34,8 @@ public:
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh1& tmesh);
 
     static bool PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmesh, vtkUnstructuredGrid* usg);
+
+    static bool SurfaceMeshToPolyData(const SurfaceMesh0& pmesh, vtkPolyData* poly);
 
 protected:
     vtkCGALUtilities();
