@@ -15,7 +15,9 @@ set(classes
   vtkCGALARAPUVParametrization
   vtkCGALLSCMUVParametrization
   vtkCGALBoolean
+  vtkCGALBoolean2DMesher
   vtkCGALBoolean3DMesher
+  vtkCGALPHBooleanSetOperations
   vtkCGALSelfIntersectionMeasurer
   vtkCGALUtilities)
 
