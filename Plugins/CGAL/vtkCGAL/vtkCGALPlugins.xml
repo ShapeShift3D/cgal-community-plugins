@@ -703,5 +703,45 @@
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
+        <SourceProxy name="CGALBoolean2DMesher"
+                     class="vtkCGALBoolean2DMesher"
+                     label="CGAL Boolean 2D Mesher">
+            <Documentation long_help="Applies a 2d boolean operation on two PolyData inputs."
+                           short_help="Applies a 2d boolean operation on two PolyData inputs."> </Documentation>
+
+            <InputProperty name="InputMeshA"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source data set.
+                </Documentation>
+            </InputProperty>
+
+            <InputProperty name="InputMeshB"
+                           port_index="1"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source data set
+                </Documentation>
+            </InputProperty>
+
+            <Hints> 
+                <ShowInMenu category="CGAL"/>
+            </Hints>
+        </SourceProxy>
     </ProxyGroup>
 </ServerManagerConfiguration>
