@@ -1253,5 +1253,44 @@
                 <ShowInMenu category="CGAL"/>
             </Hints>
         </SourceProxy>
+        <SourceProxy name="CGALSurfaceMeshSegmentation"
+                     class="vtkCGALSurfaceMeshSegmentation"
+                     label="CGAL Surface Mesh Segmentation">
+            <Documentation long_help="vtkCGALSurfaceMeshSegmentation"
+                           short_help="vtkCGALSurfaceMeshSegmentation"> </Documentation>
+
+            <InputProperty name="InputMesh"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source data set.
+                </Documentation>
+            </InputProperty>
+
+            <IntVectorProperty name="NumberOfClusters"
+                        command="SetNumberOfClusters"
+                        number_of_elements="1"
+                        default_values="4">
+            </IntVectorProperty>
+
+            <DoubleVectorProperty name="SmoothingLambda"
+                        command="SetSmoothingLambda"
+                        number_of_elements="1"
+                        default_values="0.26">
+                <DoubleRangeDomain name="range" min="0.0" max="1.0" />
+            </DoubleVectorProperty>
+
+            <Hints> 
+                <!-- possibly other hints -->
+                <ShowInMenu category="CGAL"/>
+            </Hints>
+        </SourceProxy>
     </ProxyGroup>
 </ServerManagerConfiguration>

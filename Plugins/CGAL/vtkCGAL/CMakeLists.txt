@@ -26,6 +26,7 @@ set(classes
   vtkCGALPolyLineSetToPolygonSet
   vtkCGALRegionGrowing
   vtkCGALSelfIntersectionMeasurer
+  vtkCGALSurfaceMeshSegmentation
   vtkCGALUtilities)
 
 set(headers
