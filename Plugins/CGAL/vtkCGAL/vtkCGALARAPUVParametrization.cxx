@@ -146,7 +146,7 @@ bool vtkCGALARAPUVParametrization::UpdatePointCoordinates(SurfaceMesh& sm, Verte
 	vtkDataArray* ptArray = pts->GetData();
 
 	// Process
-	boost::graph_traits<SurfaceMesh>::vertex_iterator vit, vend;
+	typename boost::graph_traits<SurfaceMesh>::vertex_iterator vit, vend;
 	boost::tie(vit, vend) = CGAL::vertices(sm);
 
 	while (vit != vend)

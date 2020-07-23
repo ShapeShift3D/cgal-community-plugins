@@ -49,7 +49,7 @@ vtkCGALBoolean3DMesher::vtkCGALBoolean3DMesher()
   this->SetNumberOfOutputPorts(2);
 
   this->Mode = UNION;
-  this->SkipPreconditions - false;
+  this->SkipPreconditions = false;
   this->ComputeSurfaceIntersection = false;
 }
 
