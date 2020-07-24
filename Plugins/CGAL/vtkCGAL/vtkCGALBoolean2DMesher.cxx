@@ -30,6 +30,7 @@
 #include <CGAL/Boolean_set_operations_2.h>
 //#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 //#include <CGAL/Surface_mesh.h>
+#include <CGAL/Bbox_2.h>
 
 //---------Module--------------------------------------------------
 #include <vtkCGALUtilities.h>
@@ -151,11 +152,55 @@ int vtkCGALBoolean2DMesher::RequestData(vtkInformation *,
 
 	vtkPolyData* output0 = vtkPolyData::GetData(outputVector->GetInformationObject(0));
 
+	// A polygon is a closed chain of edges. Several algorithms are available for polygons. 
+	// For some of those algorithms, it is necessary that the polygon is simple. 
+	// A polygon is simple if edges don't intersect, except consecutive edges, which intersect in their common vertex.
+	// Taken from https://doc.cgal.org/4.14.3/Polygon/index.html
 	Polygon_2 input0, input1;
-	vtkCGALUtilities::vtkPolyDataToPolygon2(inputMeshA, input0);
-	vtkCGALUtilities::vtkPolyDataToPolygon2(inputMeshB, input1);
+	//vtkCGALUtilities::vtkPolyDataToPolygon2(inputMeshA, input0);
+	//vtkCGALUtilities::vtkPolyDataToPolygon2(inputMeshB, input1);
+
+	input0.push_back(Point_2(0, 0));
+	input0.push_back(Point_2(5, 0));
+	input0.push_back(Point_2(3.5, 1.5));
+	input0.push_back(Point_2(2.5, 0.5));
+	input0.push_back(Point_2(1.5, 1.5));
+	//std::cout << "P = "; print_polygon(P);
+	input1.push_back(Point_2(0, 2));
+	input1.push_back(Point_2(1.5, 0.5));
+	input1.push_back(Point_2(2.5, 1.5));
+	input1.push_back(Point_2(3.5, 0.5));
+	input1.push_back(Point_2(5, 2));
+
+
+	// check if the polygon is simple.
+	cout << " === Input 0 === " << endl;
+	cout << "The polygon is " <<
+		(input0.is_simple() ? "" : "not ") << "simple." << endl;
+	// check if the polygon is convex
+	cout << "The polygon is " <<
+		(input0.is_convex() ? "" : "not ") << "convex." << endl;
+	cout << "The polygon is " <<
+		(input0.is_clockwise_oriented() ? "" : "not ") << "clockwise." << endl;
+	cout << "Signed area: " << input0.area() << endl;
+	CGAL::Bbox_2 input0Bbox = input0.bbox();
+	cout << "The origin is " <<
+		(input0.bounded_side(Point_2(0, 0)) ? "" : "not ") << "inside the polygon." << endl;
+
+	cout << " === Input 1 === " << endl;
+	cout << "The polygon is " <<
+		(input1.is_simple() ? "" : "not ") << "simple." << endl;
+	// check if the polygon is convex
+	cout << "The polygon is " <<
+		(input1.is_convex() ? "" : "not ") << "convex." << endl;
+	cout << "The polygon is " <<
+		(input1.is_clockwise_oriented() ? "" : "not ") << "clockwise." << endl;
+	cout << "Signed area: " << input1.area() << endl;
+	cout << "The origin is " <<
+		(input1.bounded_side(Point_2(0, 0)) ? "" : "not ") << "inside the polygon." << endl;
 
 	Pwh_list_2 result;
+	CGAL::intersection(input0, input1, std::back_inserter(result));
 
 	vtkNew<vtkCGALPHBooleanSetOperations> booleanSetOperations;
 	booleanSetOperations->SetInputModeToWithoutHole();

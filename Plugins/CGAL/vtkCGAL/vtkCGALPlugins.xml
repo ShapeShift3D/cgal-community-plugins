@@ -739,6 +739,11 @@
                 </Documentation>
             </InputProperty>
 
+            <Property name="Update"
+                      command="Modified"
+                      label="Update"
+                      panel_widget="command_button"/>
+
             <Hints> 
                 <ShowInMenu category="CGAL"/>
             </Hints>

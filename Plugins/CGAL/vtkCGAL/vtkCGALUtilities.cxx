@@ -175,9 +175,9 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
 
 //----------------------------------------------------------------------------
 
-/** @brief Converts a vtkPolyData (VTK) into Polygon 2 (CGAL). Code inspired from the VTK_io_plugin.cpp
-*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
+/** @brief Converts a vtkPolyData (VTK) into Polygon 2 (CGAL).
+*          This method does not write into our PolyData structure. 
+*		   Hence, we do not need to copy them before calling this function.
 *
 *  @param polyData The input PolyData
 *  @param tmesh The resulting Polygon 2 Mesh
@@ -349,28 +349,33 @@ bool vtkCGALUtilities::Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* p
 {
 	vtkNew<vtkPoints> vtk_points;
 	
-	Polygon_2::Vertex_const_iterator vertex_iterator;
+	typename Polygon_2::Vertex_const_iterator vertex_iterator;
 
 	for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
 	{
+		std::cout << "Point: " << vertex_iterator->x().exact().to_double() << ", " << vertex_iterator->y().exact().to_double() << ", " << "0" << endl;
 		vtk_points->InsertNextPoint(vertex_iterator->x().exact().to_double(), 
 									vertex_iterator->y().exact().to_double(), 
 									0);
 	}
 
+
+	// Not elegant but functional
 	vtkNew<vtkCellArray> vtk_cells;
 
-	Polygon_2::Edge_const_iterator edge_iterator;
-
-	for (edge_iterator = pmesh.edges_begin(); edge_iterator != pmesh.edges_end(); ++edge_iterator)
+	for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints() - 1; ++i)
 	{
 		vtk_cells->InsertNextCell(2);
-		vtk_cells->InsertCellPoint(edge_iterator->start().id());
-		vtk_cells->InsertCellPoint(edge_iterator->end().id());
+		vtk_cells->InsertCellPoint(i);
+		vtk_cells->InsertCellPoint(i + 1);
 	}
 
+	vtk_cells->InsertNextCell(2);
+	vtk_cells->InsertCellPoint(vtk_points->GetNumberOfPoints() - 1);
+	vtk_cells->InsertCellPoint(0);
+
 	polyline->SetPoints(vtk_points);
-	polyline->SetPolys(vtk_cells);
+	polyline->SetLines(vtk_cells);
 
 	return true;
 }
@@ -387,15 +392,23 @@ bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* 
 {
 	vtkNew<vtkAppendPolyData> appendFilter;
 
-	Pwh_list_2::const_iterator polygon_iterator;
+	typename Pwh_list_2::const_iterator polygon_iterator;
+	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
 
 	for (polygon_iterator = pmesh.begin(); polygon_iterator != pmesh.end(); ++polygon_iterator)
 	{
 		vtkNew<vtkPolyData> boundary;
 		vtkCGALUtilities::Polygon2ToPolyLine(polygon_iterator->outer_boundary(), boundary);
-
 		appendFilter->AddInputData(boundary);
+
+		for (hole_iterator = polygon_iterator->holes_begin(); hole_iterator != polygon_iterator->holes_begin(); ++hole_iterator)
+		{
+			vtkNew<vtkPolyData> hole;
+			vtkCGALUtilities::Polygon2ToPolyLine(*hole_iterator, hole);
+			appendFilter->AddInputData(hole);
+		}
 	}
+
 	appendFilter->Update();
 
 	polydata->ShallowCopy(appendFilter->GetOutput());
