@@ -5,6 +5,7 @@ LIBRARY_NAME
 DEPENDS
   VTK::FiltersCore
   VTK::FiltersGeometry
+  VTK::FiltersExtraction
 PRIVATE_DEPENDS
   VTK::CommonCore
   VTK::CommonSystem

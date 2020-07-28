@@ -744,9 +744,144 @@
                       label="Update"
                       panel_widget="command_button"/>
 
+            <IntVectorProperty name="OperationMode"
+                               command="SetOperationMode"
+                               number_of_elements="1"
+                               default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry value="1"
+                           text="Join"/>
+                    <Entry value="2"
+                           text="Intersection"/>
+                    <Entry value="3"
+                           text="Difference"/>
+                    <Entry value="4"
+                           text="Symmetric Difference"/>
+                </EnumerationDomain>
+                <Documentation>
+                    This property indicates which operation mode will be used.
+                </Documentation>
+            </IntVectorProperty>
+
             <Hints> 
                 <ShowInMenu category="CGAL"/>
             </Hints>
         </SourceProxy>
+        <!-- ==================================================================== -->
+        <SourceProxy name="CGAL2DPolygonParentTree"
+                     class="vtkCGAL2DPolygonParentTree"
+                     label="CGAL 2D Polygon Parent Tree">
+            <Documentation long_help="Analyses and evaluates the parent relationship between multiple 2D polylines. Takes a polydata in input but it must be a set of polylines and the considered plane can be specified."
+                           short_help="Analyses and evaluates the parent relationship between multiple 2D polylines."> </Documentation>
+
+            <InputProperty name="InputMesh"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source data set.
+                </Documentation>
+            </InputProperty>
+
+            <Property name="Update"
+                      command="Modified"
+                      label="Update"
+                      panel_widget="command_button"/>
+
+            <StringVectorProperty name="NodeIdArrayName"
+                                  command="SetNodeIdArrayName"
+                                  label="Node ID Array"
+                                  number_of_elements="1"
+                                  animateable="0"
+                                  default_values="NodeId">
+                <Documentation>
+                    Specifies the node ID array name
+                </Documentation>
+            </StringVectorProperty>
+
+            <StringVectorProperty name="ParentRelationshipArrayName"
+                                  command="SetParentRelationshipArrayName"
+                                  label="Parent Relationship Array"
+                                  number_of_elements="1"
+                                  animateable="0"
+                                  default_values="ParentId">
+                <Documentation>
+                    Specifies the parent relationship array name
+                </Documentation>
+            </StringVectorProperty>
+
+            <IntVectorProperty name="Plane"
+                               command="SetPlane"
+                               number_of_elements="1"
+                               default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry value="1"
+                           text="XY"/>
+                    <Entry value="2"
+                           text="YZ"/>
+                    <Entry value="3"
+                           text="XZ"/>
+                </EnumerationDomain>
+                <Documentation>
+                    This property which plane to consider
+                </Documentation>
+            </IntVectorProperty>
+
+            <Hints> 
+                <ShowInMenu category="CGAL"/>
+            </Hints>
+        </SourceProxy>
+        <!-- ==================================================================== -->
+        <!-- <SourceProxy name="CGALNefPolyhedronTest"
+                     class="vtkCGALNefPolyhedronTest"
+                     label="CGAL Nef Polyhedron">
+            <Documentation long_help="Applies a 2d boolean operation on two PolyData inputs."
+                           short_help="Applies a 2d boolean operation on two PolyData inputs."> </Documentation>
+
+            <InputProperty name="InputMeshA"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source data set.
+                </Documentation>
+            </InputProperty>
+
+            <InputProperty name="InputMeshB"
+                           port_index="1"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source data set
+                </Documentation>
+            </InputProperty>
+
+            <Property name="Update"
+                      command="Modified"
+                      label="Update"
+                      panel_widget="command_button"/>
+
+            <Hints> 
+                <ShowInMenu category="CGAL"/>
+            </Hints>
+        </SourceProxy> -->
     </ProxyGroup>
 </ServerManagerConfiguration>

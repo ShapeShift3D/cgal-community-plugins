@@ -15,16 +15,31 @@ public:
   vtkPolyData* GetInputMeshA();
   vtkPolyData* GetInputMeshB();
 
-  //vtkGetMacro(Mode, int);
-  //vtkSetMacro(Mode, int);
+  enum OperationModes {
+      JOIN = 1,
+      INTERSECTION,
+      DIFFERENCE,
+      SYMMETRIC_DIFFERENCE
+  };
+
+  vtkGetMacro(OperationMode, int);
+  vtkSetMacro(OperationMode, int);
+
+  void SetOperationModeToJoin() { OperationMode = OperationModes::JOIN; }
+  void SetOperationModeToIntersection() { OperationMode = OperationModes::INTERSECTION; }
+  void SetOperationModeToDifference() { OperationMode = OperationModes::DIFFERENCE; }
+  void SetOperationModeToSymmetricDifference() { OperationMode = OperationModes::SYMMETRIC_DIFFERENCE; }
+
 
 protected:
   vtkCGALBoolean2DMesher();
   ~vtkCGALBoolean2DMesher(){}
-  //int Mode;
+
   virtual int RequestData(vtkInformation*, 
                             vtkInformationVector**, 
                             vtkInformationVector*) override;
+
+  int OperationMode;
 
 private:
   // needed but not implemented

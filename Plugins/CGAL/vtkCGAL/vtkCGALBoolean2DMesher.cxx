@@ -34,7 +34,6 @@
 
 //---------Module--------------------------------------------------
 #include <vtkCGALUtilities.h>
-#include <vtkCGALPHBooleanSetOperations.h>
 
 //----------
 // Declare the plugin
@@ -54,6 +53,7 @@ vtkCGALBoolean2DMesher::vtkCGALBoolean2DMesher()
 {
   this->SetNumberOfInputPorts(2);
   this->SetNumberOfOutputPorts(1);
+  this->OperationMode = vtkCGALBoolean2DMesher::OperationModes::INTERSECTION;
 }
 
 //---------------------------------------------------
@@ -157,21 +157,8 @@ int vtkCGALBoolean2DMesher::RequestData(vtkInformation *,
 	// A polygon is simple if edges don't intersect, except consecutive edges, which intersect in their common vertex.
 	// Taken from https://doc.cgal.org/4.14.3/Polygon/index.html
 	Polygon_2 input0, input1;
-	//vtkCGALUtilities::vtkPolyDataToPolygon2(inputMeshA, input0);
-	//vtkCGALUtilities::vtkPolyDataToPolygon2(inputMeshB, input1);
-
-	input0.push_back(Point_2(0, 0));
-	input0.push_back(Point_2(5, 0));
-	input0.push_back(Point_2(3.5, 1.5));
-	input0.push_back(Point_2(2.5, 0.5));
-	input0.push_back(Point_2(1.5, 1.5));
-	//std::cout << "P = "; print_polygon(P);
-	input1.push_back(Point_2(0, 2));
-	input1.push_back(Point_2(1.5, 0.5));
-	input1.push_back(Point_2(2.5, 1.5));
-	input1.push_back(Point_2(3.5, 0.5));
-	input1.push_back(Point_2(5, 2));
-
+	vtkCGALUtilities::vtkPolyDataToPolygon2(inputMeshA, input0);
+	vtkCGALUtilities::vtkPolyDataToPolygon2(inputMeshB, input1);
 
 	// check if the polygon is simple.
 	cout << " === Input 0 === " << endl;
@@ -199,18 +186,39 @@ int vtkCGALBoolean2DMesher::RequestData(vtkInformation *,
 	cout << "The origin is " <<
 		(input1.bounded_side(Point_2(0, 0)) ? "" : "not ") << "inside the polygon." << endl;
 
-	Pwh_list_2 result;
-	CGAL::intersection(input0, input1, std::back_inserter(result));
-
-	vtkNew<vtkCGALPHBooleanSetOperations> booleanSetOperations;
-	booleanSetOperations->SetInputModeToWithoutHole();
-	booleanSetOperations->SetPolygonAInput(&input0);
-	booleanSetOperations->SetPolygonBInput(&input1);
-	booleanSetOperations->SetPolygonWithHoleListOutput(&result);
-	booleanSetOperations->SetOperationModeToIntersection();
-	booleanSetOperations->Update();
-
-	vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+	try
+	{
+		if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::JOIN)
+		{
+			Polygon_with_holes_2 result;
+			CGAL::join(input0, input1, result);
+			vtkCGALUtilities::PolygonWithHoles2ToPolyData(result, output0);
+		}
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::INTERSECTION)
+		{
+			Pwh_list_2 result;
+			CGAL::intersection(input0, input1, std::back_inserter(result));
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+		}
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::DIFFERENCE)
+		{
+			Pwh_list_2 result;
+			CGAL::difference(input0, input1, std::back_inserter(result));
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+		}
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::SYMMETRIC_DIFFERENCE)
+		{
+			Pwh_list_2 result;
+			CGAL::symmetric_difference(input0, input1, std::back_inserter(result));
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+		}
+	}
+	catch (const std::exception& e)
+	{
+		vtkErrorMacro(<< "Error caught : " << e.what());
+		return 0;
+	}
+	
 	return 1;
 }
 

@@ -110,6 +110,25 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
 *  @param tmesh The resulting Polygon Mesh
 *  @return bool Success (true) or failure (false)
 */
+bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron3& tmesh)
+{
+	typedef typename boost::property_map<Polyhedron3, CGAL::vertex_point_t>::type VPMap;
+	typedef typename boost::property_map_value<Polyhedron3, CGAL::vertex_point_t>::type Point_3;
+	typedef typename boost::graph_traits<Polyhedron3>::vertex_descriptor vertex_descriptor;
+
+	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron3>(polyData, tmesh);
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
+*
+*  @param polyData The input PolyData
+*  @param tmesh The resulting Polygon Mesh
+*  @return bool Success (true) or failure (false)
+*/
 template <typename KernelType, typename MeshType>
 bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType& tmesh)
 {
@@ -117,7 +136,7 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType&
     typedef typename boost::property_map_value<MeshType, CGAL::vertex_point_t>::type Point_3;
     typedef typename boost::graph_traits<MeshType>::vertex_descriptor vertex_descriptor;
 
-    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, MeshType >(polyData, tmesh);
+    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, MeshType>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -289,6 +308,19 @@ bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh2& pmesh, vtkPolyD
 *  @param usg The output Unstructured Grid
 *  @return bool Success (true) or failure (false)
 */
+bool vtkCGALUtilities::PolyhedronToPolyData(const Polyhedron3& pmesh, vtkPolyData* poly)
+{
+	return vtkCGALUtilities::SurfaceMeshToPolyDataImpl<Polyhedron3>(pmesh, poly);
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a Surface Mesh (CGAL) into a PolyData (VTK).
+*
+*  @param pmesh The input Surface Mesh
+*  @param usg The output Unstructured Grid
+*  @return bool Success (true) or failure (false)
+*/
 template <typename MeshType>
 bool vtkCGALUtilities::SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyData* poly)
 {
@@ -341,8 +373,8 @@ bool vtkCGALUtilities::SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyD
 
 /** @brief Converts a Polygon 2 (CGAL) into a PolyData (VTK).
 *
-*  @param pmesh The input Surface Mesh
-*  @param usg The output Unstructured Grid
+*  @param pmesh The input Polygon 2
+*  @param usg The output PolyData
 *  @return bool Success (true) or failure (false)
 */
 bool vtkCGALUtilities::Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* polyline)
@@ -384,8 +416,8 @@ bool vtkCGALUtilities::Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* p
 
 /** @brief Converts a Polygon with holes list 2 (CGAL) into a PolyData (VTK).
 *
-*  @param pmesh The input Surface Mesh
-*  @param usg The output Unstructured Grid
+*  @param pmesh The input Polygon with holes list
+*  @param usg The output PolyData
 *  @return bool Success (true) or failure (false)
 */
 bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata)
@@ -413,6 +445,37 @@ bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* 
 
 	polydata->ShallowCopy(appendFilter->GetOutput());
 
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a Polygon with holes 2 (CGAL) into a PolyData (VTK).
+*
+*  @param pmesh The input Polygon with holes
+*  @param usg The output PolyData
+*  @return bool Success (true) or failure (false)
+*/
+bool vtkCGALUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata)
+{
+	vtkNew<vtkAppendPolyData> appendFilter;
+
+	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
+
+	vtkNew<vtkPolyData> boundary;
+	vtkCGALUtilities::Polygon2ToPolyLine(pmesh.outer_boundary(), boundary);
+	appendFilter->AddInputData(boundary);
+
+	for (hole_iterator = pmesh.holes_begin(); hole_iterator != pmesh.holes_begin(); ++hole_iterator)
+	{
+		vtkNew<vtkPolyData> hole;
+		vtkCGALUtilities::Polygon2ToPolyLine(*hole_iterator, hole);
+		appendFilter->AddInputData(hole);
+	}
+
+	appendFilter->Update();
+	polydata->ShallowCopy(appendFilter->GetOutput());
 
 	return true;
 }
