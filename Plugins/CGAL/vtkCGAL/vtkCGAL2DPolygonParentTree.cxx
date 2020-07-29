@@ -31,10 +31,11 @@
 
 #include <vtkExtractPolyDataGeometry.h>
 
+#include <vtkIdFilter.h>
 #include <vtkPolyDataConnectivityFilter.h>
+#include <vtkAppendPolyData.h>
 #include <vtkCleanPolyData.h>
 #include <vtkThreshold.h>
-#include <vtkGeometryFilter.h>
 
 //---------CGAL---------------------------------
 #include <CGAL/Surface_mesh.h>
@@ -45,6 +46,10 @@
 
 //---------Module--------------------------------------------------
 #include <vtkCGALUtilities.h>
+
+#include <functional>
+#include <set>
+#include <vector>
 
 //----------
 // Declare the plugin
@@ -152,18 +157,27 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 	}
 	}
 
+	std::string cellIdsArrayName = "cellIds";
+
+	vtkNew<vtkIdFilter> generateIds;
+	generateIds->SetInputData(0, inputMesh);
+	generateIds->PointIdsOff();
+	generateIds->CellIdsOn();
+	generateIds->SetCellIdsArrayName(cellIdsArrayName.c_str());
+	generateIds->FieldDataOff();
+	generateIds->Update();
+
 	vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
-	connectivityFilter->SetInputData(inputMesh);
+	connectivityFilter->SetInputData(generateIds->GetOutput());
 	connectivityFilter->SetExtractionModeToAllRegions();
 	connectivityFilter->Update();
-
-	vtkNew<vtkCleanPolyData> cleanFilter;
-	cleanFilter->SetInputConnection(connectivityFilter->GetOutputPort());
 
 	int nbOfPolylines = connectivityFilter->GetNumberOfExtractedRegions();
 	connectivityFilter->SetExtractionModeToSpecifiedRegions();
 
-	int cellId = 0;
+	vtkNew<vtkCleanPolyData> cleanFilter;
+	cleanFilter->SetInputConnection(connectivityFilter->GetOutputPort());
+
 	double pt[3] = { 0.0, 0.0, 0.0 };
 
 	std::vector<std::pair<int, std::set<int>>> siblings;
@@ -176,6 +190,8 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 		cleanFilter->Update();
 
 		vtkPolyData* polyline = vtkPolyData::SafeDownCast(cleanFilter->GetOutput());
+		vtkIdTypeArray* cellIdArray = vtkArrayDownCast<vtkIdTypeArray>(polyline->GetCellData()
+																		->GetAbstractArray(cellIdsArrayName.c_str()));
 
 		// TODO: Check if polyline is well formed.
 
@@ -183,8 +199,7 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 		std::set<int> cellIds;
 		for (vtkIdType j = 0; j < polyline->GetNumberOfCells(); ++j)
 		{
-			cellIds.insert(cellId);
-			++cellId;
+			cellIds.insert(cellIdArray->GetTuple1(j));
 		}
 		nodeCellIds.push_back(std::make_pair(i, cellIds));
 
@@ -204,6 +219,11 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 			cleanFilter->Update();
 
 			cleanFilter->GetOutput()->GetPoint(0, pt);
+			if (i == 3)
+			{
+				std::cout << "pt: " << pt[0] << ", " << pt[1] << ", " << pt[2] << endl;
+				std::cout << "bounded side result: " << polygon.bounded_side(Point_2(pt[firstCoordinate], pt[secondCoordinate])) << endl;
+			}
 
 			if (polygon.bounded_side(Point_2(pt[firstCoordinate], pt[secondCoordinate])) == CGAL::ON_BOUNDED_SIDE) // is inside
 			{
@@ -217,7 +237,23 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 	// Debug info on sibling relationships
 	if (this->DebugMode)
 	{
-		std::cout << "===== PAIRS =====" << endl;
+		std::cout << "===== CELL IDs =====" << endl;
+		for (unsigned int i = 0; i < nodeCellIds.size(); ++i)
+		{
+			std::cout << "Polyline: " << nodeCellIds[i].first << endl;
+			std::cout << "Cell IdS : {";
+			for (int const& cellId : nodeCellIds[i].second)
+			{
+				std::cout << cellId << ", ";
+			}
+			std::cout << "}" << endl;
+		}
+	}
+
+	// Cell Ids
+	if (this->DebugMode)
+	{
+		std::cout << "===== Cell IDs =====" << endl;
 		for (unsigned int i = 0; i < siblings.size(); ++i)
 		{
 			std::cout << "Node: " << siblings[i].first << endl;
@@ -232,6 +268,7 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 
 	// Find children -> parent relationships
 	std::vector<std::pair<int, int>> parentChildrenRelationship;
+	int iter = 0;
 	while (siblings.size() > 0)
 	{
 		// Remove empty relationships
@@ -239,6 +276,8 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 		{
 			if ((*it).second.size() == 0)
 				siblings.erase(it);
+			else
+				++it;
 		}
 
 		// Process 1-to-1 relationships
@@ -262,6 +301,35 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 				}
 			}
 		}
+
+		// Debug info on sibling relationships
+		if (this->DebugMode)
+		{
+			std::cout << "===== ITER " << iter << " =====" << endl;
+			for (unsigned int i = 0; i < siblings.size(); ++i)
+			{
+				std::cout << "Node: " << siblings[i].first << endl;
+				std::cout << "Descendants : {";
+				for (int const& sibling : siblings[i].second)
+				{
+					std::cout << sibling << ", ";
+				}
+				std::cout << "}" << endl;
+			}
+		}
+
+		++iter;
+	}
+
+	// Debug info on parent-children relationships
+	if (this->DebugMode)
+	{
+		std::cout << "===== PARENT-CHILDREN REL =====" << endl;
+		for (unsigned int i = 0; i < parentChildrenRelationship.size(); ++i)
+		{
+			std::cout << "Parent: " << parentChildrenRelationship[i].first << endl;
+			std::cout << "Children: " << parentChildrenRelationship[i].second << endl;
+		}
 	}
 
 	// Write to arrays
@@ -269,6 +337,7 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 	parentRelationshipArray->SetName(this->ParentRelationshipArrayName.c_str());
 	parentRelationshipArray->SetNumberOfComponents(1);
 	parentRelationshipArray->SetNumberOfTuples(inputMesh->GetNumberOfCells());
+	parentRelationshipArray->Fill(-1);
 
 	vtkNew<vtkIdTypeArray> nodeIdArray;
 	nodeIdArray->SetName(this->NodeIdArrayName.c_str());
@@ -281,12 +350,24 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 
 	for (unsigned int i = 0; i < nodeCellIds.size(); ++i)
 	{
+		int& polylineId = nodeCellIds[i].first;
+		std::set<int>& cellIds = nodeCellIds[i].second;
 
+		auto parent_it = std::find_if(parentChildrenRelationship.begin(), parentChildrenRelationship.end(),
+			[&polylineId](const std::pair<int, int>& element) { return element.first == polylineId; });
+
+		int childId = parent_it != parentChildrenRelationship.end() ? (*parent_it).second : -1;
+
+		for (auto it = cellIds.begin(); it != cellIds.end(); ++it)
+		{
+			nodeIdArray->SetTuple1(*it, polylineId);
+			parentRelationshipArray->SetTuple1(*it, childId);
+		}
 	}
 
 	output0->DeepCopy(inputMesh);
-	output0->GetCellData()->
-
+	output0->GetCellData()->AddArray(nodeIdArray);
+	output0->GetCellData()->AddArray(parentRelationshipArray);
 	
 	return 1;
 }
