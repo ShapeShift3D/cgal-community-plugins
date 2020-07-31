@@ -706,10 +706,10 @@
         <SourceProxy name="CGALBoolean2DMesher"
                      class="vtkCGALBoolean2DMesher"
                      label="CGAL Boolean 2D Mesher">
-            <Documentation long_help="Applies a 2d boolean operation on two PolyData inputs."
-                           short_help="Applies a 2d boolean operation on two PolyData inputs."> </Documentation>
+            <Documentation long_help="Applies a 2d boolean operation on two PolyLine inputs."
+                           short_help="Applies a 2d boolean operation on two PolyLine inputs."> </Documentation>
 
-            <InputProperty name="InputMeshA"
+            <InputProperty name="InputPolyLineA"
                            port_index="0"
                            command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
@@ -724,7 +724,7 @@
                 </Documentation>
             </InputProperty>
 
-            <InputProperty name="InputMeshB"
+            <InputProperty name="InputPolyLineB"
                            port_index="1"
                            command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
@@ -762,6 +762,108 @@
                     This property indicates which operation mode will be used.
                 </Documentation>
             </IntVectorProperty>
+
+            <IntVectorProperty name="InvertPolyLineAOrientation"
+                               command="SetInvertPolyLineAOrientation"
+                               label="Invert PolyLine A Orientation"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    Inverts the PolyLine A orientation
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="ForcePolyLineAOrientation"
+                               command="SetForcePolyLineAOrientation"
+                               label="Force PolyLine A Orientation"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool"/>
+                <Documentation>
+                    Forces the PolyLine A orientation
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="PolyLineAOrientation"
+                               command="SetPolyLineAOrientation"
+                               label="Orientation"
+                               number_of_elements="1"
+                               default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry value="1"
+                           text="Clockwise"/>
+                    <Entry value="2"
+                           text="Counterclockwise"/>
+                </EnumerationDomain>
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="ForcePolyLineAOrientation"
+                                             value="1">
+                    </PropertyWidgetDecorator>
+                </Hints>
+                <Documentation>
+                    Choose the orientation to force
+                </Documentation>
+            </IntVectorProperty>
+
+            <PropertyGroup label="PolyLine A">
+                <Property name="InvertPolyLineAOrientation" />
+                <Property name="ForcePolyLineAOrientation" />
+                <Property name="PolyLineAOrientation" />
+            </PropertyGroup>
+
+            <IntVectorProperty name="InvertPolyLineBOrientation"
+                               command="SetInvertPolyLineBOrientation"
+                               label="Invert PolyLine B Orientation"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    Inverts the PolyLine B orientation 
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="ForcePolyLineBOrientation"
+                               command="SetForcePolyLineBOrientation"
+                               label="Force PolyLine B Orientation"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool"/>
+                <Documentation>
+                    Forces the PolyLine B orientation
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="PolyLineBOrientation"
+                               command="SetPolyLineBOrientation"
+                               label="Orientation"
+                               number_of_elements="1"
+                               default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry value="1"
+                           text="Clockwise"/>
+                    <Entry value="2"
+                           text="Counterclockwise"/>
+                </EnumerationDomain>
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="ForcePolyLineBOrientation"
+                                             value="1">
+                    </PropertyWidgetDecorator>
+                </Hints>
+                <Documentation>
+                    Choose the orientation to force
+                </Documentation>
+            </IntVectorProperty>
+
+            <PropertyGroup label="PolyLine B">
+                <Property name="InvertPolyLineBOrientation" />
+                <Property name="ForcePolyLineBOrientation" />
+                <Property name="PolyLineBOrientation" />
+            </PropertyGroup>
 
             <Hints> 
                 <ShowInMenu category="CGAL"/>
@@ -838,7 +940,7 @@
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <!-- <SourceProxy name="CGALNefPolyhedronTest"
+        <SourceProxy name="CGALNefPolyhedronTest"
                      class="vtkCGALNefPolyhedronTest"
                      label="CGAL Nef Polyhedron">
             <Documentation long_help="Applies a 2d boolean operation on two PolyData inputs."
@@ -882,6 +984,6 @@
             <Hints> 
                 <ShowInMenu category="CGAL"/>
             </Hints>
-        </SourceProxy> -->
+        </SourceProxy>
     </ProxyGroup>
 </ServerManagerConfiguration>

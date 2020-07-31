@@ -241,7 +241,7 @@ int vtkCGAL2DPolygonParentTree::RequestData(vtkInformation *,
 		for (unsigned int i = 0; i < nodeCellIds.size(); ++i)
 		{
 			std::cout << "Polyline: " << nodeCellIds[i].first << endl;
-			std::cout << "Cell IdS : {";
+			std::cout << "Cell Ids : {";
 			for (int const& cellId : nodeCellIds[i].second)
 			{
 				std::cout << cellId << ", ";

@@ -30,6 +30,7 @@
 #include <CGAL/Homogeneous.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/Nef_polyhedron_3.h>
+#include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
 
 //----------
 // Declare the plugin
@@ -39,6 +40,7 @@ typedef CGAL::Exact_integer RT;
 typedef CGAL::Homogeneous<CGAL::Exact_integer>  Kernel;
 typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
 typedef CGAL::Polyhedron_3<Kernel>  Polyhedron;
+typedef CGAL::Surface_mesh<Kernel::Point_3> Surface_Mesh;
 
 // -----------------------------------------------------------------------------
 // Constructor
@@ -155,9 +157,10 @@ int vtkCGALNefPolyhedronTest::RequestData(vtkInformation *,
 	Nef_polyhedron NefPolyB(polyB);
 
 	Nef_polyhedron NefPoly = NefPolyA.intersection(NefPolyB);
-	Polyhedron resultPoly;
-	NefPoly.convert_to_polyhedron(resultPoly);
-	vtkCGALUtilities::PolyhedronToPolyData(resultPoly, output0);
+	Surface_Mesh resultPoly;
+	CGAL::convert_nef_polyhedron_to_polygon_mesh(NefPoly, resultPoly);
+	//vtkCGALUtilities::PolyhedronToPolyData(resultPoly, output0);
+	vtkCGALUtilities::SurfaceMeshToPolyData(resultPoly, output0);
 
 	return 1;
 }

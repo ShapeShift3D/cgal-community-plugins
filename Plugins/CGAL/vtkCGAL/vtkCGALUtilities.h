@@ -33,11 +33,12 @@ public:
     // KErnel 1
     typedef CGAL::Simple_cartesian<double>                      K1;
     typedef CGAL::Surface_mesh<K1::Point_3>                     SurfaceMesh1;
-    typedef CGAL::Polyhedron_3<K1::Point_3>                     Polyhedron1;
+    typedef CGAL::Polyhedron_3<K1>                              Polyhedron1;
 
     // Kernel 2
     typedef CGAL::Exact_predicates_exact_constructions_kernel	K2;
     typedef CGAL::Surface_mesh<K2::Point_3>                     SurfaceMesh2;
+    typedef CGAL::Polyhedron_3<K2>                              Polyhedron2;
     typedef K2::Point_2											Point_2;
     typedef CGAL::Polygon_2<K2>									Polygon_2;
     typedef CGAL::Polygon_with_holes_2<K2>						Polygon_with_holes_2;
@@ -47,6 +48,7 @@ public:
     typedef CGAL::Homogeneous<CGAL::Exact_integer>              K3;
     typedef CGAL::Nef_polyhedron_3<K3>                          Nef_polyhedron3;
     typedef CGAL::Polyhedron_3<K3>                              Polyhedron3;
+    typedef CGAL::Surface_mesh<K3::Point_3>                     SurfaceMesh3;
 
    
     // Converters from VTK to CGAL
@@ -56,9 +58,15 @@ public:
     
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh1& tmesh);
 
+    static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron1& tmesh);
+
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh2& tmesh);
 
+    static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron2& tmesh);
+
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron3& tmesh);
+
+    static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh3& tmesh);
 
     static bool vtkPolyDataToPolygon2(vtkPointSet* poly_data, Polygon_2& tmesh);
 
@@ -68,6 +76,8 @@ public:
     static bool SurfaceMeshToPolyData(const SurfaceMesh0& pmesh, vtkPolyData* poly);
 
     static bool SurfaceMeshToPolyData(const SurfaceMesh2& pmesh, vtkPolyData* poly);
+
+    static bool SurfaceMeshToPolyData(const SurfaceMesh3& pmesh, vtkPolyData* poly);
 
     static bool PolyhedronToPolyData(const Polyhedron3& pmesh, vtkPolyData* poly);
 
@@ -80,6 +90,11 @@ public:
 
     static bool PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata);
 
+    static void PrintPwhList2Properties(const Pwh_list_2& pmesh);
+
+    static void PrintPolygonWithHoles2Properties(const Polygon_with_holes_2& pmesh);
+
+    static void PrintPolygonProperties(const Polygon_2& pmesh, std::string message);
 
 protected:
     vtkCGALUtilities();

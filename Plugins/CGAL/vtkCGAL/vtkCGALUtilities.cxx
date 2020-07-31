@@ -83,6 +83,25 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
 
 //----------------------------------------------------------------------------
 
+/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
+*
+*  @param polyData The input PolyData
+*  @param tmesh The resulting Polygon Mesh
+*  @return bool Success (true) or failure (false)
+*/
+bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron1& tmesh)
+{
+	typedef typename boost::property_map<Polyhedron1, CGAL::vertex_point_t>::type VPMap;
+	typedef typename boost::property_map_value<Polyhedron1, CGAL::vertex_point_t>::type Point_3;
+	typedef typename boost::graph_traits<Polyhedron1>::vertex_descriptor vertex_descriptor;
+
+	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron1>(polyData, tmesh);
+}
+
+//----------------------------------------------------------------------------
+
 /** @brief Converts a vtkPolyData (VTK) into a Surface Mesh (CGAL). Code taken from the VTK_io_plugin.cpp
 *          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
 *          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
@@ -110,6 +129,25 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
 *  @param tmesh The resulting Polygon Mesh
 *  @return bool Success (true) or failure (false)
 */
+bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron2& tmesh)
+{
+	typedef typename boost::property_map<Polyhedron2, CGAL::vertex_point_t>::type VPMap;
+	typedef typename boost::property_map_value<Polyhedron2, CGAL::vertex_point_t>::type Point_3;
+	typedef typename boost::graph_traits<Polyhedron2>::vertex_descriptor vertex_descriptor;
+
+	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron2>(polyData, tmesh);
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
+*
+*  @param polyData The input PolyData
+*  @param tmesh The resulting Polygon Mesh
+*  @return bool Success (true) or failure (false)
+*/
 bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron3& tmesh)
 {
 	typedef typename boost::property_map<Polyhedron3, CGAL::vertex_point_t>::type VPMap;
@@ -117,6 +155,25 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
 	typedef typename boost::graph_traits<Polyhedron3>::vertex_descriptor vertex_descriptor;
 
 	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron3>(polyData, tmesh);
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a vtkPolyData (VTK) into a Surface Mesh (CGAL). Code taken from the VTK_io_plugin.cpp
+*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
+*
+*  @param polyData The input PolyData
+*  @param tmesh The resulting Surface Mesh
+*  @return bool Success (true) or failure (false)
+*/
+bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh3& tmesh)
+{
+	typedef typename boost::property_map<SurfaceMesh3, CGAL::vertex_point_t>::type VPMap;
+	typedef typename boost::property_map_value<SurfaceMesh3, CGAL::vertex_point_t>::type Point_3;
+	typedef typename boost::graph_traits<SurfaceMesh3>::vertex_descriptor vertex_descriptor;
+
+	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh3>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -308,6 +365,19 @@ bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh2& pmesh, vtkPolyD
 *  @param usg The output Unstructured Grid
 *  @return bool Success (true) or failure (false)
 */
+bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh3& pmesh, vtkPolyData* poly)
+{
+	return vtkCGALUtilities::SurfaceMeshToPolyDataImpl<SurfaceMesh3>(pmesh, poly);
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a Surface Mesh (CGAL) into a PolyData (VTK).
+*
+*  @param pmesh The input Surface Mesh
+*  @param usg The output Unstructured Grid
+*  @return bool Success (true) or failure (false)
+*/
 bool vtkCGALUtilities::PolyhedronToPolyData(const Polyhedron3& pmesh, vtkPolyData* poly)
 {
 	return vtkCGALUtilities::SurfaceMeshToPolyDataImpl<Polyhedron3>(pmesh, poly);
@@ -385,7 +455,7 @@ bool vtkCGALUtilities::Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* p
 
 	for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
 	{
-		std::cout << "Point: " << vertex_iterator->x().exact().to_double() << ", " << vertex_iterator->y().exact().to_double() << ", " << "0" << endl;
+		//std::cout << "Point: " << vertex_iterator->x().exact().to_double() << ", " << vertex_iterator->y().exact().to_double() << ", " << "0" << endl;
 		vtk_points->InsertNextPoint(vertex_iterator->x().exact().to_double(), 
 									vertex_iterator->y().exact().to_double(), 
 									0);
@@ -433,7 +503,7 @@ bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* 
 		vtkCGALUtilities::Polygon2ToPolyLine(polygon_iterator->outer_boundary(), boundary);
 		appendFilter->AddInputData(boundary);
 
-		for (hole_iterator = polygon_iterator->holes_begin(); hole_iterator != polygon_iterator->holes_begin(); ++hole_iterator)
+		for (hole_iterator = polygon_iterator->holes_begin(); hole_iterator != polygon_iterator->holes_end(); ++hole_iterator)
 		{
 			vtkNew<vtkPolyData> hole;
 			vtkCGALUtilities::Polygon2ToPolyLine(*hole_iterator, hole);
@@ -441,10 +511,11 @@ bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* 
 		}
 	}
 
-	appendFilter->Update();
-
-	polydata->ShallowCopy(appendFilter->GetOutput());
-
+	if (appendFilter->GetNumberOfInputPorts() > 0)
+	{
+		appendFilter->Update();
+		polydata->ShallowCopy(appendFilter->GetOutput());
+	}
 
 	return true;
 }
@@ -467,15 +538,67 @@ bool vtkCGALUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& p
 	vtkCGALUtilities::Polygon2ToPolyLine(pmesh.outer_boundary(), boundary);
 	appendFilter->AddInputData(boundary);
 
-	for (hole_iterator = pmesh.holes_begin(); hole_iterator != pmesh.holes_begin(); ++hole_iterator)
+	for (hole_iterator = pmesh.holes_begin(); hole_iterator != pmesh.holes_end(); ++hole_iterator)
 	{
 		vtkNew<vtkPolyData> hole;
 		vtkCGALUtilities::Polygon2ToPolyLine(*hole_iterator, hole);
 		appendFilter->AddInputData(hole);
 	}
 
-	appendFilter->Update();
-	polydata->ShallowCopy(appendFilter->GetOutput());
+	if (appendFilter->GetNumberOfInputPorts() > 0)
+	{
+		appendFilter->Update();
+		polydata->ShallowCopy(appendFilter->GetOutput());
+	}
 
 	return true;
+}
+
+//----------------------------------------------------------------------------
+
+void vtkCGALUtilities::PrintPwhList2Properties(const Pwh_list_2& pmesh)
+{
+	typename Pwh_list_2::const_iterator polygon_iterator;
+	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
+
+	for (polygon_iterator = pmesh.begin(); polygon_iterator != pmesh.end(); ++polygon_iterator)
+	{
+		vtkCGALUtilities::PrintPolygonWithHoles2Properties(*polygon_iterator);
+	}
+
+}
+
+//----------------------------------------------------------------------------
+
+void vtkCGALUtilities::PrintPolygonWithHoles2Properties(const Polygon_with_holes_2& pmesh)
+{
+
+	vtkCGALUtilities::PrintPolygonProperties(pmesh.outer_boundary(), "Outer Boundary");
+
+	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
+	int i = 0;
+	for (hole_iterator = pmesh.holes_begin(); hole_iterator != pmesh.holes_end(); ++hole_iterator)
+	{
+		vtkCGALUtilities::PrintPolygonProperties(*hole_iterator, "Hole " + i);
+		++i;
+	}
+}
+
+//----------------------------------------------------------------------------
+
+void vtkCGALUtilities::PrintPolygonProperties(const Polygon_2& pmesh, std::string message)
+{
+	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
+
+	cout << "========= " << message << "=========" << endl;
+	cout << "The polygon is " <<
+		(pmesh.is_simple() ? "" : "not ") << "simple." << endl;
+	// check if the polygon is convex
+	cout << "The polygon is " <<
+		(pmesh.is_convex() ? "" : "not ") << "convex." << endl;
+	cout << "The polygon is " <<
+		(pmesh.is_clockwise_oriented() ? "" : "not ") << "clockwise." << endl;
+	cout << "Signed area: " << pmesh.area() << endl;
+	cout << "The origin is " <<
+		(pmesh.bounded_side(Point_2(0, 0)) ? "" : "not ") << "inside the polygon." << endl;
 }
