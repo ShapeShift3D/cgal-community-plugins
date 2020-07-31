@@ -450,31 +450,35 @@ bool vtkCGALUtilities::SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyD
 bool vtkCGALUtilities::Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* polyline)
 {
 	vtkNew<vtkPoints> vtk_points;
-	
+
 	typename Polygon_2::Vertex_const_iterator vertex_iterator;
 
 	for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
 	{
-		//std::cout << "Point: " << vertex_iterator->x().exact().to_double() << ", " << vertex_iterator->y().exact().to_double() << ", " << "0" << endl;
-		vtk_points->InsertNextPoint(vertex_iterator->x().exact().to_double(), 
-									vertex_iterator->y().exact().to_double(), 
-									0);
+		vtk_points->InsertNextPoint(vertex_iterator->x().exact().to_double(),
+			vertex_iterator->y().exact().to_double(),
+			0);
 	}
-
 
 	// Not elegant but functional
 	vtkNew<vtkCellArray> vtk_cells;
 
-	for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints() - 1; ++i)
+	if (pmesh.size() > 1)
 	{
-		vtk_cells->InsertNextCell(2);
-		vtk_cells->InsertCellPoint(i);
-		vtk_cells->InsertCellPoint(i + 1);
-	}
+		for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints() - 1; ++i)
+		{
+			vtk_cells->InsertNextCell(2);
+			vtk_cells->InsertCellPoint(i);
+			vtk_cells->InsertCellPoint(i + 1);
+		}
 
-	vtk_cells->InsertNextCell(2);
-	vtk_cells->InsertCellPoint(vtk_points->GetNumberOfPoints() - 1);
-	vtk_cells->InsertCellPoint(0);
+		if (pmesh.size() > 2)
+		{
+			vtk_cells->InsertNextCell(2);
+			vtk_cells->InsertCellPoint(vtk_points->GetNumberOfPoints() - 1);
+			vtk_cells->InsertCellPoint(0);
+		}
+	}
 
 	polyline->SetPoints(vtk_points);
 	polyline->SetLines(vtk_cells);
@@ -499,19 +503,12 @@ bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* 
 
 	for (polygon_iterator = pmesh.begin(); polygon_iterator != pmesh.end(); ++polygon_iterator)
 	{
-		vtkNew<vtkPolyData> boundary;
-		vtkCGALUtilities::Polygon2ToPolyLine(polygon_iterator->outer_boundary(), boundary);
-		appendFilter->AddInputData(boundary);
-
-		for (hole_iterator = polygon_iterator->holes_begin(); hole_iterator != polygon_iterator->holes_end(); ++hole_iterator)
-		{
-			vtkNew<vtkPolyData> hole;
-			vtkCGALUtilities::Polygon2ToPolyLine(*hole_iterator, hole);
-			appendFilter->AddInputData(hole);
-		}
+		vtkNew<vtkPolyData> polygonWithHoles;
+		vtkCGALUtilities::PolygonWithHoles2ToPolyData(*polygon_iterator, polygonWithHoles);
+		appendFilter->AddInputData(polygonWithHoles);
 	}
 
-	if (appendFilter->GetNumberOfInputPorts() > 0)
+	if (appendFilter->GetNumberOfInputConnections(0) > 0)
 	{
 		appendFilter->Update();
 		polydata->ShallowCopy(appendFilter->GetOutput());
@@ -545,7 +542,7 @@ bool vtkCGALUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& p
 		appendFilter->AddInputData(hole);
 	}
 
-	if (appendFilter->GetNumberOfInputPorts() > 0)
+	if (appendFilter->GetNumberOfInputConnections(0) > 0)
 	{
 		appendFilter->Update();
 		polydata->ShallowCopy(appendFilter->GetOutput());
@@ -556,49 +553,69 @@ bool vtkCGALUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& p
 
 //----------------------------------------------------------------------------
 
-void vtkCGALUtilities::PrintPwhList2Properties(const Pwh_list_2& pmesh)
+void vtkCGALUtilities::PrintPwhList2Properties(const Pwh_list_2& pmesh, std::string message, bool printPoints)
 {
+	cout << "========= " << message << " =========" << endl;
+
 	typename Pwh_list_2::const_iterator polygon_iterator;
 	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
 
 	for (polygon_iterator = pmesh.begin(); polygon_iterator != pmesh.end(); ++polygon_iterator)
 	{
-		vtkCGALUtilities::PrintPolygonWithHoles2Properties(*polygon_iterator);
+		vtkCGALUtilities::PrintPolygonWithHoles2Properties(*polygon_iterator, "", printPoints);
 	}
 
 }
 
 //----------------------------------------------------------------------------
 
-void vtkCGALUtilities::PrintPolygonWithHoles2Properties(const Polygon_with_holes_2& pmesh)
+void vtkCGALUtilities::PrintPolygonWithHoles2Properties(const Polygon_with_holes_2& pmesh, std::string message, bool printPoints)
 {
+	cout << "========= " << message << " =========" << endl;
 
-	vtkCGALUtilities::PrintPolygonProperties(pmesh.outer_boundary(), "Outer Boundary");
+	vtkCGALUtilities::PrintPolygonProperties(pmesh.outer_boundary(), "Outer Boundary", printPoints);
 
 	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
 	int i = 0;
 	for (hole_iterator = pmesh.holes_begin(); hole_iterator != pmesh.holes_end(); ++hole_iterator)
 	{
-		vtkCGALUtilities::PrintPolygonProperties(*hole_iterator, "Hole " + i);
+		vtkCGALUtilities::PrintPolygonProperties(*hole_iterator, "Hole " + std::to_string(i), printPoints);
 		++i;
 	}
 }
 
 //----------------------------------------------------------------------------
 
-void vtkCGALUtilities::PrintPolygonProperties(const Polygon_2& pmesh, std::string message)
+void vtkCGALUtilities::PrintPolygonProperties(const Polygon_2& pmesh, std::string message, bool printPoints)
 {
+	cout << "========= " << message << " =========" << endl;
+
 	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
 
-	cout << "========= " << message << "=========" << endl;
-	cout << "The polygon is " <<
-		(pmesh.is_simple() ? "" : "not ") << "simple." << endl;
-	// check if the polygon is convex
-	cout << "The polygon is " <<
-		(pmesh.is_convex() ? "" : "not ") << "convex." << endl;
-	cout << "The polygon is " <<
-		(pmesh.is_clockwise_oriented() ? "" : "not ") << "clockwise." << endl;
-	cout << "Signed area: " << pmesh.area() << endl;
-	cout << "The origin is " <<
-		(pmesh.bounded_side(Point_2(0, 0)) ? "" : "not ") << "inside the polygon." << endl;
+	if (pmesh.size() > 0)
+	{
+		cout << "The polygon is " <<
+			(pmesh.is_simple() ? "" : "not ") << "simple." << endl;
+		// check if the polygon is convex
+		cout << "The polygon is " <<
+			(pmesh.is_convex() ? "" : "not ") << "convex." << endl;
+		cout << "The polygon is " <<
+			(pmesh.is_clockwise_oriented() ? "" : "not ") << "clockwise." << endl;
+		cout << "Signed area: " << pmesh.area() << endl;
+		cout << "The origin is " <<
+			(pmesh.bounded_side(Point_2(0, 0)) ? "" : "not ") << "inside the polygon." << endl;
+
+		if (printPoints)
+		{	
+			cout << "Points: " << endl;
+			typename Polygon_2::Vertex_const_iterator vertex_iterator;
+
+			for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
+				std::cout << "\t" << vertex_iterator->x().exact().to_double() << ", " << vertex_iterator->y().exact().to_double() << endl;
+		}
+	}
+	else
+	{
+		cout << "The polygon is empty." << endl;
+	}
 }

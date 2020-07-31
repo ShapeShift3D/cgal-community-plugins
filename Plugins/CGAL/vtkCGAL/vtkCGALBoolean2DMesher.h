@@ -12,14 +12,18 @@ public:
   static vtkCGALBoolean2DMesher* New();
   vtkTypeMacro(vtkCGALBoolean2DMesher, vtkPolyDataAlgorithm);
   
-  vtkPolyData* GetInputPolyLineA();
-  vtkPolyData* GetInputPolyLineB();
+  vtkPolyData* GetInputPolyLineSetA();
+  vtkPolyData* GetInputPolyLineSetB();
 
   enum OperationModes {
       JOIN = 1,
       INTERSECTION,
       DIFFERENCE,
-      SYMMETRIC_DIFFERENCE
+      DIFFERENCE2,
+      SYMMETRIC_DIFFERENCE,
+      COMPLEMENT,
+      NAND,
+      XOR
   };
 
   vtkGetMacro(OperationMode, int);
@@ -28,70 +32,22 @@ public:
   void SetOperationModeToJoin() { OperationMode = OperationModes::JOIN; }
   void SetOperationModeToIntersection() { OperationMode = OperationModes::INTERSECTION; }
   void SetOperationModeToDifference() { OperationMode = OperationModes::DIFFERENCE; }
+  void SetOperationModeToDifference2() { OperationMode = OperationModes::DIFFERENCE2; }
   void SetOperationModeToSymmetricDifference() { OperationMode = OperationModes::SYMMETRIC_DIFFERENCE; }
+  void SetOperationModeToComplement() { OperationMode = OperationModes::COMPLEMENT; }
+  void SetOperationModeToNAND() { OperationMode = OperationModes::NAND; }
+  void SetOperationModeToXOR() { OperationMode = OperationModes::XOR; }
 
-  enum PolygonOrientations {
-      CLOCKWISE = 1,
-      COUNTERCLOCKWISE
+  enum Inputs {
+      A = 1,
+      B
   };
 
-  //@{
-  /**
-  * Inverts the PolyLine A direction
-  */
-  vtkGetMacro(InvertPolyLineAOrientation, bool);
-  vtkSetMacro(InvertPolyLineAOrientation, bool);
-  vtkBooleanMacro(InvertPolyLineAOrientation, bool);
-  //@}
+  vtkGetMacro(ComplementOf, int);
+  vtkSetMacro(ComplementOf, int);
 
-  //@{
-  /**
-  * Forces the PolyLine A orientation
-  */
-  vtkGetMacro(ForcePolyLineAOrientation, bool);
-  vtkSetMacro(ForcePolyLineAOrientation, bool);
-  vtkBooleanMacro(ForcePolyLineAOrientation, bool);
-  //@}
-
-  //@{
-  /**
-  * Choose the orientation to force
-  */
-  vtkGetMacro(PolyLineAOrientation, int);
-  vtkSetMacro(PolyLineAOrientation, int);
-  //@}
-
-  void SetPolyLineAOrientationToClockwise() { PolyLineAOrientation = PolygonOrientations::CLOCKWISE; }
-  void SetPolyLineAOrientationToCounterclockwise() { PolyLineAOrientation = PolygonOrientations::COUNTERCLOCKWISE; }
-
-  //@{
-  /**
-  * Inverts the PolyLine B orientation
-  */
-  vtkGetMacro(InvertPolyLineBOrientation, bool);
-  vtkSetMacro(InvertPolyLineBOrientation, bool);
-  vtkBooleanMacro(InvertPolyLineBOrientation, bool);
-  //@}
-
-  //@{
-  /**
-  * Forces the PolyLine B orientation
-  */
-  vtkGetMacro(ForcePolyLineBOrientation, bool);
-  vtkSetMacro(ForcePolyLineBOrientation, bool);
-  vtkBooleanMacro(ForcePolyLineBOrientation, bool);
-  //@}
-
-  //@{
-  /**
-  * Choose the orientation to force
-  */
-  vtkGetMacro(PolyLineBOrientation, int);
-  vtkSetMacro(PolyLineBOrientation, int);
-  //@}
-
-  void SetPolyLineBOrientationnToClockwise() { PolyLineBOrientation = PolygonOrientations::CLOCKWISE; }
-  void SetPolyLineBOrientationToCounterclockwise() { PolyLineBOrientation = PolygonOrientations::COUNTERCLOCKWISE; }
+  void SetComplementOfA() { ComplementOf = Inputs::A; }
+  void SetComplementOfB() { ComplementOf = Inputs::B; }
 
 protected:
   vtkCGALBoolean2DMesher();
@@ -102,16 +58,7 @@ protected:
                             vtkInformationVector*) override;
 
   int OperationMode;
-
-  // PolyLine A
-  bool InvertPolyLineAOrientation;
-  bool ForcePolyLineAOrientation;
-  int PolyLineAOrientation;
-
-  // PolyLine B
-  bool InvertPolyLineBOrientation;
-  bool ForcePolyLineBOrientation;
-  int PolyLineBOrientation;
+  int ComplementOf;
 
 private:
   // needed but not implemented

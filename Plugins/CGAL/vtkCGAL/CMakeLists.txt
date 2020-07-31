@@ -19,6 +19,7 @@ set(classes
   vtkCGALBoolean2DMesher
   vtkCGALBoolean3DMesher
   vtkCGALNefPolyhedronTest
+  vtkCGALPolygonOrientOperator
   vtkCGALSelfIntersectionMeasurer
   vtkCGALUtilities)
 

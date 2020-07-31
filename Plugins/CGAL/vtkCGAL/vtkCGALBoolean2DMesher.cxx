@@ -23,16 +23,14 @@
 
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
-#include <vtkUnstructuredGrid.h>
+
+#include <vtkPolyDataConnectivityFilter.h>
+#include <vtkCleanPolyData.h>
 
 //---------CGAL---------------------------------
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Polygon_mesh_processing/corefinement.h>
 #include <CGAL/Boolean_set_operations_2.h>
-//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-//#include <CGAL/Surface_mesh.h>
-#include <CGAL/Bbox_2.h>
 #include <CGAL/Polygon_set_2.h>
 
 //---------Module--------------------------------------------------
@@ -58,21 +56,11 @@ vtkCGALBoolean2DMesher::vtkCGALBoolean2DMesher()
   this->SetNumberOfInputPorts(2);
   this->SetNumberOfOutputPorts(1);
   this->OperationMode = vtkCGALBoolean2DMesher::OperationModes::INTERSECTION;
-  this->DebugMode = false;
-
-  // PolyLine A
-  this->InvertPolyLineAOrientation = false;
-  this->ForcePolyLineAOrientation = false;
-  this->PolyLineAOrientation = vtkCGALBoolean2DMesher::PolygonOrientations::CLOCKWISE;
-
-  // PolyLine B
-  this->InvertPolyLineBOrientation = false;
-  this->ForcePolyLineBOrientation = false;
-  this->PolyLineBOrientation = vtkCGALBoolean2DMesher::PolygonOrientations::CLOCKWISE;
+  this->DebugMode = true;
 }
 
 //---------------------------------------------------
-vtkPolyData* vtkCGALBoolean2DMesher::GetInputPolyLineA()
+vtkPolyData* vtkCGALBoolean2DMesher::GetInputPolyLineSetA()
 {
 	if (this->GetNumberOfInputConnections(0) < 1) {
 		return nullptr;
@@ -82,7 +70,7 @@ vtkPolyData* vtkCGALBoolean2DMesher::GetInputPolyLineA()
 }
 
 //----------------------------------------------------
-vtkPolyData* vtkCGALBoolean2DMesher::GetInputPolyLineB()
+vtkPolyData* vtkCGALBoolean2DMesher::GetInputPolyLineSetB()
 {
 	if (this->GetNumberOfInputConnections(1) < 1) {
 		return nullptr;
@@ -102,122 +90,123 @@ int vtkCGALBoolean2DMesher::RequestData(vtkInformation *,
 {
 	//  Get the input and output data objects.
 	//  Get the info objects
-	vtkPolyData* inputPolyLineA = this->GetInputPolyLineA();
-	vtkPolyData* inputPolyLineB = this->GetInputPolyLineB();
+	vtkPolyData* inputPolyLineSetA = this->GetInputPolyLineSetA();
+	vtkPolyData* inputPolyLineSetB = this->GetInputPolyLineSetB();
 
-	if (inputPolyLineA == nullptr)
+	if (inputPolyLineSetA == nullptr)
 	{
-		vtkErrorMacro("Input PolyLine A is empty.");
+		vtkErrorMacro("Input PolyLine Set A is empty.");
 		return 0;
 	}
 
-	if (inputPolyLineA->GetPoints() == nullptr)
+	if (inputPolyLineSetA->GetPoints() == nullptr)
 	{
-		vtkErrorMacro("Input PolyLine A does not contain any point structure.");
+		vtkErrorMacro("Input PolyLine Set A does not contain any point structure.");
 		return 0;
 	}
 
-	if (inputPolyLineA->GetNumberOfPoints() == 0)
+	if (inputPolyLineSetA->GetNumberOfPoints() == 0)
 	{
-		vtkErrorMacro("Input PolyLine A contains no points.");
+		vtkErrorMacro("Input PolyLine Set A contains no points.");
 		return 0;
 	}
 
-	if (inputPolyLineB == nullptr)
+	if (inputPolyLineSetB == nullptr)
 	{
-		vtkErrorMacro("Input PolyLine B is empty.");
+		vtkErrorMacro("Input PolyLine Set B is empty.");
 		return 0;
 	}
 
-	if (inputPolyLineB->GetPoints() == nullptr)
+	if (inputPolyLineSetB->GetPoints() == nullptr)
 	{
-		vtkErrorMacro("Input PolyLine B does not contain any point structure.");
+		vtkErrorMacro("Input PolyLine Set B does not contain any point structure.");
 		return 0;
 	}
 
-	if (inputPolyLineB->GetNumberOfPoints() == 0)
+	if (inputPolyLineSetB->GetNumberOfPoints() == 0)
 	{
-		vtkErrorMacro("Input PolyLine B contains no points.");
+		vtkErrorMacro("Input PolyLine Set B contains no points.");
 		return 0;
 	}
 
 	vtkPolyData* output0 = vtkPolyData::GetData(outputVector->GetInformationObject(0));
 
-	// A polygon is a closed chain of edges. Several algorithms are available for polygons. 
-	// For some of those algorithms, it is necessary that the polygon is simple. 
-	// A polygon is simple if edges don't intersect, except consecutive edges, which intersect in their common vertex.
-	// Taken from https://doc.cgal.org/4.14.3/Polygon/index.html
-	Polygon_2 polygonA, polygonB;
+	vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
+	connectivityFilter->SetInputData(inputPolyLineSetA);
+	connectivityFilter->SetExtractionModeToAllRegions();
+	connectivityFilter->Update();
 
-	vtkCGALUtilities::vtkPolyDataToPolygon2(inputPolyLineA, polygonA);
-	vtkCGALUtilities::vtkPolyDataToPolygon2(inputPolyLineB, polygonB);
+	int nbOfPolylines = connectivityFilter->GetNumberOfExtractedRegions();
+	connectivityFilter->SetExtractionModeToSpecifiedRegions();
+
+	vtkNew<vtkCleanPolyData> cleanFilter;
+	cleanFilter->SetInputConnection(connectivityFilter->GetOutputPort());
+
+	Polygon_set_2 polygonSetA;
+
+	for (vtkIdType i = 0; i < nbOfPolylines; ++i)
+	{
+		connectivityFilter->InitializeSpecifiedRegionList();
+		connectivityFilter->AddSpecifiedRegion(i);
+		cleanFilter->Update();
+
+		Polygon_2 polygonA;
+		vtkCGALUtilities::vtkPolyDataToPolygon2(cleanFilter->GetOutput(), polygonA);
+
+		Polygon_with_holes_2 polygonWithHolesA;
+
+		CGAL::Orientation orientA = polygonA.orientation();
+
+		if (orientA == CGAL::CLOCKWISE)
+		{
+			polygonWithHolesA.add_hole(polygonA);
+		}
+		else if (orientA == CGAL::COUNTERCLOCKWISE)
+		{
+			polygonWithHolesA.outer_boundary() = polygonA;
+		}
+
+		polygonSetA.insert(polygonWithHolesA); // Disjoint polygons only
+	}
+
+	connectivityFilter->SetInputData(inputPolyLineSetB);
+	connectivityFilter->SetExtractionModeToAllRegions();
+	connectivityFilter->Update();
+
+	nbOfPolylines = connectivityFilter->GetNumberOfExtractedRegions();
+	connectivityFilter->SetExtractionModeToSpecifiedRegions();
+
+	Polygon_set_2 polygonSetB;
+
+	for (vtkIdType i = 0; i < nbOfPolylines; ++i)
+	{
+		connectivityFilter->InitializeSpecifiedRegionList();
+		connectivityFilter->AddSpecifiedRegion(i);
+		cleanFilter->Update();
+
+		Polygon_2 polygonB;
+		vtkCGALUtilities::vtkPolyDataToPolygon2(cleanFilter->GetOutput(), polygonB);
+
+		Polygon_with_holes_2 polygonWithHolesB;
+
+		CGAL::Orientation orientB = polygonB.orientation();
+
+		if (orientB == CGAL::CLOCKWISE)
+		{
+			polygonWithHolesB.add_hole(polygonB);
+		}
+		else if (orientB == CGAL::COUNTERCLOCKWISE)
+		{
+			polygonWithHolesB.outer_boundary() = polygonB;
+		}
+
+		polygonSetB.insert(polygonWithHolesB); // Disjoint polygons only
+	}
 
 	if (this->DebugMode)
 	{
-		vtkCGALUtilities::PrintPolygonProperties(polygonA, "Polygon A");
-		vtkCGALUtilities::PrintPolygonProperties(polygonB, "Polygon B");
-	}
-
-	if (this->InvertPolyLineAOrientation)
-		polygonA.reverse_orientation();
-	
-	if (this->InvertPolyLineBOrientation)
-		polygonB.reverse_orientation();
-
-	if (this->ForcePolyLineAOrientation)
-	{
-		CGAL::Orientation orient = polygonA.orientation();
-
-		switch (this->PolyLineAOrientation)
-		{
-		case vtkCGALBoolean2DMesher::PolygonOrientations::CLOCKWISE:
-		{
-			if (orient == CGAL::COUNTERCLOCKWISE) { polygonA.reverse_orientation(); }
-			break;
-		}
-		case vtkCGALBoolean2DMesher::PolygonOrientations::COUNTERCLOCKWISE:
-		{
-			if (orient == CGAL::CLOCKWISE) { polygonA.reverse_orientation(); }
-			break;
-		}
-		default:
-		{
-			vtkErrorMacro("Unknown polygon orientation for PolyLine A.");
-			return 0;
-		}
-		}
-	}
-
-	if (this->ForcePolyLineBOrientation)
-	{
-		CGAL::Orientation orient = polygonB.orientation();
-
-		switch (this->PolyLineBOrientation)
-		{
-		case vtkCGALBoolean2DMesher::PolygonOrientations::CLOCKWISE:
-		{
-			if (orient == CGAL::COUNTERCLOCKWISE) { polygonB.reverse_orientation(); }
-			break;
-		}
-		case vtkCGALBoolean2DMesher::PolygonOrientations::COUNTERCLOCKWISE:
-		{
-			if (orient == CGAL::CLOCKWISE) { polygonB.reverse_orientation(); }
-			break;
-		}
-		default:
-		{
-			vtkErrorMacro("Unknown polygon orientation for PolyLine B.");
-			return 0;
-		}
-		}
-	}
-	
-	if (this->DebugMode)
-	{
-		CGAL::Orientation finalOrientA = polygonA.orientation();
-		cout << "Orient A: " << finalOrientA << endl;
-		CGAL::Orientation finalOrientB = polygonB.orientation();
-		cout << "Orient B: " << finalOrientB << endl;
+		vtkCGALUtilities::PrintPolygonWithHoles2Properties(finalPolyLineA, "Polygon A", true);
+		vtkCGALUtilities::PrintPolygonWithHoles2Properties(finalPolyLineB, "Polygon B", false);
 	}
 
 	try
@@ -225,34 +214,100 @@ int vtkCGALBoolean2DMesher::RequestData(vtkInformation *,
 		if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::JOIN)
 		{
 			Polygon_with_holes_2 result;
-			CGAL::join(polygonA, polygonB, result);
+			CGAL::join(finalPolyLineA, finalPolyLineB, result);
 			vtkCGALUtilities::PolygonWithHoles2ToPolyData(result, output0);
 			if (this->DebugMode)
-				vtkCGALUtilities::PrintPolygonWithHoles2Properties(result);
+				vtkCGALUtilities::PrintPolygonWithHoles2Properties(result, "Result", true);
 		}
 		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::INTERSECTION)
 		{
 			Pwh_list_2 result;
-			CGAL::intersection(polygonA, polygonB, std::back_inserter(result));
+			CGAL::intersection(finalPolyLineA, finalPolyLineB, std::back_inserter(result));
 			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
 			if (this->DebugMode)
-				vtkCGALUtilities::PrintPwhList2Properties(result);
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
 		}
 		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::DIFFERENCE)
 		{
 			Pwh_list_2 result;
-			CGAL::difference(polygonA, polygonB, std::back_inserter(result));
+			CGAL::difference(finalPolyLineA, finalPolyLineB, std::back_inserter(result));
 			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
 			if (this->DebugMode)
-				vtkCGALUtilities::PrintPwhList2Properties(result);
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
 		}
 		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::SYMMETRIC_DIFFERENCE)
 		{
 			Pwh_list_2 result;
-			CGAL::symmetric_difference(polygonA, polygonB, std::back_inserter(result));
+			CGAL::symmetric_difference(finalPolyLineA, finalPolyLineB, std::back_inserter(result));
 			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
 			if (this->DebugMode)
-				vtkCGALUtilities::PrintPwhList2Properties(result);
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+		}
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::COMPLEMENT)
+		{
+			if (this->ComplementOf == vtkCGALBoolean2DMesher::Inputs::A)
+			{
+				Pwh_list_2 result;
+				CGAL::complement(finalPolyLineA, result.begin());
+				vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+				if (this->DebugMode)
+					vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+			}
+			else if (this->ComplementOf == vtkCGALBoolean2DMesher::Inputs::B)
+			{
+				Pwh_list_2 result;
+				CGAL::complement(finalPolyLineB, result.begin());
+				vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+				if (this->DebugMode)
+					vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+			}
+		}
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::NAND)
+		{
+			
+			Polygon_set_2 S;
+			S.insert(finalPolyLineA);
+			S.complement();
+
+			Polygon_set_2 Q;
+			Q.insert(finalPolyLineB);
+			Q.complement();
+
+			S.intersection(Q);
+
+			Pwh_list_2 result;
+			S.polygons_with_holes(std::back_inserter(result));
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+			if (this->DebugMode)
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+		}
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::XOR)
+		{
+			Polygon_set_2 S;
+			S.insert(finalPolyLineA);
+			S.complement();
+
+			Polygon_set_2 Q;
+			Q.insert(finalPolyLineB);
+			Q.complement();
+
+			S.intersection(Q);
+
+			Polygon_set_2 T;
+			T.insert(finalPolyLineA);
+
+			Polygon_set_2 R;
+			R.insert(finalPolyLineB);
+
+			T.join(R);
+			T.intersection(S);
+
+			Pwh_list_2 result;
+			T.polygons_with_holes(std::back_inserter(result));
+			
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+			if (this->DebugMode)
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
 		}
 	}
 	catch (const std::exception& e)

@@ -90,11 +90,11 @@ public:
 
     static bool PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata);
 
-    static void PrintPwhList2Properties(const Pwh_list_2& pmesh);
+    static void PrintPwhList2Properties(const Pwh_list_2& pmesh, std::string message, bool printPoints);
 
-    static void PrintPolygonWithHoles2Properties(const Polygon_with_holes_2& pmesh);
+    static void PrintPolygonWithHoles2Properties(const Polygon_with_holes_2& pmesh, std::string message, bool printPoints);
 
-    static void PrintPolygonProperties(const Polygon_2& pmesh, std::string message);
+    static void PrintPolygonProperties(const Polygon_2& pmesh, std::string message, bool printPoints);
 
 protected:
     vtkCGALUtilities();
