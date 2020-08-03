@@ -441,60 +441,13 @@ bool vtkCGALUtilities::SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyD
 
 //----------------------------------------------------------------------------
 
-/** @brief Converts a Polygon 2 (CGAL) into a PolyData (VTK).
-*
-*  @param pmesh The input Polygon 2
-*  @param usg The output PolyData
-*  @return bool Success (true) or failure (false)
-*/
-bool vtkCGALUtilities::Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* polyline)
-{
-	vtkNew<vtkPoints> vtk_points;
-
-	typename Polygon_2::Vertex_const_iterator vertex_iterator;
-
-	for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
-	{
-		vtk_points->InsertNextPoint(vertex_iterator->x().exact().to_double(),
-			vertex_iterator->y().exact().to_double(),
-			0);
-	}
-
-	// Not elegant but functional
-	vtkNew<vtkCellArray> vtk_cells;
-
-	if (pmesh.size() > 1)
-	{
-		for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints() - 1; ++i)
-		{
-			vtk_cells->InsertNextCell(2);
-			vtk_cells->InsertCellPoint(i);
-			vtk_cells->InsertCellPoint(i + 1);
-		}
-
-		if (pmesh.size() > 2)
-		{
-			vtk_cells->InsertNextCell(2);
-			vtk_cells->InsertCellPoint(vtk_points->GetNumberOfPoints() - 1);
-			vtk_cells->InsertCellPoint(0);
-		}
-	}
-
-	polyline->SetPoints(vtk_points);
-	polyline->SetLines(vtk_cells);
-
-	return true;
-}
-
-//----------------------------------------------------------------------------
-
 /** @brief Converts a Polygon with holes list 2 (CGAL) into a PolyData (VTK).
 *
 *  @param pmesh The input Polygon with holes list
 *  @param usg The output PolyData
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata)
+bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata, bool oneCell /* = false */)
 {
 	vtkNew<vtkAppendPolyData> appendFilter;
 
@@ -504,7 +457,7 @@ bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* 
 	for (polygon_iterator = pmesh.begin(); polygon_iterator != pmesh.end(); ++polygon_iterator)
 	{
 		vtkNew<vtkPolyData> polygonWithHoles;
-		vtkCGALUtilities::PolygonWithHoles2ToPolyData(*polygon_iterator, polygonWithHoles);
+		vtkCGALUtilities::PolygonWithHoles2ToPolyData(*polygon_iterator, polygonWithHoles, oneCell);
 		appendFilter->AddInputData(polygonWithHoles);
 	}
 
@@ -525,20 +478,20 @@ bool vtkCGALUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* 
 *  @param usg The output PolyData
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata)
+bool vtkCGALUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata, bool oneCell /* = false */)
 {
 	vtkNew<vtkAppendPolyData> appendFilter;
 
 	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
 
 	vtkNew<vtkPolyData> boundary;
-	vtkCGALUtilities::Polygon2ToPolyLine(pmesh.outer_boundary(), boundary);
+	vtkCGALUtilities::Polygon2ToPolyLine(pmesh.outer_boundary(), boundary, oneCell);
 	appendFilter->AddInputData(boundary);
 
 	for (hole_iterator = pmesh.holes_begin(); hole_iterator != pmesh.holes_end(); ++hole_iterator)
 	{
 		vtkNew<vtkPolyData> hole;
-		vtkCGALUtilities::Polygon2ToPolyLine(*hole_iterator, hole);
+		vtkCGALUtilities::Polygon2ToPolyLine(*hole_iterator, hole, oneCell);
 		appendFilter->AddInputData(hole);
 	}
 
@@ -546,6 +499,85 @@ bool vtkCGALUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& p
 	{
 		appendFilter->Update();
 		polydata->ShallowCopy(appendFilter->GetOutput());
+	}
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
+
+/** @brief Converts a Polygon 2 (CGAL) into a PolyData (VTK).
+*
+*  @param pmesh The input Polygon 2
+*  @param usg The output PolyData
+*  @return bool Success (true) or failure (false)
+*/
+bool vtkCGALUtilities::Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* polyline, bool oneCell /* = false */)
+{
+	vtkNew<vtkPoints> vtk_points;
+
+	typename Polygon_2::Vertex_const_iterator vertex_iterator;
+
+	for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
+	{
+		vtk_points->InsertNextPoint(vertex_iterator->x().exact().to_double(),
+			vertex_iterator->y().exact().to_double(),
+			0);
+	}
+
+	polyline->SetPoints(vtk_points);
+
+	if (polyline->GetLines() == nullptr || polyline->GetNumberOfLines() == 0)
+	{
+		// Not elegant but functional
+		vtkNew<vtkCellArray> vtk_cells;
+
+		if (oneCell)
+		{
+			if (pmesh.size() > 1)
+			{
+				if (pmesh.size() == 2)
+				{
+					vtk_cells->InsertNextCell(vtk_points->GetNumberOfPoints());
+					for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints(); ++i)
+					{
+						vtk_cells->InsertCellPoint(i);
+					}
+				}
+				else
+				{
+					vtk_cells->InsertNextCell(vtk_points->GetNumberOfPoints() + 1);
+					for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints(); ++i)
+					{
+						vtk_cells->InsertCellPoint(i);
+					}
+					vtk_cells->InsertCellPoint(0);
+				}
+			}
+		}
+		else
+		{
+			if (pmesh.size() > 1)
+			{
+				for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints() - 1; ++i)
+				{
+					vtk_cells->InsertNextCell(2);
+					vtk_cells->InsertCellPoint(i);
+					vtk_cells->InsertCellPoint(i + 1);
+				}
+
+				if (pmesh.size() > 2)
+				{
+					vtk_cells->InsertNextCell(2);
+					vtk_cells->InsertCellPoint(vtk_points->GetNumberOfPoints() - 1);
+					vtk_cells->InsertCellPoint(0);
+				}
+			}
+		}
+
+
+
+		polyline->SetLines(vtk_cells);
 	}
 
 	return true;
@@ -565,6 +597,16 @@ void vtkCGALUtilities::PrintPwhList2Properties(const Pwh_list_2& pmesh, std::str
 		vtkCGALUtilities::PrintPolygonWithHoles2Properties(*polygon_iterator, "", printPoints);
 	}
 
+}
+
+//----------------------------------------------------------------------------
+
+void vtkCGALUtilities::PrintPolygonSet2Properties(const Polygon_set_2& pmesh, std::string message, bool printPoints)
+{
+	Pwh_list_2 pmeshList;
+	pmesh.polygons_with_holes(std::back_inserter(pmeshList));
+
+	vtkCGALUtilities::PrintPwhList2Properties(pmeshList, message, printPoints);
 }
 
 //----------------------------------------------------------------------------
@@ -605,10 +647,16 @@ void vtkCGALUtilities::PrintPolygonProperties(const Polygon_2& pmesh, std::strin
 		cout << "The origin is " <<
 			(pmesh.bounded_side(Point_2(0, 0)) ? "" : "not ") << "inside the polygon." << endl;
 
+		typename Polygon_2::Vertex_const_iterator vertex_iterator;
+		int i = 0;
+		for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
+			++i;
+
+		cout << "Number of Points: " << i << endl;
+
 		if (printPoints)
 		{	
 			cout << "Points: " << endl;
-			typename Polygon_2::Vertex_const_iterator vertex_iterator;
 
 			for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
 				std::cout << "\t" << vertex_iterator->x().exact().to_double() << ", " << vertex_iterator->y().exact().to_double() << endl;

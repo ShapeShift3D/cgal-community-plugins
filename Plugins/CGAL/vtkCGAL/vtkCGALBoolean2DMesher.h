@@ -16,38 +16,57 @@ public:
   vtkPolyData* GetInputPolyLineSetB();
 
   enum OperationModes {
-      JOIN = 1,
-      INTERSECTION,
-      DIFFERENCE,
-      DIFFERENCE2,
-      SYMMETRIC_DIFFERENCE,
+      ADD = 1,
+      INTERSECT,
+      A_MINUS_B,
+      B_MINUS_A,
+      EXCLUDE_OVERLAP,
       COMPLEMENT,
-      NAND,
-      XOR
+      INTERSECT_COMPLEMENT,
+      EXCLUSIVE_ADD
   };
 
+  //@{
+  /**
+  * This property indicates which operation mode will be used.
+  */
   vtkGetMacro(OperationMode, int);
   vtkSetMacro(OperationMode, int);
+  //@}
 
-  void SetOperationModeToJoin() { OperationMode = OperationModes::JOIN; }
-  void SetOperationModeToIntersection() { OperationMode = OperationModes::INTERSECTION; }
-  void SetOperationModeToDifference() { OperationMode = OperationModes::DIFFERENCE; }
-  void SetOperationModeToDifference2() { OperationMode = OperationModes::DIFFERENCE2; }
-  void SetOperationModeToSymmetricDifference() { OperationMode = OperationModes::SYMMETRIC_DIFFERENCE; }
+  void SetOperationModeToAdd() { OperationMode = OperationModes::ADD; }
+  void SetOperationModeToIntersect() { OperationMode = OperationModes::INTERSECT; }
+  void SetOperationModeToAMinusB() { OperationMode = OperationModes::A_MINUS_B; }
+  void SetOperationModeToBMinusA() { OperationMode = OperationModes::B_MINUS_A; }
+  void SetOperationModeToExcludeOverlap() { OperationMode = OperationModes::EXCLUDE_OVERLAP; }
   void SetOperationModeToComplement() { OperationMode = OperationModes::COMPLEMENT; }
-  void SetOperationModeToNAND() { OperationMode = OperationModes::NAND; }
-  void SetOperationModeToXOR() { OperationMode = OperationModes::XOR; }
+  void SetOperationModeToIntersectComplement() { OperationMode = OperationModes::INTERSECT_COMPLEMENT; }
+  void SetOperationModeToExclusiveAdd() { OperationMode = OperationModes::EXCLUSIVE_ADD; }
 
   enum Inputs {
       A = 1,
       B
   };
 
+  //@{
+  /**
+  * Apply a complement on an input
+  */
   vtkGetMacro(ComplementOf, int);
   vtkSetMacro(ComplementOf, int);
+  //@}
 
   void SetComplementOfA() { ComplementOf = Inputs::A; }
   void SetComplementOfB() { ComplementOf = Inputs::B; }
+
+  //@{
+  /**
+  * If true, every polygon will be composed of one cell.
+  */
+  vtkGetMacro(OneCell, bool);
+  vtkSetMacro(OneCell, bool);
+  vtkBooleanMacro(OneCell, bool);
+  //@}
 
 protected:
   vtkCGALBoolean2DMesher();
@@ -59,6 +78,7 @@ protected:
 
   int OperationMode;
   int ComplementOf;
+  bool OneCell;
 
 private:
   // needed but not implemented

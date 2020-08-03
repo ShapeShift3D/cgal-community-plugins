@@ -137,6 +137,7 @@ int vtkCGALPolygonOrientOperator::RequestData(vtkInformation *,
 		}
 	}
 
+	output0->DeepCopy(inputPolyLine);
 	vtkCGALUtilities::Polygon2ToPolyLine(polygon, output0);
 	return 1;
 }

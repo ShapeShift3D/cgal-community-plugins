@@ -13,6 +13,7 @@
 #include <CGAL/Nef_polyhedron_3.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
+#include <CGAL/Polygon_set_2.h>
 #include <CGAL/Simple_cartesian.h>
 
 class vtkPointSet;
@@ -43,6 +44,7 @@ public:
     typedef CGAL::Polygon_2<K2>									Polygon_2;
     typedef CGAL::Polygon_with_holes_2<K2>						Polygon_with_holes_2;
     typedef std::list<Polygon_with_holes_2>						Pwh_list_2;
+    typedef CGAL::Polygon_set_2<K2>								Polygon_set_2;
 
     // Kernel 3
     typedef CGAL::Homogeneous<CGAL::Exact_integer>              K3;
@@ -84,13 +86,15 @@ public:
     template <typename MeshType>
     static bool SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyData* poly);
 
-    static bool Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* polyline);
+    static bool PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata, bool oneCell = false);
 
-    static bool PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata);
+    static bool PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata, bool oneCell = false);
 
-    static bool PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata);
+    static bool Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* polyline, bool oneCell = false);
 
     static void PrintPwhList2Properties(const Pwh_list_2& pmesh, std::string message, bool printPoints);
+
+    static void PrintPolygonSet2Properties(const Polygon_set_2& pmesh, std::string message, bool printPoints);
 
     static void PrintPolygonWithHoles2Properties(const Polygon_with_holes_2& pmesh, std::string message, bool printPoints);
 

@@ -186,4 +186,6 @@ int vtkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(vtkPolyData* polyDataI
 
 	polyDataOut->DeepCopy(polyDataIn);
 	polyDataOut->GetCellData()->AddArray(intersectingTrisArray);
+
+	return 1;
 }

@@ -55,7 +55,8 @@ vtkCGALBoolean2DMesher::vtkCGALBoolean2DMesher()
 {
   this->SetNumberOfInputPorts(2);
   this->SetNumberOfOutputPorts(1);
-  this->OperationMode = vtkCGALBoolean2DMesher::OperationModes::INTERSECTION;
+  this->OperationMode = vtkCGALBoolean2DMesher::OperationModes::INTERSECT;
+  this->OneCell = true;
   this->DebugMode = true;
 }
 
@@ -205,109 +206,124 @@ int vtkCGALBoolean2DMesher::RequestData(vtkInformation *,
 
 	if (this->DebugMode)
 	{
-		vtkCGALUtilities::PrintPolygonWithHoles2Properties(finalPolyLineA, "Polygon A", true);
-		vtkCGALUtilities::PrintPolygonWithHoles2Properties(finalPolyLineB, "Polygon B", false);
+		vtkCGALUtilities::PrintPolygonSet2Properties(polygonSetA, "Polygon Set A", false);
+		vtkCGALUtilities::PrintPolygonSet2Properties(polygonSetB, "Polygon Set B", false);
 	}
 
 	try
 	{
-		if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::JOIN)
+		if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::ADD)
 		{
-			Polygon_with_holes_2 result;
-			CGAL::join(finalPolyLineA, finalPolyLineB, result);
-			vtkCGALUtilities::PolygonWithHoles2ToPolyData(result, output0);
-			if (this->DebugMode)
-				vtkCGALUtilities::PrintPolygonWithHoles2Properties(result, "Result", true);
-		}
-		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::INTERSECTION)
-		{
+			polygonSetA.join(polygonSetB);
+
 			Pwh_list_2 result;
-			CGAL::intersection(finalPolyLineA, finalPolyLineB, std::back_inserter(result));
-			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+			polygonSetA.polygons_with_holes(std::back_inserter(result));
+
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
 			if (this->DebugMode)
-				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", false);
 		}
-		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::DIFFERENCE)
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::INTERSECT)
 		{
+			polygonSetA.intersection(polygonSetB);
+
 			Pwh_list_2 result;
-			CGAL::difference(finalPolyLineA, finalPolyLineB, std::back_inserter(result));
-			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+			polygonSetA.polygons_with_holes(std::back_inserter(result));
+
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
 			if (this->DebugMode)
-				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", false);
 		}
-		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::SYMMETRIC_DIFFERENCE)
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::A_MINUS_B)
 		{
+			polygonSetA.difference(polygonSetB);
+
 			Pwh_list_2 result;
-			CGAL::symmetric_difference(finalPolyLineA, finalPolyLineB, std::back_inserter(result));
-			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+			polygonSetA.polygons_with_holes(std::back_inserter(result));
+
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
 			if (this->DebugMode)
-				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", false);
+		}
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::B_MINUS_A)
+		{
+			polygonSetB.difference(polygonSetA);
+
+			Pwh_list_2 result;
+			polygonSetB.polygons_with_holes(std::back_inserter(result));
+
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
+			if (this->DebugMode)
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", false);
+		}
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::EXCLUDE_OVERLAP)
+		{
+			polygonSetA.symmetric_difference(polygonSetB);
+
+			Pwh_list_2 result;
+			polygonSetA.polygons_with_holes(std::back_inserter(result));
+
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
+			if (this->DebugMode)
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", false);
 		}
 		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::COMPLEMENT)
 		{
 			if (this->ComplementOf == vtkCGALBoolean2DMesher::Inputs::A)
 			{
+				polygonSetA.complement();
+
 				Pwh_list_2 result;
-				CGAL::complement(finalPolyLineA, result.begin());
-				vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+				polygonSetA.polygons_with_holes(std::back_inserter(result));
+
+				vtkCGALUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
 				if (this->DebugMode)
-					vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+					vtkCGALUtilities::PrintPwhList2Properties(result, "Result", false);
 			}
 			else if (this->ComplementOf == vtkCGALBoolean2DMesher::Inputs::B)
 			{
+				polygonSetB.complement();
+
 				Pwh_list_2 result;
-				CGAL::complement(finalPolyLineB, result.begin());
-				vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+				polygonSetB.polygons_with_holes(std::back_inserter(result));
+
+				vtkCGALUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
 				if (this->DebugMode)
-					vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+					vtkCGALUtilities::PrintPwhList2Properties(result, "Result", false);
 			}
 		}
-		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::NAND)
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::INTERSECT_COMPLEMENT)
 		{
-			
-			Polygon_set_2 S;
-			S.insert(finalPolyLineA);
-			S.complement();
-
-			Polygon_set_2 Q;
-			Q.insert(finalPolyLineB);
-			Q.complement();
-
-			S.intersection(Q);
+			// NAND
+			polygonSetA.intersection(polygonSetB);
+			polygonSetA.complement();
 
 			Pwh_list_2 result;
-			S.polygons_with_holes(std::back_inserter(result));
-			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+			polygonSetA.polygons_with_holes(std::back_inserter(result));
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
 			if (this->DebugMode)
-				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", false);
 		}
-		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::XOR)
+		else if (this->OperationMode == vtkCGALBoolean2DMesher::OperationModes::EXCLUSIVE_ADD)
 		{
-			Polygon_set_2 S;
-			S.insert(finalPolyLineA);
+			// Intersect Complement (NAND)
+			Polygon_set_2 S = polygonSetA;
+			Polygon_set_2 Q = polygonSetB;
+			S.intersection(Q);
 			S.complement();
 
-			Polygon_set_2 Q;
-			Q.insert(finalPolyLineB);
-			Q.complement();
+			// OR
+			polygonSetA.join(polygonSetB);
 
-			S.intersection(Q);
-
-			Polygon_set_2 T;
-			T.insert(finalPolyLineA);
-
-			Polygon_set_2 R;
-			R.insert(finalPolyLineB);
-
-			T.join(R);
-			T.intersection(S);
+			// AND
+			polygonSetA.intersection(S);
 
 			Pwh_list_2 result;
-			T.polygons_with_holes(std::back_inserter(result));
+			polygonSetA.polygons_with_holes(std::back_inserter(result));
 			
-			vtkCGALUtilities::PwhList2ToPolyData(result, output0);
+			vtkCGALUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
 			if (this->DebugMode)
-				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", true);
+				vtkCGALUtilities::PrintPwhList2Properties(result, "Result", false);
 		}
 	}
 	catch (const std::exception& e)

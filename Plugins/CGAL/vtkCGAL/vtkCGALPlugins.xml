@@ -832,21 +832,21 @@
                                default_values="1">
                 <EnumerationDomain name="enum">
                     <Entry value="1"
-                           text="Join"/>
+                           text="Add"/>
                     <Entry value="2"
-                           text="Intersection"/>
+                           text="Intersect"/>
                     <Entry value="3"
-                           text="Difference"/>
+                           text="A - B"/>
                     <Entry value="4"
-                           text="Difference2"/>
+                           text="B - A"/>
                     <Entry value="5"
-                           text="Symmetric Difference"/>
+                           text="Exclude Overlap"/>
                     <Entry value="6"
                            text="Complement"/>
                     <Entry value="7"
-                           text="NAND"/>
+                           text="Intersect Complement"/>
                     <Entry value="8"
-                           text="XOR"/>
+                           text="Exclusive Add"/>
                 </EnumerationDomain>
                 <Documentation>
                     This property indicates which operation mode will be used.
@@ -873,6 +873,17 @@
                 </Hints>
                 <Documentation>
                     Apply a complement on an input
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="OneCell"
+                               command="SetOneCell"
+                               label="One Cell"
+                               number_of_elements="1"
+                               default_values="1">
+                <BooleanDomain name="bool"/>
+                <Documentation>
+                    If true, every polygon will be composed of one cell.
                 </Documentation>
             </IntVectorProperty>
 
