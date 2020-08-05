@@ -59,6 +59,19 @@ public:
   void SetComplementOfA() { ComplementOf = Inputs::A; }
   void SetComplementOfB() { ComplementOf = Inputs::B; }
 
+  enum Planes {
+      XY = 1,
+      YZ,
+      XZ
+  };
+
+  vtkGetMacro(Plane, int);
+  vtkSetMacro(Plane, int);
+
+  void SetPlaneToXY() { Plane = Planes::XY; }
+  void SetPlaneToYZ() { Plane = Planes::YZ; }
+  void SetPlaneToXZ() { Plane = Planes::XZ; }
+
   //@{
   /**
   * If true, every polygon will be composed of one cell.
@@ -78,13 +91,14 @@ protected:
 
   int OperationMode;
   int ComplementOf;
+  int Plane;
   bool OneCell;
+  bool DebugMode;
 
 private:
   // needed but not implemented
   vtkCGALBoolean2DMesher(const vtkCGALBoolean2DMesher&) = delete;
   void operator=(const vtkCGALBoolean2DMesher&) = delete;
 
-  bool DebugMode;
 };
 #endif

@@ -259,7 +259,7 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
 *  @param tmesh The resulting Polygon 2 Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygon2(vtkPointSet* polyData, Polygon_2& tmesh)
+bool vtkCGALUtilities::vtkPolyDataToPolygon2(vtkPointSet* polyData, Polygon_2& tmesh, int& coordinate0, int& coordinate1)
 {
     // get nb of points and cells
     vtkIdType nb_points = polyData->GetNumberOfPoints();
@@ -270,7 +270,7 @@ bool vtkCGALUtilities::vtkPolyDataToPolygon2(vtkPointSet* polyData, Polygon_2& t
         double coords[3];
         polyData->GetPoint(i, coords);
 
-        tmesh.push_back(Point_2(coords[0], coords[1]));
+        tmesh.push_back(Point_2(coords[coordinate0], coords[coordinate1]));
     }
 
     return true;
@@ -590,13 +590,11 @@ void vtkCGALUtilities::PrintPwhList2Properties(const Pwh_list_2& pmesh, std::str
 	cout << "========= " << message << " =========" << endl;
 
 	typename Pwh_list_2::const_iterator polygon_iterator;
-	typename CGAL::Polygon_with_holes_2<K2>::Hole_const_iterator hole_iterator;
 
 	for (polygon_iterator = pmesh.begin(); polygon_iterator != pmesh.end(); ++polygon_iterator)
 	{
 		vtkCGALUtilities::PrintPolygonWithHoles2Properties(*polygon_iterator, "", printPoints);
 	}
-
 }
 
 //----------------------------------------------------------------------------

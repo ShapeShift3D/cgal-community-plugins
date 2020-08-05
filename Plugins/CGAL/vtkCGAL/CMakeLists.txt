@@ -10,7 +10,6 @@ endif ()
 
 # ParaView 6.0 or later
 set(classes
-  vtkCGAL2DPolygonParentTree
   vtkCGAL3DPolyhedralMesher
   vtkCGALAbstractUVParametrization
   vtkCGALARAPUVParametrization
@@ -18,8 +17,9 @@ set(classes
   vtkCGALBoolean
   vtkCGALBoolean2DMesher
   vtkCGALBoolean3DMesher
-  vtkCGALNefPolyhedronTest
   vtkCGALPolygonOrientOperator
+  vtkCGALPolygonSetInteriorCellExtract
+  vtkCGALPolyLineSetToPolygonSet
   vtkCGALSelfIntersectionMeasurer
   vtkCGALUtilities)
 

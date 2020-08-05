@@ -70,7 +70,7 @@ public:
 
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh3& tmesh);
 
-    static bool vtkPolyDataToPolygon2(vtkPointSet* poly_data, Polygon_2& tmesh);
+    static bool vtkPolyDataToPolygon2(vtkPointSet* poly_data, Polygon_2& tmesh, int& coordinate0, int& coordinate1);
 
     // Converters from CGAL to VTK
     static bool PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmesh, vtkUnstructuredGrid* usg);

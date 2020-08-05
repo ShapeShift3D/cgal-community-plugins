@@ -14,6 +14,19 @@ public:
   
   vtkPolyData* GetInputPolyLine();
 
+  enum Planes {
+      XY = 1,
+      YZ,
+      XZ
+  };
+
+  vtkGetMacro(Plane, int);
+  vtkSetMacro(Plane, int);
+
+  void SetPlaneToXY() { Plane = Planes::XY; }
+  void SetPlaneToYZ() { Plane = Planes::YZ; }
+  void SetPlaneToXZ() { Plane = Planes::XZ; }
+
   enum PolygonOrientations {
       CLOCKWISE = 1,
       COUNTERCLOCKWISE
@@ -56,6 +69,7 @@ protected:
                             vtkInformationVector**, 
                             vtkInformationVector*) override;
 
+  int Plane;
   bool InvertPolyLineOrientation;
   bool ForcePolyLineOrientation;
   int PolyLineOrientation;

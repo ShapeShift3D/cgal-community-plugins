@@ -28,7 +28,8 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Boolean_set_operations_2.h>
-#include <CGAL/Polygon_set_2.h>
+//#include <CGAL/Polygon_set_2.h>
+#include <CGAL/General_polygon_set_2.h>
 
 //---------Module--------------------------------------------------
 #include <vtkCGALUtilities.h>
@@ -42,7 +43,7 @@ typedef K::Point_2											Point_2;
 typedef CGAL::Polygon_2<K>									Polygon_2;
 typedef CGAL::Polygon_with_holes_2<K>						Polygon_with_holes_2;
 typedef std::list<Polygon_with_holes_2>						Pwh_list_2;
-typedef CGAL::Polygon_set_2<K>								Polygon_set_2;
+typedef CGAL::General_polygon_set_2<K>								Polygon_set_2;
 
 // -----------------------------------------------------------------------------
 // Constructor
@@ -53,7 +54,7 @@ vtkCGALPolygonOrientOperator::vtkCGALPolygonOrientOperator()
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
 
-  // PolyLine A
+  this->Plane = vtkCGALPolygonOrientOperator::Planes::XY;
   this->InvertPolyLineOrientation = false;
   this->ForcePolyLineOrientation = false;
   this->PolyLineOrientation = vtkCGALPolygonOrientOperator::PolygonOrientations::CLOCKWISE;
@@ -102,13 +103,43 @@ int vtkCGALPolygonOrientOperator::RequestData(vtkInformation *,
 
 	vtkPolyData* output0 = vtkPolyData::GetData(outputVector->GetInformationObject(0));
 
+	int firstCoordinate = -1;
+	int secondCoordinate = -1;
+	switch (this->Plane)
+	{
+	case Planes::XY:
+	{
+		firstCoordinate = 0;
+		secondCoordinate = 1;
+		break;
+	}
+	case Planes::YZ:
+	{
+		firstCoordinate = 1;
+		secondCoordinate = 2;
+		break;
+	}
+	case Planes::XZ:
+	{
+		firstCoordinate = 0;
+		secondCoordinate = 2;
+		break;
+	}
+	default:
+	{
+		vtkErrorMacro("Unknown Plane.");
+		return 0;
+	}
+	}
+
 	// A polygon is a closed chain of edges. Several algorithms are available for polygons. 
 	// For some of those algorithms, it is necessary that the polygon is simple. 
 	// A polygon is simple if edges don't intersect, except consecutive edges, which intersect in their common vertex.
 	// Taken from https://doc.cgal.org/4.14.3/Polygon/index.html
 	Polygon_2 polygon;
 
-	vtkCGALUtilities::vtkPolyDataToPolygon2(inputPolyLine, polygon);
+	vtkCGALUtilities::vtkPolyDataToPolygon2(inputPolyLine, polygon,
+												firstCoordinate, secondCoordinate);
 
 	if (this->InvertPolyLineOrientation)
 		polygon.reverse_orientation();

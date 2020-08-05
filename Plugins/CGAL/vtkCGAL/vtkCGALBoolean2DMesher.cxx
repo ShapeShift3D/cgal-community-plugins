@@ -24,9 +24,6 @@
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 
-#include <vtkPolyDataConnectivityFilter.h>
-#include <vtkCleanPolyData.h>
-
 //---------CGAL---------------------------------
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
@@ -34,6 +31,7 @@
 #include <CGAL/Polygon_set_2.h>
 
 //---------Module--------------------------------------------------
+#include <vtkCGALPolyLineSetToPolygonSet.h>
 #include <vtkCGALUtilities.h>
 
 //----------
@@ -57,6 +55,7 @@ vtkCGALBoolean2DMesher::vtkCGALBoolean2DMesher()
   this->SetNumberOfOutputPorts(1);
   this->OperationMode = vtkCGALBoolean2DMesher::OperationModes::INTERSECT;
   this->OneCell = true;
+  this->Plane = vtkCGALBoolean2DMesher::Planes::XY;
   this->DebugMode = true;
 }
 
@@ -131,78 +130,19 @@ int vtkCGALBoolean2DMesher::RequestData(vtkInformation *,
 	}
 
 	vtkPolyData* output0 = vtkPolyData::GetData(outputVector->GetInformationObject(0));
+	
 
-	vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
-	connectivityFilter->SetInputData(inputPolyLineSetA);
-	connectivityFilter->SetExtractionModeToAllRegions();
-	connectivityFilter->Update();
+	vtkNew<vtkCGALPolyLineSetToPolygonSet> polylineSetToPolygonSetFilter;
+	polylineSetToPolygonSetFilter->SetPlane(this->Plane);
 
-	int nbOfPolylines = connectivityFilter->GetNumberOfExtractedRegions();
-	connectivityFilter->SetExtractionModeToSpecifiedRegions();
+	polylineSetToPolygonSetFilter->SetInputData(0, inputPolyLineSetA);
+	polylineSetToPolygonSetFilter->Update();
+	Polygon_set_2 polygonSetA = *polylineSetToPolygonSetFilter->GetOutputPolygonSet();
 
-	vtkNew<vtkCleanPolyData> cleanFilter;
-	cleanFilter->SetInputConnection(connectivityFilter->GetOutputPort());
+	polylineSetToPolygonSetFilter->SetInputData(0, inputPolyLineSetB);
+	polylineSetToPolygonSetFilter->Update();
+	Polygon_set_2 polygonSetB = *polylineSetToPolygonSetFilter->GetOutputPolygonSet();
 
-	Polygon_set_2 polygonSetA;
-
-	for (vtkIdType i = 0; i < nbOfPolylines; ++i)
-	{
-		connectivityFilter->InitializeSpecifiedRegionList();
-		connectivityFilter->AddSpecifiedRegion(i);
-		cleanFilter->Update();
-
-		Polygon_2 polygonA;
-		vtkCGALUtilities::vtkPolyDataToPolygon2(cleanFilter->GetOutput(), polygonA);
-
-		Polygon_with_holes_2 polygonWithHolesA;
-
-		CGAL::Orientation orientA = polygonA.orientation();
-
-		if (orientA == CGAL::CLOCKWISE)
-		{
-			polygonWithHolesA.add_hole(polygonA);
-		}
-		else if (orientA == CGAL::COUNTERCLOCKWISE)
-		{
-			polygonWithHolesA.outer_boundary() = polygonA;
-		}
-
-		polygonSetA.insert(polygonWithHolesA); // Disjoint polygons only
-	}
-
-	connectivityFilter->SetInputData(inputPolyLineSetB);
-	connectivityFilter->SetExtractionModeToAllRegions();
-	connectivityFilter->Update();
-
-	nbOfPolylines = connectivityFilter->GetNumberOfExtractedRegions();
-	connectivityFilter->SetExtractionModeToSpecifiedRegions();
-
-	Polygon_set_2 polygonSetB;
-
-	for (vtkIdType i = 0; i < nbOfPolylines; ++i)
-	{
-		connectivityFilter->InitializeSpecifiedRegionList();
-		connectivityFilter->AddSpecifiedRegion(i);
-		cleanFilter->Update();
-
-		Polygon_2 polygonB;
-		vtkCGALUtilities::vtkPolyDataToPolygon2(cleanFilter->GetOutput(), polygonB);
-
-		Polygon_with_holes_2 polygonWithHolesB;
-
-		CGAL::Orientation orientB = polygonB.orientation();
-
-		if (orientB == CGAL::CLOCKWISE)
-		{
-			polygonWithHolesB.add_hole(polygonB);
-		}
-		else if (orientB == CGAL::COUNTERCLOCKWISE)
-		{
-			polygonWithHolesB.outer_boundary() = polygonB;
-		}
-
-		polygonSetB.insert(polygonWithHolesB); // Disjoint polygons only
-	}
 
 	if (this->DebugMode)
 	{
