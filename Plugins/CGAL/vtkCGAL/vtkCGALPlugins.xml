@@ -102,7 +102,7 @@
     <ProxyGroup name="boolean_meshers">
         <Proxy name="CGALBoolean3DMesher"
                      class="vtkCGALBoolean3DMesher"
-                     label="Boolean #2">
+                     label="Boolean 3D #2">
             <Documentation long_help="Applies a boolean operation on two PolyData inputs."
                            short_help="Applies a boolean operation on two PolyData inputs."> </Documentation>
 
@@ -188,10 +188,10 @@
         <Proxy name="CGALBoolean2DMesher"
                      class="vtkCGALBoolean2DMesher"
                      label="Boolean 2D #1">
-            <Documentation long_help="Applies a boolean operation on two PolyData inputs."
-                           short_help="Applies a boolean operation on two PolyData inputs."> </Documentation>
+            <Documentation long_help="Applies a 2d boolean operation on sets of PolyLine inputs."
+                           short_help="Applies a 2d boolean operation on sets of PolyLine inputs."> </Documentation>
 
-            <InputProperty name="InputMeshA"
+            <InputProperty name="InputPolyLineSetA"
                            port_index="0"
                            command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
@@ -206,7 +206,7 @@
                 </Documentation>
             </InputProperty>
 
-            <InputProperty name="InputMeshB"
+            <InputProperty name="InputPolyLineSetB"
                            port_index="1"
                            command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
@@ -221,54 +221,87 @@
                 </Documentation>
             </InputProperty>
 
-            <IntVectorProperty name="Mode"
-                               command="SetMode"
+            <IntVectorProperty name="OperationMode"
+                               command="SetOperationMode"
                                number_of_elements="1"
-                               default_values="0">
+                               default_values="1">
                 <EnumerationDomain name="enum">
                     <Entry value="1"
-                           text="Union"/>
+                           text="Add"/>
                     <Entry value="2"
-                           text="Intersection"/>
+                           text="Intersect"/>
                     <Entry value="3"
-                           text="Difference"/>
+                           text="A - B"/>
                     <Entry value="4"
-                           text="Difference2"/>
+                           text="B - A"/>
+                    <Entry value="5"
+                           text="Exclude Overlap"/>
+                    <Entry value="6"
+                           text="Complement"/>
+                    <Entry value="7"
+                           text="Intersect Complement"/>
+                    <Entry value="8"
+                           text="Exclusive Add"/>
                 </EnumerationDomain>
                 <Documentation>
-                    This property indicates which mode will be used.
+                    This property indicates which operation mode will be used.
                 </Documentation>
             </IntVectorProperty>
 
-            <IntVectorProperty command="SetSkipPreconditions"
-                               name="SkipPreconditions"
-                               label="Skip Preconditions"
-                               default_values="0"
+            <IntVectorProperty name="ComplementOf"
+                               command="SetComplementOf"
+                               label="Complement Of"
                                number_of_elements="1"
-                               panel_visibility="advanced">
+                               default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry value="1"
+                           text="A"/>
+                    <Entry value="2"
+                           text="B"/>
+                </EnumerationDomain>
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="OperationMode"
+                                             value="6">
+                    </PropertyWidgetDecorator>
+                </Hints>
                 <Documentation>
-                    Removes precondition checking
+                    Apply a complement on an input
                 </Documentation>
-                <BooleanDomain name="bool" />
             </IntVectorProperty>
 
-            <IntVectorProperty command="SetComputeSurfaceIntersection"
-                               name="ComputeSurfaceIntersection"
-                               label="Compute Surface Intersection"
-                               default_values="0"
+            <IntVectorProperty name="Plane"
+                               command="SetPlane"
                                number_of_elements="1"
-                               panel_visibility="advanced">
+                               default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry value="1"
+                           text="XY"/>
+                    <Entry value="2"
+                           text="YZ"/>
+                    <Entry value="3"
+                           text="XZ"/>
+                </EnumerationDomain>
                 <Documentation>
-                    Calculates surface intersection between both inputs.
+                    This property which plane to consider
                 </Documentation>
-                <BooleanDomain name="bool" />
             </IntVectorProperty>
 
-            <OutputPort name="Boolean Result"
-                        index="0" />
-            <OutputPort name="Intersection"
-                        index="1" />
+            <IntVectorProperty name="OneCell"
+                               command="SetOneCell"
+                               label="One Cell"
+                               number_of_elements="1"
+                               default_values="1">
+                <BooleanDomain name="bool"/>
+                <Documentation>
+                    If true, every polygon will be composed of one cell.
+                </Documentation>
+            </IntVectorProperty>
 
+            <Hints> 
+                <ShowInMenu category="CGAL"/>
+            </Hints>
         </Proxy>
     </ProxyGroup>
     <!-- ==================================================================== -->
@@ -891,13 +924,33 @@
         <!-- ==================================================================== -->
         <SourceProxy name="CGALBoolean2DMesher"
                      class="vtkCGALBoolean2DMesher"
-                     label="CGAL Boolean 2D Mesher">
+                     label="CGAL Boolean 2D Mesher"
+                     base_proxygroup="boolean_meshers"
+                     base_proxyname="CGALBoolean2DMesher">
             <Documentation long_help="Applies a 2d boolean operation on sets of PolyLine inputs."
                            short_help="Applies a 2d boolean operation on sets of PolyLine inputs."> </Documentation>
 
-            <InputProperty name="InputPolyLineSetA"
+            <Property name="Update"
+                      command="Modified"
+                      label="Update"
+                      panel_widget="command_button"/>
+
+            <Hints> 
+                <ShowInMenu category="CGAL"/>
+            </Hints>
+        </SourceProxy>
+        <!-- ==================================================================== -->
+        <SourceProxy name="CGALPolygonRecursiveSerialAppender"
+                     class="vtkCGALPolygonRecursiveSerialAppender"
+                     label="CGAL Polygon Recursive Serial Appender">
+            <Documentation long_help="Appends multiple polygons under the same operation."
+                           short_help="Appends multiple polygons under the same operation."> </Documentation>
+
+            <InputProperty name="InputPolyLines"
                            port_index="0"
-                           command="SetInputConnection">
+                           multiple_input="1"
+                           clean_command="RemoveAllInputs"
+                           command="AddInputConnection">
                 <ProxyGroupDomain name="groups">
                     <Group name="sources"/>
                     <Group name="filters"/>
@@ -910,103 +963,22 @@
                 </Documentation>
             </InputProperty>
 
-            <InputProperty name="InputPolyLineSetB"
-                           port_index="1"
-                           command="SetInputConnection">
-                <ProxyGroupDomain name="groups">
-                    <Group name="sources"/>
-                    <Group name="filters"/>
-                </ProxyGroupDomain>
-                <DataTypeDomain name="input_type">
-                    <DataType value="vtkDataSet"/>
-                </DataTypeDomain>
-                <Documentation>
-                    Set the source data set
-                </Documentation>
-            </InputProperty>
-
             <Property name="Update"
                       command="Modified"
                       label="Update"
                       panel_widget="command_button"/>
 
-            <IntVectorProperty name="OperationMode"
-                               command="SetOperationMode"
-                               number_of_elements="1"
-                               default_values="1">
-                <EnumerationDomain name="enum">
-                    <Entry value="1"
-                           text="Add"/>
-                    <Entry value="2"
-                           text="Intersect"/>
-                    <Entry value="3"
-                           text="A - B"/>
-                    <Entry value="4"
-                           text="B - A"/>
-                    <Entry value="5"
-                           text="Exclude Overlap"/>
-                    <Entry value="6"
-                           text="Complement"/>
-                    <Entry value="7"
-                           text="Intersect Complement"/>
-                    <Entry value="8"
-                           text="Exclusive Add"/>
-                </EnumerationDomain>
+            <ProxyProperty name="Boolean2DMesher"
+                           command="SetBoolean2DMesher"
+                           label="Boolean 2D Mesher">
                 <Documentation>
-                    This property indicates which operation mode will be used.
+                    Specify a boolean 2d meshing algorithm.
                 </Documentation>
-            </IntVectorProperty>
-
-            <IntVectorProperty name="ComplementOf"
-                               command="SetComplementOf"
-                               label="Complement Of"
-                               number_of_elements="1"
-                               default_values="1">
-                <EnumerationDomain name="enum">
-                    <Entry value="1"
-                           text="A"/>
-                    <Entry value="2"
-                           text="B"/>
-                </EnumerationDomain>
-                <Hints>
-                    <PropertyWidgetDecorator type="GenericDecorator"
-                                             mode="visibility"
-                                             property="OperationMode"
-                                             value="6">
-                    </PropertyWidgetDecorator>
-                </Hints>
-                <Documentation>
-                    Apply a complement on an input
-                </Documentation>
-            </IntVectorProperty>
-
-            <IntVectorProperty name="Plane"
-                               command="SetPlane"
-                               number_of_elements="1"
-                               default_values="1">
-                <EnumerationDomain name="enum">
-                    <Entry value="1"
-                           text="XY"/>
-                    <Entry value="2"
-                           text="YZ"/>
-                    <Entry value="3"
-                           text="XZ"/>
-                </EnumerationDomain>
-                <Documentation>
-                    This property which plane to consider
-                </Documentation>
-            </IntVectorProperty>
-
-            <IntVectorProperty name="OneCell"
-                               command="SetOneCell"
-                               label="One Cell"
-                               number_of_elements="1"
-                               default_values="1">
-                <BooleanDomain name="bool"/>
-                <Documentation>
-                    If true, every polygon will be composed of one cell.
-                </Documentation>
-            </IntVectorProperty>
+                <ProxyListDomain name="proxy_list">
+                    <Proxy group="boolean_meshers"
+                           name="CGALBoolean2DMesher" />
+                </ProxyListDomain>
+            </ProxyProperty>
 
             <Hints> 
                 <ShowInMenu category="CGAL"/>

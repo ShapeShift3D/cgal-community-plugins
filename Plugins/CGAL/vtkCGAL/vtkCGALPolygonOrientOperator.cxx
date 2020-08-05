@@ -28,8 +28,7 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Boolean_set_operations_2.h>
-//#include <CGAL/Polygon_set_2.h>
-#include <CGAL/General_polygon_set_2.h>
+#include <CGAL/Polygon_set_2.h>
 
 //---------Module--------------------------------------------------
 #include <vtkCGALUtilities.h>
@@ -43,7 +42,7 @@ typedef K::Point_2											Point_2;
 typedef CGAL::Polygon_2<K>									Polygon_2;
 typedef CGAL::Polygon_with_holes_2<K>						Polygon_with_holes_2;
 typedef std::list<Polygon_with_holes_2>						Pwh_list_2;
-typedef CGAL::General_polygon_set_2<K>								Polygon_set_2;
+typedef CGAL::Polygon_set_2<K>								Polygon_set_2;
 
 // -----------------------------------------------------------------------------
 // Constructor

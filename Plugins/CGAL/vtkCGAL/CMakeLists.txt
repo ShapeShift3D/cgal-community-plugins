@@ -18,6 +18,7 @@ set(classes
   vtkCGALBoolean2DMesher
   vtkCGALBoolean3DMesher
   vtkCGALPolygonOrientOperator
+  vtkCGALPolygonRecursiveSerialAppender
   vtkCGALPolygonSetInteriorCellExtract
   vtkCGALPolyLineSetToPolygonSet
   vtkCGALSelfIntersectionMeasurer
