@@ -62,6 +62,7 @@ vtkCGALPolygonSetInteriorCellExtract::vtkCGALPolygonSetInteriorCellExtract()
   this->SetNumberOfOutputPorts(1);
   this->Criterion = vtkCGALPolygonSetInteriorCellExtract::Criteria::CENTROID;
   this->Plane = vtkCGALPolygonSetInteriorCellExtract::Planes::XY;
+  this->PwhIdArrayName = "PolygonWithHolesId";
   this->DebugMode = true;
 }
 

@@ -9,6 +9,8 @@
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Polygon_set_2.h>
 
+#include <string>
+
 typedef CGAL::Exact_predicates_exact_constructions_kernel	K;
 typedef K::Point_2											Point_2;
 typedef CGAL::Polygon_2<K>									Polygon_2;
@@ -39,6 +41,14 @@ public:
   void SetPlaneToXY() { Plane = Planes::XY; }
   void SetPlaneToYZ() { Plane = Planes::YZ; }
   void SetPlaneToXZ() { Plane = Planes::XZ; }
+
+  //@{
+  /**
+  * Name of the Polygon With Holes ID array.
+  */
+  vtkSetMacro(PwhIdArrayName, std::string);
+  vtkGetMacro(PwhIdArrayName, std::string);
+  //@}
 
   //@{
   /**
@@ -76,6 +86,7 @@ protected:
                             vtkInformationVector*) override;
 
   int Plane;
+  std::string PwhIdArrayName;
   bool OneCell;
   bool DebugMode;
   bool PrintPoints;

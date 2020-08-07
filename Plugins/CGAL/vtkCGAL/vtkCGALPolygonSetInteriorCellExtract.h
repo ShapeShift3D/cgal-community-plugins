@@ -28,6 +28,14 @@ public:
   void SetPlaneToYZ() { Plane = Planes::YZ; }
   void SetPlaneToXZ() { Plane = Planes::XZ; }
 
+  //@{
+  /**
+  * Name of the Polygon With Holes ID array.
+  */
+  vtkSetMacro(PwhIdArrayName, std::string);
+  vtkGetMacro(PwhIdArrayName, std::string);
+  //@}
+
   enum Criteria {
       CENTROID = 1
   };
@@ -64,6 +72,7 @@ protected:
                             vtkInformationVector*) override;
 
   int Plane;
+  std::string PwhIdArrayName;
   int Criterion;
   int OrientedSide;
 

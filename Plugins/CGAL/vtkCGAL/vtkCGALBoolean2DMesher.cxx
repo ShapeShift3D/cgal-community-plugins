@@ -55,8 +55,9 @@ vtkCGALBoolean2DMesher::vtkCGALBoolean2DMesher()
   this->SetNumberOfInputPorts(2);
   this->SetNumberOfOutputPorts(1);
   this->OperationMode = vtkCGALBoolean2DMesher::OperationModes::INTERSECT;
-  this->OneCell = true;
   this->Plane = vtkCGALBoolean2DMesher::Planes::XY;
+  this->PwhIdArrayName = "PolygonWithHolesId";
+  this->OneCell = true;
   this->DebugMode = true;
 }
 
@@ -123,6 +124,7 @@ int vtkCGALBoolean2DMesher::RequestData(vtkInformation *,
 
 	vtkNew<vtkCGALPolyLineSetToPolygonSet> polylineSetToPolygonSetFilter;
 	polylineSetToPolygonSetFilter->SetPlane(this->Plane);
+	polylineSetToPolygonSetFilter->SetPwhIdArrayName(this->PwhIdArrayName.c_str());
 	polylineSetToPolygonSetFilter->SetDebugMode(false);
 	polylineSetToPolygonSetFilter->SetPrintPoints(false);
 
@@ -142,6 +144,7 @@ int vtkCGALBoolean2DMesher::RequestData(vtkInformation *,
 
 	vtkNew<vtkCGALPolygonSetToPolyLineSet> polygonSetToPolylineSetFilter;
 	polygonSetToPolylineSetFilter->SetPlane(this->Plane);
+	polygonSetToPolylineSetFilter->SetPwhIdArrayName(this->PwhIdArrayName.c_str());
 	polygonSetToPolylineSetFilter->SetOneCell(this->OneCell);
 	polygonSetToPolylineSetFilter->SetDebugMode(false);
 	polygonSetToPolylineSetFilter->SetPrintPoints(false);

@@ -29,9 +29,9 @@ public:
 
     static bool vtkPolyDataToPolygon2(vtkPointSet* polydata, Polygon_2& tmesh, int& coordinate0, int& coordinate1);
 
-    static bool PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata, bool oneCell = false);
+    static bool PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata, std::string pwhIdArrayName = "PolygonWithHolesId", bool oneCell = false);
 
-    static bool PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata, bool oneCell = false);
+    static bool PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata, std::string pwhIdArrayName = "PolygonWithHolesId", int pwhId = 0, bool oneCell = false);
 
     static void PrintPolygonSet2Properties(const Polygon_set_2& pmesh, std::string message, bool printPoints);
 

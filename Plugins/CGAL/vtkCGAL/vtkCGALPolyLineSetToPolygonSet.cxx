@@ -23,7 +23,11 @@
 
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
+#include <vtkCellData.h>
+#include <vtkIdTypeArray.h>
 
+#include <vtkThreshold.h>
+#include <vtkGeometryFilter.h>
 #include <vtkPolyDataConnectivityFilter.h>
 #include <vtkCleanPolyData.h>
 
@@ -43,6 +47,7 @@ vtkCGALPolyLineSetToPolygonSet::vtkCGALPolyLineSetToPolygonSet()
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
   this->Plane = vtkCGALPolyLineSetToPolygonSet::Planes::XY;
+  this->PwhIdArrayName = "PolygonWithHolesId";
   this->DebugMode = true;
   this->PrintPoints = false;
 }
@@ -88,6 +93,30 @@ int vtkCGALPolyLineSetToPolygonSet::RequestData(vtkInformation *,
 		return 0;
 	}
 
+	// Verifying Polygon with holes ID array
+	vtkIdTypeArray* pwhIdArray = nullptr;
+
+	vtkAbstractArray* pwhIdAbstractArray = inputPolyLineSet->GetCellData()->GetAbstractArray(this->PwhIdArrayName.c_str());
+	if (pwhIdAbstractArray == nullptr)
+	{
+		vtkWarningMacro("Polygon with holes ID array is missing. Assuming they are all from the same Polygon With Hole.");
+	}
+	else
+	{
+		pwhIdArray = vtkArrayDownCast<vtkIdTypeArray>(pwhIdAbstractArray);
+		if (pwhIdArray == nullptr)
+		{
+			vtkErrorMacro("Polygon with holes ID array does not contain numeric data.");
+			return 0;
+		}
+
+		if (pwhIdArray->GetNumberOfComponents() != 1)
+		{
+			vtkErrorMacro("Polygon with holes ID array must only have 1 component.");
+			return 0;
+		}
+	}
+
 	vtkPolyData* output0 = vtkPolyData::GetData(outputVector->GetInformationObject(0));
 
 	this->PolygonSet.clear();
@@ -121,42 +150,30 @@ int vtkCGALPolyLineSetToPolygonSet::RequestData(vtkInformation *,
 	}
 	}
 
-	vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
-	connectivityFilter->SetInputData(inputPolyLineSet);
-	connectivityFilter->SetExtractionModeToAllRegions();
-	connectivityFilter->Update();
-
-	int nbOfPolylines = connectivityFilter->GetNumberOfExtractedRegions();
-	connectivityFilter->SetExtractionModeToSpecifiedRegions();
-
-	vtkNew<vtkCleanPolyData> cleanFilter;
-	cleanFilter->SetInputConnection(connectivityFilter->GetOutputPort());
-
-	for (vtkIdType i = 0; i < nbOfPolylines; ++i)
+	if (pwhIdArray != nullptr)
 	{
-		connectivityFilter->InitializeSpecifiedRegionList();
-		connectivityFilter->AddSpecifiedRegion(i);
-		cleanFilter->Update();
+		double range[3] = { 0.0, 0.0 };
+		pwhIdArray->GetRange(range);
 
-		Polygon_2 polygon;
-		vtkCGALPolygonUtilities::vtkPolyDataToPolygon2(cleanFilter->GetOutput(), polygon,
-													firstCoordinate, secondCoordinate);
+		vtkNew<vtkThreshold> pwhExtractionFilter;
+		pwhExtractionFilter->SetInputData(inputPolyLineSet);
+		pwhExtractionFilter->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_CELLS, this->PwhIdArrayName.c_str());
+		pwhExtractionFilter->SetAllScalars(true);
+		
+		vtkNew<vtkGeometryFilter> UGToPoly;
+		UGToPoly->SetInputConnection(pwhExtractionFilter->GetOutputPort());
 
-		CGAL::Orientation orient = polygon.orientation();
-		if (this->DebugMode)
-			vtkCGALPolygonUtilities::PrintPolygonProperties(polygon, "Polyline " + std::to_string(i), false);
-
-
-		if (polygon.is_clockwise_oriented())
+		for (int i = range[0]; i < range[1] + 1; ++i)
 		{
-			Polygon_with_holes_2 polygonResult;
-			polygonResult.add_hole(polygon);
-			PolygonSet.insert(polygonResult); // Disjoint polygons only
+			pwhExtractionFilter->ThresholdBetween(i, i);
+			UGToPoly->Update();
+
+			this->ProcessPwh(UGToPoly->GetOutput(), firstCoordinate, secondCoordinate);
 		}
-		else
-		{
-			PolygonSet.insert(polygon);
-		}
+	}
+	else
+	{
+		this->ProcessPwh(inputPolyLineSet, firstCoordinate, secondCoordinate);
 	}
 
 	if (this->DebugMode)
@@ -167,3 +184,54 @@ int vtkCGALPolyLineSetToPolygonSet::RequestData(vtkInformation *,
 	return 1;
 }
 
+//---------------------------------------------------
+bool vtkCGALPolyLineSetToPolygonSet::ProcessPwh(vtkPolyData* pwhPoly, int firstCoord, int secondCoord)
+{
+	vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
+	connectivityFilter->SetInputData(pwhPoly);
+	connectivityFilter->SetExtractionModeToAllRegions();
+	connectivityFilter->Update();
+
+	int nbOfPolylines = connectivityFilter->GetNumberOfExtractedRegions();
+	connectivityFilter->SetExtractionModeToSpecifiedRegions();
+
+	vtkNew<vtkCleanPolyData> cleanFilter;
+	cleanFilter->SetInputConnection(connectivityFilter->GetOutputPort());
+
+	Polygon_with_holes_2 polygonResult;
+	bool boundaryPresent = false;
+
+	for (vtkIdType i = 0; i < nbOfPolylines; ++i)
+	{
+		connectivityFilter->InitializeSpecifiedRegionList();
+		connectivityFilter->AddSpecifiedRegion(i);
+		cleanFilter->Update();
+
+		Polygon_2 polygon;
+		vtkCGALPolygonUtilities::vtkPolyDataToPolygon2(cleanFilter->GetOutput(), polygon, firstCoord, secondCoord);
+
+		CGAL::Orientation orient = polygon.orientation();
+		if (this->DebugMode)
+			vtkCGALPolygonUtilities::PrintPolygonProperties(polygon, "Polyline " + std::to_string(i), false);
+
+		if (polygon.is_clockwise_oriented())
+		{
+			
+			polygonResult.add_hole(polygon);
+		}
+		else
+		{
+			if (boundaryPresent)
+			{
+				vtkErrorMacro("You cannot have multiple boundaries in a polygon with hole.");
+				return 0;
+			}
+
+			polygonResult.outer_boundary() = polygon;
+			boundaryPresent = true;
+		}
+	}
+
+	PolygonSet.insert(polygonResult);
+	return 1;
+}

@@ -44,6 +44,7 @@ vtkCGALPolygonSetToPolyLineSet::vtkCGALPolygonSetToPolyLineSet()
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
   this->Plane = vtkCGALPolygonSetToPolyLineSet::Planes::XY;
+  this->PwhIdArrayName = "PolygonWithHolesId";
   this->OneCell = true;
   this->DebugMode = false;
   this->PrintPoints = false;
@@ -103,7 +104,7 @@ int vtkCGALPolygonSetToPolyLineSet::RequestData(vtkInformation *,
 
 	Pwh_list_2 result;
 	this->PolygonSet.polygons_with_holes(std::back_inserter(result));
-	vtkCGALPolygonUtilities::PwhList2ToPolyData(result, output0, this->OneCell);
+	vtkCGALPolygonUtilities::PwhList2ToPolyData(result, output0, this->PwhIdArrayName, this->OneCell);
 
 	if (this->DebugMode)
 	{

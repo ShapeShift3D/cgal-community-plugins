@@ -74,6 +74,14 @@ public:
 
   //@{
   /**
+  * Name of the Polygon With Holes ID array.
+  */
+  vtkSetMacro(PwhIdArrayName, std::string);
+  vtkGetMacro(PwhIdArrayName, std::string);
+  //@}
+
+  //@{
+  /**
   * If true, every polygon will be composed of one cell.
   */
   vtkGetMacro(OneCell, bool);
@@ -92,6 +100,7 @@ protected:
   int OperationMode;
   int ComplementOf;
   int Plane;
+  std::string PwhIdArrayName;
   bool OneCell;
   bool DebugMode;
 

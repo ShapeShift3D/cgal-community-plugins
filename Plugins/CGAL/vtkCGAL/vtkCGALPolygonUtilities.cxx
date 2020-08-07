@@ -11,6 +11,8 @@
 #include <vtkObjectFactory.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkPolyData.h>
+#include <vtkCellData.h>
+#include <vtkIdTypeArray.h>
 
 #include <vtkAppendPolyData.h>
 
@@ -59,18 +61,22 @@ bool vtkCGALPolygonUtilities::vtkPolyDataToPolygon2(vtkPointSet* polyData, Polyg
 *  @param usg The output PolyData
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALPolygonUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata, bool oneCell /* = false */)
+bool vtkCGALPolygonUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata, std::string pwhIdArrayName /* = "PolygonWithHolesId" */, bool oneCell /* = false */)
 {
 	vtkNew<vtkAppendPolyData> appendFilter;
 
 	typename Pwh_list_2::const_iterator polygon_iterator;
 	typename CGAL::Polygon_with_holes_2<K>::Hole_const_iterator hole_iterator;
 
+	int id = 0;
+
 	for (polygon_iterator = pmesh.begin(); polygon_iterator != pmesh.end(); ++polygon_iterator)
 	{
 		vtkNew<vtkPolyData> polygonWithHoles;
-		vtkCGALPolygonUtilities::PolygonWithHoles2ToPolyData(*polygon_iterator, polygonWithHoles, oneCell);
+		vtkCGALPolygonUtilities::PolygonWithHoles2ToPolyData(*polygon_iterator, polygonWithHoles, pwhIdArrayName, id, oneCell);
 		appendFilter->AddInputData(polygonWithHoles);
+
+		++id;
 	}
 
 	if (appendFilter->GetNumberOfInputConnections(0) > 0)
@@ -90,11 +96,15 @@ bool vtkCGALPolygonUtilities::PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPol
 *  @param usg The output PolyData
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALPolygonUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata, bool oneCell /* = false */)
+bool vtkCGALPolygonUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata, std::string pwhIdArrayName /* = "PolygonWithHolesId" */, int pwhId /* = 0 */, bool oneCell /* = false */)
 {
 	vtkNew<vtkAppendPolyData> appendFilter;
 
 	typename CGAL::Polygon_with_holes_2<K>::Hole_const_iterator hole_iterator;
+
+	vtkNew<vtkIdTypeArray> pwhIdArray;
+	pwhIdArray->SetName(pwhIdArrayName.c_str());
+	pwhIdArray->SetNumberOfComponents(1);
 
 	vtkNew<vtkPolyData> boundary;
 	vtkCGALPolygonUtilities::Polygon2ToPolyLine(pmesh.outer_boundary(), boundary, oneCell);
@@ -111,6 +121,11 @@ bool vtkCGALPolygonUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_hol
 	{
 		appendFilter->Update();
 		polydata->ShallowCopy(appendFilter->GetOutput());
+
+		// Setup ID array
+		pwhIdArray->SetNumberOfTuples(polydata->GetNumberOfCells());
+		pwhIdArray->Fill(pwhId);
+		polydata->GetCellData()->AddArray(pwhIdArray);
 	}
 
 	return true;

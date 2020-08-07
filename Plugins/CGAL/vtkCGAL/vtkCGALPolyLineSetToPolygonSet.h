@@ -9,6 +9,8 @@
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Polygon_set_2.h>
 
+#include <string>
+
 typedef CGAL::Exact_predicates_exact_constructions_kernel	K;
 typedef K::Point_2											Point_2;
 typedef CGAL::Polygon_2<K>									Polygon_2;
@@ -43,6 +45,14 @@ public:
 
   //@{
   /**
+  * Name of the Polygon With Holes ID array.
+  */
+  vtkSetMacro(PwhIdArrayName, std::string);
+  vtkGetMacro(PwhIdArrayName, std::string);
+  //@}
+
+  //@{
+  /**
   * Enables debug printing
   */
   vtkGetMacro(DebugMode, bool);
@@ -68,6 +78,7 @@ protected:
                             vtkInformationVector*) override;
 
   int Plane;
+  std::string PwhIdArrayName;
   bool DebugMode;
   bool PrintPoints;
 
@@ -75,6 +86,8 @@ private:
   // needed but not implemented
   vtkCGALPolyLineSetToPolygonSet(const vtkCGALPolyLineSetToPolygonSet&) = delete;
   void operator=(const vtkCGALPolyLineSetToPolygonSet&) = delete;
+
+  bool ProcessPwh(vtkPolyData* pwhPoly, int firstCoord, int secondCoord);
 
   Polygon_set_2 PolygonSet;
 };

@@ -288,6 +288,17 @@
                 </Documentation>
             </IntVectorProperty>
 
+            <StringVectorProperty name="PwhIdArrayName"
+                                  command="SetPwhIdArrayName"
+                                  number_of_elements="1"
+                                  animateable="0"
+                                  default_values="PolygonWithHolesId"
+                                  panel_visibility="advanced">
+                <Documentation>
+                    Name of the Polygon With Holes Id Array Name
+                </Documentation>
+            </StringVectorProperty>
+
             <IntVectorProperty name="OneCell"
                                command="SetOneCell"
                                label="One Cell"
@@ -901,6 +912,17 @@
                     This property which plane to consider
                 </Documentation>
             </IntVectorProperty>
+
+            <StringVectorProperty name="PwhIdArrayName"
+                                  command="SetPwhIdArrayName"
+                                  number_of_elements="1"
+                                  animateable="0"
+                                  default_values="PolygonWithHolesId"
+                                  panel_visibility="advanced">
+                <Documentation>
+                    Name of the Polygon With Holes Id Array Name
+                </Documentation>
+            </StringVectorProperty>
 
             <IntVectorProperty name="Criterion"
                                command="SetCriterion"
