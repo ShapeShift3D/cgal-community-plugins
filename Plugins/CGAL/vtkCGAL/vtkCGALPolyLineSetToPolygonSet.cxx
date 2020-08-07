@@ -96,24 +96,34 @@ int vtkCGALPolyLineSetToPolygonSet::RequestData(vtkInformation *,
 	// Verifying Polygon with holes ID array
 	vtkIdTypeArray* pwhIdArray = nullptr;
 
-	vtkAbstractArray* pwhIdAbstractArray = inputPolyLineSet->GetCellData()->GetAbstractArray(this->PwhIdArrayName.c_str());
-	if (pwhIdAbstractArray == nullptr)
-	{
-		vtkWarningMacro("Polygon with holes ID array is missing. Assuming they are all from the same Polygon With Hole.");
-	}
-	else
-	{
-		pwhIdArray = vtkArrayDownCast<vtkIdTypeArray>(pwhIdAbstractArray);
-		if (pwhIdArray == nullptr)
-		{
-			vtkErrorMacro("Polygon with holes ID array does not contain numeric data.");
-			return 0;
-		}
+	vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
+	connectivityFilter->SetInputData(inputPolyLineSet);
+	connectivityFilter->SetExtractionModeToAllRegions();
+	connectivityFilter->Update();
 
-		if (pwhIdArray->GetNumberOfComponents() != 1)
+	int nbOfPolylines = connectivityFilter->GetNumberOfExtractedRegions();
+
+	if (nbOfPolylines > 1) // If we have one curve, it is necessarily one polygon.
+	{
+		vtkAbstractArray* pwhIdAbstractArray = inputPolyLineSet->GetCellData()->GetAbstractArray(this->PwhIdArrayName.c_str());
+		if (pwhIdAbstractArray == nullptr)
 		{
-			vtkErrorMacro("Polygon with holes ID array must only have 1 component.");
-			return 0;
+			vtkWarningMacro("Polygon with holes ID array is missing. Assuming they are all from the same Polygon With Hole.");
+		}
+		else
+		{
+			pwhIdArray = vtkArrayDownCast<vtkIdTypeArray>(pwhIdAbstractArray);
+			if (pwhIdArray == nullptr)
+			{
+				vtkErrorMacro("Polygon with holes ID array does not contain numeric data.");
+				return 0;
+			}
+
+			if (pwhIdArray->GetNumberOfComponents() != 1)
+			{
+				vtkErrorMacro("Polygon with holes ID array must only have 1 component.");
+				return 0;
+			}
 		}
 	}
 
