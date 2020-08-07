@@ -38,7 +38,7 @@
 #include <CGAL/Polygon_set_2.h>
 
 //---------Module--------------------------------------------------
-#include <vtkCGALUtilities.h>
+#include <vtkCGALPolygonUtilities.h>
 #include <vtkCGALPolyLineSetToPolygonSet.h>
 
 //----------
@@ -212,7 +212,7 @@ int vtkCGALPolygonSetInteriorCellExtract::RequestData(vtkInformation *,
 
 	if (this->DebugMode)
 	{
-		vtkCGALUtilities::PrintPolygonSet2Properties(polygonSet, "Polygon Set", false);
+		vtkCGALPolygonUtilities::PrintPolygonSet2Properties(polygonSet, "Polygon Set", false);
 	}
 
 	if (this->Criterion == vtkCGALPolygonSetInteriorCellExtract::Criteria::CENTROID)

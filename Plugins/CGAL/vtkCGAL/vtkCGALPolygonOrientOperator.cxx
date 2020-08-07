@@ -31,7 +31,7 @@
 #include <CGAL/Polygon_set_2.h>
 
 //---------Module--------------------------------------------------
-#include <vtkCGALUtilities.h>
+#include <vtkCGALPolygonUtilities.h>
 
 //----------
 // Declare the plugin
@@ -137,7 +137,7 @@ int vtkCGALPolygonOrientOperator::RequestData(vtkInformation *,
 	// Taken from https://doc.cgal.org/4.14.3/Polygon/index.html
 	Polygon_2 polygon;
 
-	vtkCGALUtilities::vtkPolyDataToPolygon2(inputPolyLine, polygon,
+	vtkCGALPolygonUtilities::vtkPolyDataToPolygon2(inputPolyLine, polygon,
 												firstCoordinate, secondCoordinate);
 
 	if (this->InvertPolyLineOrientation)
@@ -168,7 +168,7 @@ int vtkCGALPolygonOrientOperator::RequestData(vtkInformation *,
 	}
 
 	output0->DeepCopy(inputPolyLine);
-	vtkCGALUtilities::Polygon2ToPolyLine(polygon, output0);
+	vtkCGALPolygonUtilities::Polygon2ToPolyLine(polygon, output0);
 	return 1;
 }
 

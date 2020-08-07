@@ -40,11 +40,6 @@ public:
     typedef CGAL::Exact_predicates_exact_constructions_kernel	K2;
     typedef CGAL::Surface_mesh<K2::Point_3>                     SurfaceMesh2;
     typedef CGAL::Polyhedron_3<K2>                              Polyhedron2;
-    typedef K2::Point_2											Point_2;
-    typedef CGAL::Polygon_2<K2>									Polygon_2;
-    typedef CGAL::Polygon_with_holes_2<K2>						Polygon_with_holes_2;
-    typedef std::list<Polygon_with_holes_2>						Pwh_list_2;
-    typedef CGAL::Polygon_set_2<K2>								Polygon_set_2;
 
     // Kernel 3
     typedef CGAL::Homogeneous<CGAL::Exact_integer>              K3;
@@ -70,8 +65,6 @@ public:
 
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh3& tmesh);
 
-    static bool vtkPolyDataToPolygon2(vtkPointSet* poly_data, Polygon_2& tmesh, int& coordinate0, int& coordinate1);
-
     // Converters from CGAL to VTK
     static bool PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmesh, vtkUnstructuredGrid* usg);
 
@@ -85,20 +78,6 @@ public:
 
     template <typename MeshType>
     static bool SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyData* poly);
-
-    static bool PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata, bool oneCell = false);
-
-    static bool PolygonWithHoles2ToPolyData(const Polygon_with_holes_2& pmesh, vtkPolyData* polydata, bool oneCell = false);
-
-    static bool Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* polyline, bool oneCell = false);
-
-    static void PrintPwhList2Properties(const Pwh_list_2& pmesh, std::string message, bool printPoints);
-
-    static void PrintPolygonSet2Properties(const Polygon_set_2& pmesh, std::string message, bool printPoints);
-
-    static void PrintPolygonWithHoles2Properties(const Polygon_with_holes_2& pmesh, std::string message, bool printPoints);
-
-    static void PrintPolygonProperties(const Polygon_2& pmesh, std::string message, bool printPoints);
 
 protected:
     vtkCGALUtilities();

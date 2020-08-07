@@ -28,7 +28,7 @@
 #include <vtkCleanPolyData.h>
 
 //---------Module--------------------------------------------------
-#include <vtkCGALUtilities.h>
+#include <vtkCGALPolygonUtilities.h>
 
 //----------
 // Declare the plugin
@@ -44,6 +44,7 @@ vtkCGALPolyLineSetToPolygonSet::vtkCGALPolyLineSetToPolygonSet()
   this->SetNumberOfOutputPorts(1);
   this->Plane = vtkCGALPolyLineSetToPolygonSet::Planes::XY;
   this->DebugMode = true;
+  this->PrintPoints = false;
 }
 
 //---------------------------------------------------
@@ -84,12 +85,6 @@ int vtkCGALPolyLineSetToPolygonSet::RequestData(vtkInformation *,
 	if (inputPolyLineSet->GetPoints() == nullptr)
 	{
 		vtkErrorMacro("Input PolyLine Set does not contain any point structure.");
-		return 0;
-	}
-
-	if (inputPolyLineSet->GetNumberOfPoints() == 0)
-	{
-		vtkErrorMacro("Input PolyLine Set contains no points.");
 		return 0;
 	}
 
@@ -144,14 +139,12 @@ int vtkCGALPolyLineSetToPolygonSet::RequestData(vtkInformation *,
 		cleanFilter->Update();
 
 		Polygon_2 polygon;
-		vtkCGALUtilities::vtkPolyDataToPolygon2(cleanFilter->GetOutput(), polygon, 
+		vtkCGALPolygonUtilities::vtkPolyDataToPolygon2(cleanFilter->GetOutput(), polygon,
 													firstCoordinate, secondCoordinate);
-
-		
 
 		CGAL::Orientation orient = polygon.orientation();
 		if (this->DebugMode)
-			vtkCGALUtilities::PrintPolygonProperties(polygon, "Polyline " + std::to_string(i), false);
+			vtkCGALPolygonUtilities::PrintPolygonProperties(polygon, "Polyline " + std::to_string(i), false);
 
 
 		if (polygon.is_clockwise_oriented())
@@ -168,7 +161,7 @@ int vtkCGALPolyLineSetToPolygonSet::RequestData(vtkInformation *,
 
 	if (this->DebugMode)
 	{
-		vtkCGALUtilities::PrintPolygonSet2Properties(PolygonSet, "Polygon Set", false);
+		vtkCGALPolygonUtilities::PrintPolygonSet2Properties(PolygonSet, "Polygon Set", false);
 	}
 	
 	return 1;

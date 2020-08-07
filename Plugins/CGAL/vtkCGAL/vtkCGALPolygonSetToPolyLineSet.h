@@ -1,5 +1,5 @@
-#ifndef vtkCGALPolyLineSetToPolygonSet_h
-#define vtkCGALPolyLineSetToPolygonSet_h
+#ifndef vtkCGALPolygonSetToPolyLineSet_h
+#define vtkCGALPolygonSetToPolyLineSet_h
 // Gives access to macros for communication with the UI
 #include "vtkPolyDataAlgorithm.h" 
 #include <vtkCGALModule.h>
@@ -17,16 +17,15 @@ typedef std::list<Polygon_with_holes_2>						Pwh_list_2;
 typedef CGAL::Polygon_set_2<K>								Polygon_set_2;
 
 // Inherit from the desired filter
-class VTKCGAL_EXPORT vtkCGALPolyLineSetToPolygonSet : public vtkPolyDataAlgorithm
+class VTKCGAL_EXPORT vtkCGALPolygonSetToPolyLineSet : public vtkPolyDataAlgorithm
 {
 public:
   // VTK requirements
-  static vtkCGALPolyLineSetToPolygonSet* New();
-  vtkTypeMacro(vtkCGALPolyLineSetToPolygonSet, vtkPolyDataAlgorithm);
+  static vtkCGALPolygonSetToPolyLineSet* New();
+  vtkTypeMacro(vtkCGALPolygonSetToPolyLineSet, vtkPolyDataAlgorithm);
   
-  vtkPolyData* GetInputPolyLineSet();
-  Polygon_set_2* GetOutputPolygonSet();
-
+  void SetInputPolygonSet(Polygon_set_2& polygonSet);
+  vtkPolyData* GetOutputPolyLineSet();
 
   enum Planes {
       XY = 1,
@@ -40,6 +39,15 @@ public:
   void SetPlaneToXY() { Plane = Planes::XY; }
   void SetPlaneToYZ() { Plane = Planes::YZ; }
   void SetPlaneToXZ() { Plane = Planes::XZ; }
+
+  //@{
+  /**
+  * Outputs Polylines having one cell per polygon
+  */
+  vtkGetMacro(OneCell, bool);
+  vtkSetMacro(OneCell, bool);
+  vtkBooleanMacro(OneCell, bool);
+  //@}
 
   //@{
   /**
@@ -60,21 +68,22 @@ public:
   //@}
 
 protected:
-  vtkCGALPolyLineSetToPolygonSet();
-  ~vtkCGALPolyLineSetToPolygonSet(){}
+  vtkCGALPolygonSetToPolyLineSet();
+  ~vtkCGALPolygonSetToPolyLineSet(){}
 
   virtual int RequestData(vtkInformation*, 
                             vtkInformationVector**, 
                             vtkInformationVector*) override;
 
   int Plane;
+  bool OneCell;
   bool DebugMode;
   bool PrintPoints;
 
 private:
   // needed but not implemented
-  vtkCGALPolyLineSetToPolygonSet(const vtkCGALPolyLineSetToPolygonSet&) = delete;
-  void operator=(const vtkCGALPolyLineSetToPolygonSet&) = delete;
+  vtkCGALPolygonSetToPolyLineSet(const vtkCGALPolygonSetToPolyLineSet&) = delete;
+  void operator=(const vtkCGALPolygonSetToPolyLineSet&) = delete;
 
   Polygon_set_2 PolygonSet;
 };
