@@ -1,5 +1,5 @@
 /**
-* \class vtkCGALPolygonSetInteriorCellExtract
+* \class vtkCGALPolygonSetOrientedSideClassifier
 *
 * \brief 
 *        
@@ -15,7 +15,7 @@
 */
 
 //---------VTK----------------------------------
-#include "vtkCGALPolygonSetInteriorCellExtract.h"
+#include "vtkCGALPolygonSetOrientedSideClassifier.h"
 
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
@@ -23,13 +23,8 @@
 
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
-#include <vtkIdTypeArray.h>
-
-#include <vtkCellCenters.h>
-#include <vtkSelectionNode.h>
-#include <vtkSelection.h>
-#include <vtkExtractSelection.h>
-#include <vtkGeometryFilter.h>
+#include <vtkPointData.h>
+#include <vtkCharArray.h>
 
 //---------CGAL---------------------------------
 #include <CGAL/Surface_mesh.h>
@@ -43,7 +38,7 @@
 
 //----------
 // Declare the plugin
-vtkStandardNewMacro(vtkCGALPolygonSetInteriorCellExtract);
+vtkStandardNewMacro(vtkCGALPolygonSetOrientedSideClassifier);
 
 typedef CGAL::Exact_predicates_exact_constructions_kernel	K;
 typedef K::Point_2											Point_2;
@@ -56,18 +51,19 @@ typedef CGAL::Polygon_set_2<K>								Polygon_set_2;
 // Constructor
 // Fills the number of input and output objects.
 // Initializes the members that need it.
-vtkCGALPolygonSetInteriorCellExtract::vtkCGALPolygonSetInteriorCellExtract()
+vtkCGALPolygonSetOrientedSideClassifier::vtkCGALPolygonSetOrientedSideClassifier()
 {
   this->SetNumberOfInputPorts(2);
   this->SetNumberOfOutputPorts(1);
-  this->Criterion = vtkCGALPolygonSetInteriorCellExtract::Criteria::CENTROID;
-  this->Plane = vtkCGALPolygonSetInteriorCellExtract::Planes::XY;
+  this->Plane = vtkCGALPolygonSetOrientedSideClassifier::Planes::XY;
   this->PwhIdArrayName = "PolygonWithHolesId";
-  this->DebugMode = true;
+  this->DebugMode = false;
+  this->OrientedSide = OrientedSides::INSIDE;
+  this->OrientedSideArrayName = "OrientedSide";
 }
 
-//---------------------------------------------------
-vtkPolyData* vtkCGALPolygonSetInteriorCellExtract::GetInputPolyLineSet()
+//----------------------------------------------------
+vtkPolyData* vtkCGALPolygonSetOrientedSideClassifier::GetInputPointSet()
 {
 	if (this->GetNumberOfInputConnections(0) < 1) {
 		return nullptr;
@@ -76,8 +72,8 @@ vtkPolyData* vtkCGALPolygonSetInteriorCellExtract::GetInputPolyLineSet()
 	return vtkPolyData::SafeDownCast(this->GetInputDataObject(0, 0));
 }
 
-//----------------------------------------------------
-vtkPolyData* vtkCGALPolygonSetInteriorCellExtract::GetInputCells()
+//---------------------------------------------------
+vtkPolyData* vtkCGALPolygonSetOrientedSideClassifier::GetInputPolyLineSet()
 {
 	if (this->GetNumberOfInputConnections(1) < 1) {
 		return nullptr;
@@ -91,14 +87,32 @@ vtkPolyData* vtkCGALPolygonSetInteriorCellExtract::GetInputCells()
 // Creates CGAL::Surface_mesh from vtkPolydata
 // Calls the CGAL::RunBooleanOperations
 // Fills the output vtkUnstructuredGrid from the result.
-int vtkCGALPolygonSetInteriorCellExtract::RequestData(vtkInformation *,
+int vtkCGALPolygonSetOrientedSideClassifier::RequestData(vtkInformation *,
                                 vtkInformationVector **inputVector,
                                 vtkInformationVector *outputVector)
 {
 	//  Get the input and output data objects.
 	//  Get the info objects
+	vtkPolyData* inputPointSet = this->GetInputPointSet();
 	vtkPolyData* inputPolyLineSet = this->GetInputPolyLineSet();
-	vtkPolyData* inputCells = this->GetInputCells();
+
+	if (inputPointSet == nullptr)
+	{
+		vtkErrorMacro("Input Point Set is empty.");
+		return 0;
+	}
+
+	if (inputPointSet->GetPoints() == nullptr)
+	{
+		vtkErrorMacro("Input Point Set does not contain any point structure.");
+		return 0;
+	}
+
+	if (inputPointSet->GetNumberOfPoints() == 0)
+	{
+		vtkErrorMacro("Input Point Set contains no points.");
+		return 0;
+	}
 
 	if (inputPolyLineSet == nullptr)
 	{
@@ -115,36 +129,6 @@ int vtkCGALPolygonSetInteriorCellExtract::RequestData(vtkInformation *,
 	if (inputPolyLineSet->GetNumberOfPoints() == 0)
 	{
 		vtkErrorMacro("Input PolyLine Set contains no points.");
-		return 0;
-	}
-
-	if (inputCells == nullptr)
-	{
-		vtkErrorMacro("Input Cells is empty.");
-		return 0;
-	}
-
-	if (inputCells->GetPoints() == nullptr)
-	{
-		vtkErrorMacro("Input Cells does not contain any point structure.");
-		return 0;
-	}
-
-	if (inputCells->GetNumberOfPoints() == 0)
-	{
-		vtkErrorMacro("Input Cells contains no points.");
-		return 0;
-	}
-
-	if (inputCells->GetPolys() == nullptr)
-	{
-		vtkErrorMacro("Input Cells does not contain any cell structure.");
-		return 0;
-	}
-
-	if (inputCells->GetNumberOfCells() == 0)
-	{
-		vtkErrorMacro("Input Cells contains no cells.");
 		return 0;
 	}
 
@@ -206,6 +190,7 @@ int vtkCGALPolygonSetInteriorCellExtract::RequestData(vtkInformation *,
 
 	vtkNew<vtkCGALPolyLineSetToPolygonSet> polylineSetToPolygonSetFilter;
 	polylineSetToPolygonSetFilter->SetPlane(this->Plane);
+	polylineSetToPolygonSetFilter->SetPwhIdArrayName(this->PwhIdArrayName.c_str());
 	polylineSetToPolygonSetFilter->SetInputData(0, inputPolyLineSet);
 	polylineSetToPolygonSetFilter->Update();
 
@@ -216,48 +201,24 @@ int vtkCGALPolygonSetInteriorCellExtract::RequestData(vtkInformation *,
 		vtkCGALPolygonUtilities::PrintPolygonSet2Properties(polygonSet, "Polygon Set", false);
 	}
 
-	if (this->Criterion == vtkCGALPolygonSetInteriorCellExtract::Criteria::CENTROID)
+	vtkNew<vtkCharArray> orientedSideArray;
+	orientedSideArray->SetName(this->OrientedSideArrayName.c_str());
+	orientedSideArray->SetNumberOfComponents(1);
+	orientedSideArray->SetNumberOfTuples(inputPointSet->GetNumberOfPoints());
+
+	double pt[3] = { 0.0, 0.0, 0.0 };
+	for (vtkIdType i = 0; i < inputPointSet->GetNumberOfPoints(); ++i)
 	{
-		vtkNew<vtkSelectionNode> selectionNode;
-		selectionNode->SetFieldType(vtkSelectionNode::SelectionField::CELL);
-		selectionNode->SetContentType(vtkSelectionNode::SelectionContent::INDICES);
+		inputPointSet->GetPoint(i, pt);
 
-		vtkNew<vtkIdTypeArray> selectionListArray;
-		selectionListArray->SetName("SelectionList");
-		selectionListArray->SetNumberOfComponents(1);
-
-		vtkNew<vtkCellCenters> generateCentersFilter;
-		generateCentersFilter->SetInputData(0, inputCells);
-		generateCentersFilter->Update();
-
-		vtkPolyData* centroids = generateCentersFilter->GetOutput();
-
-		double centroid[3] = { 0.0, 0.0, 0.0 };
-		for (vtkIdType i = 0; i < centroids->GetNumberOfPoints(); ++i)
+		if (polygonSet.oriented_side(Point_2(pt[firstCoordinate], pt[secondCoordinate])) == orientedSideValue)
 		{
-			centroids->GetPoint(i, centroid);
-
-			if (polygonSet.oriented_side(Point_2(centroid[firstCoordinate], centroid[secondCoordinate])) == orientedSideValue)
-			{
-				selectionListArray->InsertNextTuple1(i); // Assuming cellCenters conserves order.
-			}
+			orientedSideArray->SetTuple1(i, orientedSideValue); // Assuming cellCenters conserves order.
 		}
-
-		selectionNode->SetSelectionList(selectionListArray);
-
-		vtkNew<vtkSelection> selection;
-		selection->AddNode(selectionNode);
-
-		vtkNew<vtkExtractSelection> extractCellsFilter;
-		extractCellsFilter->SetInputData(0, inputCells);
-		extractCellsFilter->SetInputData(1, selection);
-
-		vtkNew<vtkGeometryFilter> UGToPoly;
-		UGToPoly->SetInputConnection(extractCellsFilter->GetOutputPort());
-		UGToPoly->Update();
-
-		output0->ShallowCopy(UGToPoly->GetOutput());
 	}
+
+	output0->DeepCopy(inputPointSet);
+	output0->GetPointData()->AddArray(orientedSideArray);
 	
 	return 1;
 }

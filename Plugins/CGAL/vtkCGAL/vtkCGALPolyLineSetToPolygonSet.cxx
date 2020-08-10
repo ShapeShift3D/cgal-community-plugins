@@ -48,7 +48,7 @@ vtkCGALPolyLineSetToPolygonSet::vtkCGALPolyLineSetToPolygonSet()
   this->SetNumberOfOutputPorts(1);
   this->Plane = vtkCGALPolyLineSetToPolygonSet::Planes::XY;
   this->PwhIdArrayName = "PolygonWithHolesId";
-  this->DebugMode = true;
+  this->DebugMode = false;
   this->PrintPoints = false;
 }
 

@@ -1,19 +1,19 @@
-#ifndef vtkCGALPolygonSetInteriorCellExtract_h
-#define vtkCGALPolygonSetInteriorCellExtract_h
+#ifndef vtkCGALPolygonSetOrientedSideClassifier_h
+#define vtkCGALPolygonSetOrientedSideClassifier_h
 // Gives access to macros for communication with the UI
 #include "vtkPolyDataAlgorithm.h" 
 #include <vtkCGALModule.h>
 
 // Inherit from the desired filter
-class VTKCGAL_EXPORT vtkCGALPolygonSetInteriorCellExtract : public vtkPolyDataAlgorithm
+class VTKCGAL_EXPORT vtkCGALPolygonSetOrientedSideClassifier : public vtkPolyDataAlgorithm
 {
 public:
   // VTK requirements
-  static vtkCGALPolygonSetInteriorCellExtract* New();
-  vtkTypeMacro(vtkCGALPolygonSetInteriorCellExtract, vtkPolyDataAlgorithm);
+  static vtkCGALPolygonSetOrientedSideClassifier* New();
+  vtkTypeMacro(vtkCGALPolygonSetOrientedSideClassifier, vtkPolyDataAlgorithm);
   
+  vtkPolyData* GetInputPointSet();
   vtkPolyData* GetInputPolyLineSet();
-  vtkPolyData* GetInputCells();
 
   enum Planes {
       XY = 1,
@@ -36,20 +36,6 @@ public:
   vtkGetMacro(PwhIdArrayName, std::string);
   //@}
 
-  enum Criteria {
-      CENTROID = 1
-  };
-
-  //@{
-  /**
-  * This property indicates which operation mode will be used.
-  */
-  vtkGetMacro(Criterion, int);
-  vtkSetMacro(Criterion, int);
-  //@}
-
-  void SetCriterionToCentroid() { Criterion = Criteria::CENTROID; }
-
   enum OrientedSides {
       INSIDE = 1,
       OUTSIDE,
@@ -63,9 +49,18 @@ public:
   void SetOrientedSideToOutside() { OrientedSide = OrientedSides::OUTSIDE; }
   void SetOrientedSideToBoundary() { OrientedSide = OrientedSides::BOUNDARY; }
 
+  //@{
+  /**
+  * Name of the array storing the oriented side results. 
+  * -1 for outside, 0 for boundary and +1 for inside.
+  */
+  vtkSetMacro(OrientedSideArrayName, std::string);
+  vtkGetMacro(OrientedSideArrayName, std::string);
+  //@}
+
 protected:
-  vtkCGALPolygonSetInteriorCellExtract();
-  ~vtkCGALPolygonSetInteriorCellExtract(){}
+  vtkCGALPolygonSetOrientedSideClassifier();
+  ~vtkCGALPolygonSetOrientedSideClassifier(){}
 
   virtual int RequestData(vtkInformation*, 
                             vtkInformationVector**, 
@@ -73,13 +68,13 @@ protected:
 
   int Plane;
   std::string PwhIdArrayName;
-  int Criterion;
   int OrientedSide;
+  std::string OrientedSideArrayName;
 
 private:
   // needed but not implemented
-  vtkCGALPolygonSetInteriorCellExtract(const vtkCGALPolygonSetInteriorCellExtract&) = delete;
-  void operator=(const vtkCGALPolygonSetInteriorCellExtract&) = delete;
+  vtkCGALPolygonSetOrientedSideClassifier(const vtkCGALPolygonSetOrientedSideClassifier&) = delete;
+  void operator=(const vtkCGALPolygonSetOrientedSideClassifier&) = delete;
 
   bool DebugMode;
 };

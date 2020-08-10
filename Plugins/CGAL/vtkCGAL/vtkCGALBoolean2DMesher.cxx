@@ -58,7 +58,7 @@ vtkCGALBoolean2DMesher::vtkCGALBoolean2DMesher()
   this->Plane = vtkCGALBoolean2DMesher::Planes::XY;
   this->PwhIdArrayName = "PolygonWithHolesId";
   this->OneCell = true;
-  this->DebugMode = true;
+  this->DebugMode = false;
 }
 
 //---------------------------------------------------

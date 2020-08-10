@@ -18,7 +18,7 @@ set(classes
   vtkCGALBoolean2DMesher
   vtkCGALBoolean3DMesher
   vtkCGALPolygonOrientOperator
-  vtkCGALPolygonSetInteriorCellExtract
+  vtkCGALPolygonSetOrientedSideClassifier
   vtkCGALPolygonSetToPolyLineSet
   vtkCGALPolygonUtilities
   vtkCGALPolyLineSetToPolygonSet
