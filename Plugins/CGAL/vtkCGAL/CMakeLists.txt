@@ -15,7 +15,13 @@ set(classes
   vtkCGALARAPUVParametrization
   vtkCGALLSCMUVParametrization
   vtkCGALBoolean
+  vtkCGALBoolean2DMesher
   vtkCGALBoolean3DMesher
+  vtkCGALPolygonOrientOperator
+  vtkCGALPolygonSetOrientedSideClassifier
+  vtkCGALPolygonSetToPolyLineSet
+  vtkCGALPolygonUtilities
+  vtkCGALPolyLineSetToPolygonSet
   vtkCGALSelfIntersectionMeasurer
   vtkCGALUtilities)
 
