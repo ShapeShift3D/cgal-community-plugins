@@ -58,7 +58,7 @@ vtkCGALPolygonSetOrientedSideClassifier::vtkCGALPolygonSetOrientedSideClassifier
   this->Plane = vtkCGALPolygonSetOrientedSideClassifier::Planes::XY;
   this->PwhIdArrayName = "PolygonWithHolesId";
   this->DebugMode = false;
-  this->OrientedSide = OrientedSides::INSIDE;
+
   this->OrientedSideArrayName = "OrientedSide";
 }
 
@@ -163,31 +163,6 @@ int vtkCGALPolygonSetOrientedSideClassifier::RequestData(vtkInformation *,
 	}
 	}
 
-	int orientedSideValue = -1;
-	switch (this->OrientedSide)
-	{
-	case OrientedSides::INSIDE:
-	{
-		orientedSideValue = 1;
-		break;
-	}
-	case OrientedSides::OUTSIDE:
-	{
-		orientedSideValue = -1;
-		break;
-	}
-	case OrientedSides::BOUNDARY:
-	{
-		orientedSideValue = 0;
-		break;
-	}
-	default:
-	{
-		vtkErrorMacro("Unknown Oriented Side.");
-		return 0;
-	}
-	}
-
 	vtkNew<vtkCGALPolyLineSetToPolygonSet> polylineSetToPolygonSetFilter;
 	polylineSetToPolygonSetFilter->SetPlane(this->Plane);
 	polylineSetToPolygonSetFilter->SetPwhIdArrayName(this->PwhIdArrayName.c_str());
@@ -211,10 +186,8 @@ int vtkCGALPolygonSetOrientedSideClassifier::RequestData(vtkInformation *,
 	{
 		inputPointSet->GetPoint(i, pt);
 
-		if (polygonSet.oriented_side(Point_2(pt[firstCoordinate], pt[secondCoordinate])) == orientedSideValue)
-		{
-			orientedSideArray->SetTuple1(i, orientedSideValue); // Assuming cellCenters conserves order.
-		}
+		CGAL::Oriented_side side = polygonSet.oriented_side(Point_2(pt[firstCoordinate], pt[secondCoordinate]));
+		orientedSideArray->SetTuple1(i, side);
 	}
 
 	output0->DeepCopy(inputPointSet);

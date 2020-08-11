@@ -470,23 +470,6 @@
                 </Documentation>
             </StringVectorProperty>
 
-            <IntVectorProperty name="OrientedSide"
-                               command="SetOrientedSide"
-                               number_of_elements="1"
-                               default_values="1">
-                <EnumerationDomain name="enum">
-                    <Entry value="1"
-                           text="Inside"/>
-                    <Entry value="2"
-                           text="Outside"/>
-                    <Entry value="3"
-                           text="On Boundary"/>
-                </EnumerationDomain>
-                <Documentation>
-                    This property chooses which oriented side to choose.
-                </Documentation>
-            </IntVectorProperty>
-
             <StringVectorProperty name="OrientedSideArrayName"
                                   command="SetOrientedSideArrayName"
                                   number_of_elements="1"

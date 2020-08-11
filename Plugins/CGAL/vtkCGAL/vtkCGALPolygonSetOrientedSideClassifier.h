@@ -36,18 +36,6 @@ public:
   vtkGetMacro(PwhIdArrayName, std::string);
   //@}
 
-  enum OrientedSides {
-      INSIDE = 1,
-      OUTSIDE,
-      BOUNDARY
-  };
-
-  vtkGetMacro(OrientedSide, int);
-  vtkSetMacro(OrientedSide, int);
-
-  void SetOrientedSideToInside() { OrientedSide = OrientedSides::INSIDE; }
-  void SetOrientedSideToOutside() { OrientedSide = OrientedSides::OUTSIDE; }
-  void SetOrientedSideToBoundary() { OrientedSide = OrientedSides::BOUNDARY; }
 
   //@{
   /**
@@ -68,7 +56,6 @@ protected:
 
   int Plane;
   std::string PwhIdArrayName;
-  int OrientedSide;
   std::string OrientedSideArrayName;
 
 private:
