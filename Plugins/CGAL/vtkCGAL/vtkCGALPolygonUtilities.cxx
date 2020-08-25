@@ -147,9 +147,9 @@ bool vtkCGALPolygonUtilities::Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPoly
 
 	for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
 	{
-		vtk_points->InsertNextPoint(vertex_iterator->x().exact().to_double(),
-			vertex_iterator->y().exact().to_double(),
-			0);
+
+		vtk_points->InsertNextPoint(
+            CGAL::to_double(vertex_iterator->x().exact()), CGAL::to_double(vertex_iterator->y().exact()), 0);
 	}
 
 	polyline->SetPoints(vtk_points);
@@ -282,7 +282,10 @@ void vtkCGALPolygonUtilities::PrintPolygonProperties(const Polygon_2& pmesh, std
 			cout << "Points: " << endl;
 
 			for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
-				std::cout << "\t" << vertex_iterator->x().exact().to_double() << ", " << vertex_iterator->y().exact().to_double() << endl;
+            {
+                std::cout << "\t" << CGAL::to_double(vertex_iterator->x().exact()) << ", " << CGAL::to_double(vertex_iterator->y().exact()) << endl;
+            }
+				
 		}
 	}
 	else
