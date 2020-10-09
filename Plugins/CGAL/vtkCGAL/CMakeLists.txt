@@ -22,6 +22,7 @@ set(classes
   vtkCGALPolygonSetToPolyLineSet
   vtkCGALPolygonUtilities
   vtkCGALPolyLineSetToPolygonSet
+  vtkCGALRegionGrowing
   vtkCGALSelfIntersectionMeasurer
   vtkCGALUtilities)
 

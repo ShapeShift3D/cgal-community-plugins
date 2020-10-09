@@ -971,5 +971,48 @@
                 <ShowInMenu category="CGAL"/>
             </Hints>
         </SourceProxy>
+        <!-- ==================================================================== -->
+        <SourceProxy name="CGALRegionGrowing"
+               class="vtkCGALRegionGrowing"
+               label="Shape Detection - Region Growing">
+        <Documentation long_help="todo."
+                       short_help="todo."> </Documentation>
+
+            <InputProperty name="Input"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+            </InputProperty>
+            <IntVectorProperty name="MaxDistanceToPlane"
+                               command="SetMaxDistanceToPlane"
+                               number_of_elements="1"
+                               default_values="1">
+                <Documentation>
+                    The maximum distance from the furthest face vertex to a plane.
+                </Documentation>
+            </IntVectorProperty>
+            <IntVectorProperty name="MaxAcceptedAngle"
+                               command="SetMaxAcceptedAngle"
+                               number_of_elements="1"
+                               default_values="45">
+                <Documentation>
+                    The maximum accepted angle between the face normal and the normal of a plane.
+                </Documentation>
+            </IntVectorProperty>
+            <IntVectorProperty name="MinRegionSize"
+                               command="SetMinRegionSize"
+                               number_of_elements="1"
+                               default_values="5">
+                <Documentation>
+                    The minimum number of mesh faces a region must have.
+                </Documentation>
+            </IntVectorProperty>
+        </SourceProxy>
     </ProxyGroup>
 </ServerManagerConfiguration>
