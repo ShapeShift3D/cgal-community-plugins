@@ -17,10 +17,10 @@ public:
   vtkSetClampMacro(UseParameters, int, 0, 1);
 
   vtkGetMacro(MinPoints, int);
-  vtkSetClampMacro(MinPoints, int, 1, VTK_INT_MAX);
+  vtkSetClampMacro(MinPoints, int, 0, VTK_INT_MAX);
 
   vtkGetMacro(Probability, double);
-  vtkSetClampMacro(Probability, double, 0, 1);
+  vtkSetClampMacro(Probability, double, 0.0, 1.0);
 
   vtkGetMacro(Epsilon, double);
   vtkSetClampMacro(Epsilon, double, 0, VTK_DOUBLE_MAX);
@@ -29,7 +29,7 @@ public:
   vtkSetClampMacro(ClusterEpsilon, double, 0, VTK_DOUBLE_MAX);
 
   vtkGetMacro(MaxNormalDeviation, double);
-  vtkSetClampMacro(MaxNormalDeviation, double, 0, VTK_DOUBLE_MAX);
+  vtkSetClampMacro(MaxNormalDeviation, double, 0.0, 1.0);
 
 protected:
   vtkCGALEfficientRANSAC();

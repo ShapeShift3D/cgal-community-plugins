@@ -1050,7 +1050,7 @@
                                command="SetMinPoints"
                                number_of_elements="1"
                                default_values="200">
-                <IntRangeDomain min="1" name="range" />
+                <IntRangeDomain min="0" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
@@ -1058,14 +1058,15 @@
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set the minimum number of points criteria
+                    Set the minimum number of points criteria.
+                    Minimum number of points in a shape.
                 </Documentation>
             </IntVectorProperty>
             <DoubleVectorProperty name="Probability"
                                   command="SetProbability"
                                   number_of_elements="1"
                                   default_values="0.05">
-                <DoubleRangeDomain min="0" max="1" name="range" />
+                <DoubleRangeDomain min="0.0" max="1.0" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
@@ -1073,14 +1074,15 @@
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set probability to miss the largest primitive at each iteration.
+                    Set probability to miss the largest primitive at each iteration. Probability to control search endurance.
+                    A lower probability provides a higher reliability and determinism at the cost of longer running time due to a higher search endurance.
                 </Documentation>
             </DoubleVectorProperty>
             <DoubleVectorProperty name="Epsilon"
                                   command="SetEpsilon"
                                   number_of_elements="1"
                                   default_values="0.002">
-                <DoubleRangeDomain min="0" name="range" />
+                <DoubleRangeDomain min="0.0" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
@@ -1088,14 +1090,14 @@
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set maximum Euclidean distance between a point and a shape.
+                    Set maximum acceptable Euclidean distance between a point and a shape.
                 </Documentation>
             </DoubleVectorProperty>
             <DoubleVectorProperty name="ClusterEpsilon"
                                   command="SetClusterEpsilon"
                                   number_of_elements="1"
                                   default_values="0.01">
-                <DoubleRangeDomain min="0" name="range" />
+                <DoubleRangeDomain min="0.0" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
@@ -1103,14 +1105,14 @@
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set maximum Euclidean distance between points to be clustered.
+                    Set maximum acceptable Euclidean distance between points, which are assumed to be neighbors.
                 </Documentation>
             </DoubleVectorProperty>
             <DoubleVectorProperty name="MaxNormalDeviation"
                                   command="SetMaxNormalDeviation"
                                   number_of_elements="1"
                                   default_values="0.9">
-                <DoubleRangeDomain min="0" name="range" />
+                <DoubleRangeDomain min="0.0" max="1.0" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
@@ -1118,7 +1120,8 @@
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set maximum normal deviation.
+                    Set maximum threshold on the dot product between the estimated shape's normal and
+                    the point's normal, that is the cosine of the angle (cos(25°) = 0.9). 
                 </Documentation>
             </DoubleVectorProperty>
         </SourceProxy>

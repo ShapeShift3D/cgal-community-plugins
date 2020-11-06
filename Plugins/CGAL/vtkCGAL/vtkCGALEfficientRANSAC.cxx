@@ -121,6 +121,8 @@ int vtkCGALEfficientRANSAC::RequestData(
   // Register planar shapes via template method.
   ransac.add_shape_factory<Plane>();
 
+  // TODO: Use detect() with callback so we can get the algo advancement
+
   // Set parameters for shape detection.
   Efficient_ransac::Parameters parameters;
   if (this->UseParameters)
@@ -145,14 +147,7 @@ int vtkCGALEfficientRANSAC::RequestData(
   // --- method 1
   /*
   // Detect registered shapes with default parameters.
-  if (this->UseParameters)
-  {
-    ransac.detect(parameters);
-  }
-  else
-  {
-    ransac.detect();
-  }
+  ransac.detect(parameters);
 
   // Print number of detected shapes.
   std::cout << ransac.shapes().end() - ransac.shapes().begin()
@@ -187,14 +182,7 @@ int vtkCGALEfficientRANSAC::RequestData(
     time.start();
 
     // Detect shapes.
-    if (this->UseParameters)
-    {
-      ransac.detect(parameters);
-    }
-    else
-    {
-      ransac.detect();
-    }
+    ransac.detect(parameters);
 
     // Measure time after detection.
     time.stop();
