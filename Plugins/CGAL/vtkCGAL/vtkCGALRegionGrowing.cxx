@@ -21,6 +21,7 @@
 #include <vtkIntArray.h>
 #include <vtkPointData.h>
 #include <vtkSmartPointer.h>
+#include <vtkTimerLog.h>
 
 // -- CGAL
 #include <CGAL/memory.h>
@@ -129,6 +130,8 @@ int vtkCGALRegionGrowing::RequestData(
     << std::endl << "\tMinRegionSize" << "\t" << this->MinRegionSize
     << std::endl << std::endl;
 
+  vtkTimerLog::MarkStartEvent("CGAL Region Growing");
+
   const Face_range face_range = faces(polygon_mesh);
   std::cout << "* polygon mesh with "
     << face_range.size() << " faces is loaded" << std::endl;
@@ -191,6 +194,8 @@ int vtkCGALRegionGrowing::RequestData(
     regionIndex++;
   }
 #endif // USE_SURFACE_MESH
+
+  vtkTimerLog::MarkEndEvent("CGAL Region Growing");
 
   std::cout
     << std::endl << "region_growing_on_polygon_mesh example finished"

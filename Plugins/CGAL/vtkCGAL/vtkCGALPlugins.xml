@@ -977,7 +977,6 @@
                label="Shape Detection - Region Growing">
         <Documentation long_help="todo."
                        short_help="todo."> </Documentation>
-
             <InputProperty name="Input"
                            port_index="0"
                            command="SetInputConnection">
