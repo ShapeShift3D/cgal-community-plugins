@@ -1053,7 +1053,7 @@
                 <IntRangeDomain min="1" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="enabled_state"
+                                           mode="visibility"
                                            property="UseParameters"
                                            value="1" />
                 </Hints>
@@ -1068,7 +1068,7 @@
                 <DoubleRangeDomain min="0" max="1" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="enabled_state"
+                                           mode="visibility"
                                            property="UseParameters"
                                            value="1" />
                 </Hints>
@@ -1083,7 +1083,7 @@
                 <DoubleRangeDomain min="0" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="enabled_state"
+                                           mode="visibility"
                                            property="UseParameters"
                                            value="1" />
                 </Hints>
@@ -1098,7 +1098,7 @@
                 <DoubleRangeDomain min="0" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="enabled_state"
+                                           mode="visibility"
                                            property="UseParameters"
                                            value="1" />
                 </Hints>
@@ -1113,7 +1113,7 @@
                 <DoubleRangeDomain min="0" name="range" />
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="enabled_state"
+                                           mode="visibility"
                                            property="UseParameters"
                                            value="1" />
                 </Hints>
