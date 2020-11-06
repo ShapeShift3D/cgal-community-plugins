@@ -1013,5 +1013,114 @@
                 </Documentation>
             </IntVectorProperty>
         </SourceProxy>
+        <!-- ==================================================================== -->
+        <SourceProxy name="CGALEfficientRANSAC"
+               class="vtkCGALEfficientRANSAC"
+               label="Shape Detection - Efficient RANSAC">
+        <Documentation long_help="todo."
+                       short_help="todo."> </Documentation>
+            <InputProperty name="Input"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkDataSet"/>
+                </DataTypeDomain>
+            </InputProperty>
+            <IntVectorProperty name="NumberOfIterations"
+                               command="SetNumberOfIterations"
+                               number_of_elements="1"
+                               default_values="1">
+                <IntRangeDomain min="1" name="range" />
+                <Documentation>
+                    The algorithm will perform detection several times and choose result
+                    with the highest coverage (i.e. ratio of the points assigned to a shape.)
+                </Documentation>
+            </IntVectorProperty>
+            <IntVectorProperty name="UseParameters"
+                             command="SetUseParameters"
+                             number_of_elements="1"
+                             default_values="0">
+                <BooleanDomain name="bool" />
+            </IntVectorProperty>
+            <IntVectorProperty name="MinPoints"
+                               command="SetMinPoints"
+                               number_of_elements="1"
+                               default_values="200">
+                <IntRangeDomain min="1" name="range" />
+                <Hints>
+                  <PropertyWidgetDecorator type="GenericDecorator"
+                                           mode="enabled_state"
+                                           property="UseParameters"
+                                           value="1" />
+                </Hints>
+                <Documentation>
+                    Set the minimum number of points criteria
+                </Documentation>
+            </IntVectorProperty>
+            <DoubleVectorProperty name="Probability"
+                                  command="SetProbability"
+                                  number_of_elements="1"
+                                  default_values="0.05">
+                <DoubleRangeDomain min="0" max="1" name="range" />
+                <Hints>
+                  <PropertyWidgetDecorator type="GenericDecorator"
+                                           mode="enabled_state"
+                                           property="UseParameters"
+                                           value="1" />
+                </Hints>
+                <Documentation>
+                    Set probability to miss the largest primitive at each iteration.
+                </Documentation>
+            </DoubleVectorProperty>
+            <DoubleVectorProperty name="Epsilon"
+                                  command="SetEpsilon"
+                                  number_of_elements="1"
+                                  default_values="0.002">
+                <DoubleRangeDomain min="0" name="range" />
+                <Hints>
+                  <PropertyWidgetDecorator type="GenericDecorator"
+                                           mode="enabled_state"
+                                           property="UseParameters"
+                                           value="1" />
+                </Hints>
+                <Documentation>
+                    Set maximum Euclidean distance between a point and a shape.
+                </Documentation>
+            </DoubleVectorProperty>
+            <DoubleVectorProperty name="ClusterEpsilon"
+                                  command="SetClusterEpsilon"
+                                  number_of_elements="1"
+                                  default_values="0.01">
+                <DoubleRangeDomain min="0" name="range" />
+                <Hints>
+                  <PropertyWidgetDecorator type="GenericDecorator"
+                                           mode="enabled_state"
+                                           property="UseParameters"
+                                           value="1" />
+                </Hints>
+                <Documentation>
+                    Set maximum Euclidean distance between points to be clustered.
+                </Documentation>
+            </DoubleVectorProperty>
+            <DoubleVectorProperty name="MaxNormalDeviation"
+                                  command="SetMaxNormalDeviation"
+                                  number_of_elements="1"
+                                  default_values="0.9">
+                <DoubleRangeDomain min="0" name="range" />
+                <Hints>
+                  <PropertyWidgetDecorator type="GenericDecorator"
+                                           mode="enabled_state"
+                                           property="UseParameters"
+                                           value="1" />
+                </Hints>
+                <Documentation>
+                    Set maximum normal deviation.
+                </Documentation>
+            </DoubleVectorProperty>
+        </SourceProxy>
     </ProxyGroup>
 </ServerManagerConfiguration>
