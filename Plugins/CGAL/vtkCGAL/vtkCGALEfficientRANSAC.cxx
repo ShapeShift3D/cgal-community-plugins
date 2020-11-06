@@ -103,7 +103,7 @@ int vtkCGALEfficientRANSAC::RequestData(
   colors->Fill(-1);
 
   auto distances = vtkFloatArray::New();
-  distances->SetName("average_distances");
+  distances->SetName("distances");
   distances->SetNumberOfComponents(1);
   distances->SetNumberOfTuples(numPoints);
   distances->Fill(-1);
@@ -143,7 +143,7 @@ int vtkCGALEfficientRANSAC::RequestData(
   }
 
   // --- method 1
-
+  /*
   // Detect registered shapes with default parameters.
   if (this->UseParameters)
   {
@@ -157,8 +157,8 @@ int vtkCGALEfficientRANSAC::RequestData(
   // Print number of detected shapes.
   std::cout << ransac.shapes().end() - ransac.shapes().begin()
     << " shapes detected." << std::endl;
-
-  // --- end method 2
+  */
+  // --- end method 1
 
 
 
