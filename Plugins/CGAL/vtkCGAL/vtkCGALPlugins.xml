@@ -988,26 +988,28 @@
                     <DataType value="vtkDataSet"/>
                 </DataTypeDomain>
             </InputProperty>
-            <IntVectorProperty name="MaxDistanceToPlane"
+            <DoubleVectorProperty name="MaxDistanceToPlane"
                                command="SetMaxDistanceToPlane"
                                number_of_elements="1"
-                               default_values="1">
+                               default_values="1.0">
+                <DoubleRangeDomain min="0.0" name="range" />
                 <Documentation>
                     The maximum distance from the furthest face vertex to a plane.
                 </Documentation>
-            </IntVectorProperty>
-            <IntVectorProperty name="MaxAcceptedAngle"
+            </DoubleVectorProperty>
+            <DoubleVectorProperty name="MaxAcceptedAngle"
                                command="SetMaxAcceptedAngle"
                                number_of_elements="1"
-                               default_values="45">
+                               default_values="45.0">
                 <Documentation>
                     The maximum accepted angle between the face normal and the normal of a plane.
                 </Documentation>
-            </IntVectorProperty>
+            </DoubleVectorProperty>
             <IntVectorProperty name="MinRegionSize"
                                command="SetMinRegionSize"
                                number_of_elements="1"
                                default_values="5">
+                <IntRangeDomain min="0" name="range" />
                 <Documentation>
                     The minimum number of mesh faces a region must have.
                 </Documentation>

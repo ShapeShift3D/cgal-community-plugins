@@ -10,14 +10,14 @@ public:
   static vtkCGALRegionGrowing* New();
   vtkTypeMacro(vtkCGALRegionGrowing, vtkPolyDataAlgorithm);
 
-  vtkGetMacro(MaxDistanceToPlane, int);
-  vtkSetMacro(MaxDistanceToPlane, int);
+  vtkGetMacro(MaxDistanceToPlane, double);
+  vtkSetClampMacro(MaxDistanceToPlane, double, 0.0, VTK_DOUBLE_MAX);
 
-  vtkGetMacro(MaxAcceptedAngle, int);
-  vtkSetMacro(MaxAcceptedAngle, int);
+  vtkGetMacro(MaxAcceptedAngle, double);
+  vtkSetMacro(MaxAcceptedAngle, double);
 
   vtkGetMacro(MinRegionSize, int);
-  vtkSetMacro(MinRegionSize, int);
+  vtkSetClampMacro(MinRegionSize, int, 0, VTK_INT_MAX);
 
 protected:
   vtkCGALRegionGrowing();
@@ -28,8 +28,8 @@ protected:
     vtkInformationVector **,
     vtkInformationVector *) override;
 
-  int MaxDistanceToPlane;
-  int MaxAcceptedAngle;
+  double MaxDistanceToPlane;
+  double MaxAcceptedAngle;
   int MinRegionSize;
 
 private:

@@ -93,8 +93,8 @@ vtkStandardNewMacro(vtkCGALRegionGrowing);
 // Todo.
 vtkCGALRegionGrowing::vtkCGALRegionGrowing()
 {
-  this->MaxDistanceToPlane = 1;
-  this->MaxAcceptedAngle = 45;
+  this->MaxDistanceToPlane = 1.0;
+  this->MaxAcceptedAngle = 45.0;
   this->MinRegionSize = 5;
 }
 
