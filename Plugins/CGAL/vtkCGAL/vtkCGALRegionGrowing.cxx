@@ -25,13 +25,10 @@
 
 // -- CGAL
 #include <CGAL/memory.h>
-#include <CGAL/IO/Color.h>
 #include <CGAL/Iterator_range.h>
-#include <CGAL/HalfedgeDS_vector.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
 #include <CGAL/Surface_mesh.h>
-#include <CGAL/Polyhedron_3.h>
 
 #include <CGAL/Shape_detection/Region_growing/Region_growing.h>
 #include <CGAL/Shape_detection/Region_growing/Region_growing_on_polygon_mesh.h>
@@ -39,7 +36,6 @@
 // -- STL
 #include <vector>
 #include <cstdlib>
-#include <iostream>
 #include <iterator>
 
 // Type declarations.
@@ -48,34 +44,15 @@ using Kernel = CGAL::Exact_predicates_exact_constructions_kernel;
 using FT = typename Kernel::FT;
 using Point_3 = typename Kernel::Point_3;
 
-using Color = CGAL::Color;
+using Polygon_mesh = CGAL::Surface_mesh<Point_3>;
+using Face_range = typename Polygon_mesh::Face_range;
 
-// Choose the type of a container for a polygon mesh.
-#define USE_SURFACE_MESH
-
-#if defined(USE_SURFACE_MESH)
-  using Polygon_mesh = CGAL::Surface_mesh<Point_3>;
-  using Face_range = typename Polygon_mesh::Face_range;
-
-  using Neighbor_query =
-    CGAL::Shape_detection::Polygon_mesh::One_ring_neighbor_query<Polygon_mesh>;
-  using Region_type =
-    CGAL::Shape_detection::Polygon_mesh::Least_squares_plane_fit_region<Kernel, Polygon_mesh>;
-  using Sorting =
-    CGAL::Shape_detection::Polygon_mesh::Least_squares_plane_fit_sorting<Kernel, Polygon_mesh, Neighbor_query>;
-#else
-  using Polygon_mesh =
-    CGAL::Polyhedron_3<Kernel, CGAL::Polyhedron_items_3, CGAL::HalfedgeDS_vector>;
-  using Face_range =
-    typename CGAL::Iterator_range<typename boost::graph_traits<Polygon_mesh>::face_iterator>;
-
-  using Neighbor_query =
-    CGAL::Shape_detection::Polygon_mesh::One_ring_neighbor_query<Polygon_mesh, Face_range>;
-  using Region_type =
-    CGAL::Shape_detection::Polygon_mesh::Least_squares_plane_fit_region<Kernel, Polygon_mesh, Face_range>;
-  using Sorting =
-    CGAL::Shape_detection::Polygon_mesh::Least_squares_plane_fit_sorting<Kernel, Polygon_mesh, Neighbor_query, Face_range>;
-#endif
+using Neighbor_query =
+  CGAL::Shape_detection::Polygon_mesh::One_ring_neighbor_query<Polygon_mesh>;
+using Region_type =
+  CGAL::Shape_detection::Polygon_mesh::Least_squares_plane_fit_region<Kernel, Polygon_mesh>;
+using Sorting =
+  CGAL::Shape_detection::Polygon_mesh::Least_squares_plane_fit_sorting<Kernel, Polygon_mesh, Neighbor_query>;
 
 using Region = std::vector<std::size_t>;
 using Regions = std::vector<Region>;
@@ -90,7 +67,7 @@ vtkStandardNewMacro(vtkCGALRegionGrowing);
 
 // -----------------------------------------------------------------------------
 // Constructor
-// Todo.
+// TODO: description
 vtkCGALRegionGrowing::vtkCGALRegionGrowing()
 {
   this->MaxDistanceToPlane = 1.0;
@@ -99,7 +76,7 @@ vtkCGALRegionGrowing::vtkCGALRegionGrowing()
 }
 
 // -----------------------------------------------------------------------------
-// Todo.
+// TODO: description
 int vtkCGALRegionGrowing::RequestData(
   vtkInformation *vtkNotUsed(request),
   vtkInformationVector **inputVector,
@@ -123,18 +100,7 @@ int vtkCGALRegionGrowing::RequestData(
   Polygon_mesh polygon_mesh;
   vtkCGALUtilities::vtkPolyDataToPolygonMesh(input, polygon_mesh);
 
-  std::cout << std::endl <<
-    "region_growing_on_polygon_mesh example started with "
-    << std::endl << "\tMaxDistanceToPlane" << "\t" << this->MaxDistanceToPlane
-    << std::endl << "\tMaxAcceptedAngle" << "\t" << this->MaxAcceptedAngle
-    << std::endl << "\tMinRegionSize" << "\t" << this->MinRegionSize
-    << std::endl << std::endl;
-
-  vtkTimerLog::MarkStartEvent("CGAL Region Growing");
-
   const Face_range face_range = faces(polygon_mesh);
-  std::cout << "* polygon mesh with "
-    << face_range.size() << " faces is loaded" << std::endl;
 
   // Default parameter values for the data file polygon_mesh.off.
   const FT          max_distance_to_plane = FT(this->MaxDistanceToPlane);
@@ -147,6 +113,8 @@ int vtkCGALRegionGrowing::RequestData(
   const Vertex_to_point_map vertex_to_point_map(
     get(CGAL::vertex_point, polygon_mesh));
 
+  vtkTimerLog::MarkStartEvent("Sorting");
+
   Region_type region_type(
     polygon_mesh,
     max_distance_to_plane, max_accepted_angle, min_region_size,
@@ -154,9 +122,12 @@ int vtkCGALRegionGrowing::RequestData(
 
   // Sort face indices.
   Sorting sorting(
-    polygon_mesh, neighbor_query,
-    vertex_to_point_map);
+    polygon_mesh, neighbor_query, vertex_to_point_map);
   sorting.sort();
+
+  vtkTimerLog::MarkEndEvent("Sorting");
+
+  vtkTimerLog::MarkStartEvent("Detection");
 
   // Create an instance of the region growing class.
   Region_growing region_growing(
@@ -167,21 +138,16 @@ int vtkCGALRegionGrowing::RequestData(
   Regions regions;
   region_growing.detect(std::back_inserter(regions));
 
-  // Print the number of found regions.
-  std::cout << "* " << regions.size()
-    << " regions have been found" << std::endl;
+  vtkTimerLog::MarkEndEvent("Detection");
 
   vtkIdType numPolys = input->GetNumberOfPolys();
-
   auto colors = vtkIntArray::New();
   colors->SetName("regions");
   colors->SetNumberOfComponents(1);
   colors->SetNumberOfTuples(numPolys);
   colors->Fill(-1);
 
-#if defined(USE_SURFACE_MESH)
   int regionIndex = 0;
-
   for (const auto& region : regions)
   {
     // Iterate through all region items.
@@ -193,13 +159,6 @@ int vtkCGALRegionGrowing::RequestData(
 
     regionIndex++;
   }
-#endif // USE_SURFACE_MESH
-
-  vtkTimerLog::MarkEndEvent("CGAL Region Growing");
-
-  std::cout
-    << std::endl << "region_growing_on_polygon_mesh example finished"
-    << std::endl << std::endl;
 
   output->GetCellData()->SetScalars(colors);
   colors->Delete();

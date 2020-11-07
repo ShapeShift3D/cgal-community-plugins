@@ -42,13 +42,15 @@ typedef CGAL::Shape_detection::Efficient_RANSAC_traits
 typedef CGAL::Shape_detection::Efficient_RANSAC<Traits>         Efficient_ransac;
 typedef CGAL::Shape_detection::Plane<Traits>                    Plane;
 
+#define ITERATIVE_METHOD
+
 // -----------------------------------------------------------------------------
 // Declare the plugin
 vtkStandardNewMacro(vtkCGALEfficientRANSAC);
 
 // -----------------------------------------------------------------------------
 // Constructor
-// Todo.
+// TODO: description
 vtkCGALEfficientRANSAC::vtkCGALEfficientRANSAC()
 {
   this->NumberOfIterations = 1;
@@ -62,7 +64,7 @@ vtkCGALEfficientRANSAC::vtkCGALEfficientRANSAC()
 }
 
 // -----------------------------------------------------------------------------
-// Todo.
+// TODO: description
 int vtkCGALEfficientRANSAC::RequestData(
   vtkInformation *vtkNotUsed(request),
   vtkInformationVector **inputVector,
@@ -92,8 +94,6 @@ int vtkCGALEfficientRANSAC::RequestData(
     return 0;
   }
 
-  std::cout << "Efficient RANSAC" << std::endl;
-
   vtkIdType numPoints = input->GetNumberOfPoints();
 
   auto colors = vtkIntArray::New();
@@ -110,8 +110,6 @@ int vtkCGALEfficientRANSAC::RequestData(
 
   int regionIndex = 0;
 
-  vtkTimerLog::MarkStartEvent("CGAL Efficient RANSAC");
-
   // Instantiate shape detection engine.
   Efficient_ransac ransac;
 
@@ -121,7 +119,7 @@ int vtkCGALEfficientRANSAC::RequestData(
   // Register planar shapes via template method.
   ransac.add_shape_factory<Plane>();
 
-  // TODO: Use detect() with callback so we can get the algo advancement
+  // TODO: Use detect() with callback so we can see the progress
 
   // Set parameters for shape detection.
   Efficient_ransac::Parameters parameters;
@@ -144,80 +142,62 @@ int vtkCGALEfficientRANSAC::RequestData(
     parameters.normal_threshold = this->MaxNormalDeviation;
   }
 
-  // --- method 1
-  /*
-  // Detect registered shapes with default parameters.
-  ransac.detect(parameters);
-
-  // Print number of detected shapes.
-  std::cout << ransac.shapes().end() - ransac.shapes().begin()
-    << " shapes detected." << std::endl;
-  */
-  // --- end method 1
-
-
-
-  // --- method 2
-
-  // Measure time before setting up the shape detection.
-  CGAL::Timer time;
-  time.start();
+  vtkTimerLog::MarkStartEvent("Preprocessing");
 
   // Build internal data structures.
   ransac.preprocess();
 
-  // Measure time after preprocessing.
-  time.stop();
+  vtkTimerLog::MarkEndEvent("Preprocessing");
 
-  std::cout << "preprocessing took: " << time.time() * 1000 << "ms" << std::endl;
+  vtkTimerLog::MarkStartEvent("Detection");
 
-  // Perform detection several times and choose result with the highest coverage.
+  // Efficient_ransac::shapes() provides
+  // an iterator range to the detected shapes.
   Efficient_ransac::Shape_range shapes = ransac.shapes();
 
+#ifndef ITERATIVE_METHOD
+  // Detect registered shapes with default parameters.
+  ransac.detect(parameters);
+  shapes = ransac.shapes();
+#else
+  // Perform detection several times and choose result with the highest coverage.
   FT best_coverage = 0;
   for (std::size_t i = 0; i < this->NumberOfIterations; ++i)
   {
-    // Reset timer.
-    time.reset();
-    time.start();
+    vtkTimerLog::MarkStartEvent("Detection iteration");
 
     // Detect shapes.
     ransac.detect(parameters);
 
-    // Measure time after detection.
-    time.stop();
+    vtkTimerLog::MarkEndEvent("Detection iteration");
 
     // Compute coverage, i.e. ratio of the points assigned to a shape.
     FT coverage =
       FT(points.size() - ransac.number_of_unassigned_points()) / FT(points.size());
 
     // Print number of assigned shapes and unassigned points.
-    std::cout << "time: " << time.time() * 1000 << "ms" << std::endl;
-    std::cout << ransac.shapes().end() - ransac.shapes().begin()
-      << " primitives, " << coverage << " coverage" << std::endl;
+    vtkWarningMacro(<< "Iteration #" << i
+      << " | " << ransac.shapes().end() - ransac.shapes().begin() << " primitives"
+      << " | " << coverage << " coverage");
 
     // Choose result with the highest coverage.
     if (coverage > best_coverage)
     {
       best_coverage = coverage;
-
-      // Efficient_ransac::shapes() provides
-      // an iterator range to the detected shapes.
       shapes = ransac.shapes();
     }
   }
+#endif // !ITERATIVE_METHOD
 
-  // --- end method 2
+  vtkTimerLog::MarkEndEvent("Detection");
 
-
+  // Print number of detected shapes.
+  vtkWarningMacro(<< ransac.shapes().end() - ransac.shapes().begin() << " shapes detected.");
 
   Efficient_ransac::Shape_range::iterator it = shapes.begin();
   while (it != shapes.end())
   {
     boost::shared_ptr<Efficient_ransac::Shape> shape = *it;
-
-    // Use Shape_base::info() to print the parameters of the detected shape.
-    std::cout << (*it)->info();
 
     // Sums distances of points to the detected shapes.
     FT sum_distances = 0;
@@ -248,7 +228,9 @@ int vtkCGALEfficientRANSAC::RequestData(
     // Compute and print the average distance.
     FT average_distance = sum_distances /
       shape->indices_of_assigned_points().size();
-    std::cout << " average distance: " << average_distance << std::endl;
+
+    vtkWarningMacro(<< "Average distance region #"
+      << regionIndex << ": " << average_distance);
 
     // Proceed with the next detected shape.
     it++;
@@ -258,6 +240,7 @@ int vtkCGALEfficientRANSAC::RequestData(
   output->GetPointData()->SetScalars(colors);
   colors->Delete();
 
+  // This array is here to help testing
   output->GetPointData()->AddArray(distances);
   distances->Delete();
 
