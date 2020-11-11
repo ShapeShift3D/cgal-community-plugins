@@ -11,7 +11,6 @@
 #include <vtkObjectFactory.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkPolyData.h>
-#include <vtkPointData.h>
 
 #include <vtkAppendPolyData.h>
 
@@ -65,21 +64,6 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
 
 //----------------------------------------------------------------------------
 
-/** @brief Converts a vtkPointSet (VTK) into a vector of points with normals (CGAL). Code taken from the VTK_io_plugin.cpp
-*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
-*
-*  @param todo
-*  @param todo
-*  @return bool Success (true) or failure (false)
-*/
-bool vtkCGALUtilities::vtkPolyDataToPointsWithNormals(vtkPolyData* poly_data, Pwn_vector0& pwn_vector)
-{
-	return vtkCGALUtilities::vtkPolyDataToPointsWithNormalsImpl<K0::Point_3, K0::Vector_3, Pwn_vector0>(poly_data, pwn_vector);
-}
-
-//----------------------------------------------------------------------------
-
 /** @brief Converts a vtkPolyData (VTK) into a Surface Mesh (CGAL). Code taken from the VTK_io_plugin.cpp
 *          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
 *          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
@@ -114,21 +98,6 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
 	typedef typename boost::graph_traits<Polyhedron1>::vertex_descriptor vertex_descriptor;
 
 	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron1>(polyData, tmesh);
-}
-
-//----------------------------------------------------------------------------
-
-/** @brief Converts a vtkPointSet (VTK) into a vector of points with normals (CGAL). Code taken from the VTK_io_plugin.cpp
-*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
-*
-*  @param todo
-*  @param todo
-*  @return bool Success (true) or failure (false)
-*/
-bool vtkCGALUtilities::vtkPolyDataToPointsWithNormals(vtkPolyData* poly_data, Pwn_vector1& pwn_vector)
-{
-	return vtkCGALUtilities::vtkPolyDataToPointsWithNormalsImpl<K1::Point_3, K1::Vector_3, Pwn_vector1>(poly_data, pwn_vector);
 }
 
 //----------------------------------------------------------------------------
@@ -171,21 +140,6 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
 
 //----------------------------------------------------------------------------
 
-/** @brief Converts a vtkPointSet (VTK) into a vector of points with normals (CGAL). Code taken from the VTK_io_plugin.cpp
-*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
-*
-*  @param todo
-*  @param todo
-*  @return bool Success (true) or failure (false)
-*/
-bool vtkCGALUtilities::vtkPolyDataToPointsWithNormals(vtkPolyData* poly_data, Pwn_vector2& pwn_vector)
-{
-	return vtkCGALUtilities::vtkPolyDataToPointsWithNormalsImpl<K2::Point_3, K2::Vector_3, Pwn_vector2>(poly_data, pwn_vector);
-}
-
-//----------------------------------------------------------------------------
-
 /** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
 *          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
 *          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
@@ -220,21 +174,6 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
 	typedef typename boost::graph_traits<SurfaceMesh3>::vertex_descriptor vertex_descriptor;
 
 	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh3>(polyData, tmesh);
-}
-
-//----------------------------------------------------------------------------
-
-/** @brief Converts a vtkPointSet (VTK) into a vector of points with normals (CGAL). Code taken from the VTK_io_plugin.cpp
-*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
-*
-*  @param todo
-*  @param todo
-*  @return bool Success (true) or failure (false)
-*/
-bool vtkCGALUtilities::vtkPolyDataToPointsWithNormals(vtkPolyData* poly_data, Pwn_vector3& pwn_vector)
-{
-	return vtkCGALUtilities::vtkPolyDataToPointsWithNormalsImpl<K3::Point_3, K3::Vector_3, Pwn_vector3>(poly_data, pwn_vector);
 }
 
 //----------------------------------------------------------------------------
@@ -308,43 +247,6 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
     }
 
     return true;
-}
-
-//----------------------------------------------------------------------------
-
-/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
-*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
-*          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
-*
-*  @param polyData The input PolyData
-*  @param todo
-*  @return bool Success (true) or failure (false)
-*/
-template <typename PointType, typename VectorType, typename PWVType>
-bool vtkCGALUtilities::vtkPolyDataToPointsWithNormalsImpl(vtkPolyData* poly_data, PWVType& points)
-{
-	// get nb of points and cells
-	vtkIdType nb_points = poly_data->GetNumberOfPoints();
-	vtkDataArray* normals = poly_data->GetPointData()->GetNormals();
-	if (!normals)
-	{
-		return false;
-	}
-
-	// extract points and normals
-	for (vtkIdType i = 0; i < nb_points; ++i)
-	{
-		double p[3];
-		poly_data->GetPoint(i, p);
-
-		double n[3];
-		normals->GetTuple(i, n);
-
-		points.push_back(std::make_pair(
-			PointType(p[0], p[1], p[2]), VectorType(n[0], n[1], n[2])));
-	}
-
-	return true;
 }
 
 //----------------------------------------------------------------------------
