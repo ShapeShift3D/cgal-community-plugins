@@ -975,7 +975,7 @@
         <SourceProxy name="CGALRegionGrowing"
                class="vtkCGALRegionGrowing"
                label="Shape Detection - Region Growing">
-        <Documentation long_help="todo."
+            <Documentation long_help="todo."
                        short_help="todo."> </Documentation>
             <InputProperty name="Input"
                            port_index="0"
@@ -988,6 +988,23 @@
                     <DataType value="vtkDataSet"/>
                 </DataTypeDomain>
             </InputProperty>
+            <IntVectorProperty name="Kernel"
+                               command="SetKernelValue"
+                               number_of_elements="1"
+                               default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry text="EPEC"              value="1" />
+                    <Entry text="EPEC_SQRT"         value="2" />
+                    <Entry text="EPEC_ROOT"         value="3" />
+                    <Entry text="EPEC_ROOT_OF"      value="4" />
+                    <Entry text="EPIC"              value="5" />
+                    <Entry text="Cartesian"         value="6" />
+                    <Entry text="Simple_cartesian"  value="7" />
+                </EnumerationDomain>
+                <Documentation>
+					Set the kernel.
+                </Documentation>
+            </IntVectorProperty>
             <DoubleVectorProperty name="MaxDistanceToPlane"
                                command="SetMaxDistanceToPlane"
                                number_of_elements="1"
@@ -1019,7 +1036,7 @@
         <SourceProxy name="CGALEfficientRANSAC"
                class="vtkCGALEfficientRANSAC"
                label="Shape Detection - Efficient RANSAC">
-        <Documentation long_help="todo."
+            <Documentation long_help="todo."
                        short_help="todo."> </Documentation>
             <InputProperty name="Input"
                            port_index="0"
