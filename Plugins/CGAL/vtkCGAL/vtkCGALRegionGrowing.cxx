@@ -1,15 +1,3 @@
-/**
-* \class vtkCGALRegionGrowing
-* 
-* \brief todo
-* 
-* 
-* 
-* Inputs: todo
-* Output: todo
-* 
-*/
-
 #include <vtkCGALRegionGrowing.h>
 
 // -- VTK
@@ -40,27 +28,23 @@
 #include <CGAL/Shape_detection/Region_growing/Region_growing_on_polygon_mesh.h>
 
 // -- STL
-#include <vector>
 #include <cstdlib>
 #include <iterator>
+#include <vector>
 
-// -----------------------------------------------------------------------------
-// Declare the plugin
+//----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkCGALRegionGrowing);
 
-// -----------------------------------------------------------------------------
-// Constructor
-// TODO: description
+//----------------------------------------------------------------------------
 vtkCGALRegionGrowing::vtkCGALRegionGrowing()
 {
   this->KernelValue = vtkCGALRegionGrowing::EPEC;
+  this->MinRegionSize = 5;
   this->MaxDistanceToPlane = 1.0;
   this->MaxAcceptedAngle = 45.0;
-  this->MinRegionSize = 5;
 }
 
-// -----------------------------------------------------------------------------
-// TODO: description
+//----------------------------------------------------------------------------
 int vtkCGALRegionGrowing::RequestData(
   vtkInformation *vtkNotUsed(request),
   vtkInformationVector **inputVector,
@@ -92,7 +76,7 @@ int vtkCGALRegionGrowing::RequestData(
     {
       return this->Detection<CGAL::Exact_predicates_exact_constructions_kernel_with_sqrt>(input, output);
     }
-    case KernelEnum::EPEC_ROOT:
+    case KernelEnum::EPEC_KTH_ROOT:
     {
       return this->Detection<CGAL::Exact_predicates_exact_constructions_kernel_with_kth_root>(input, output);
     }
@@ -131,8 +115,17 @@ int vtkCGALRegionGrowing::RequestData(
   return 1;
 }
 
+//----------------------------------------------------------------------------
+/** @brief Proceed to detect the regions contained within the input dataset.
+*
+*  @param input       source data structure
+*  @param output      copy of the input data with relevant data arrays appended
+*  @tparam CGalKernel must be a CGAL kernel compatible type
+*
+*  @return int Success (1) or failure (0)
+*/
 template <class CGalKernel>
-int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
+int vtkCGALRegionGrowing::Detection(vtkPolyData *input, vtkPolyData *output)
 {
   using FT = typename CGalKernel::FT;
   using Point_3 = typename CGalKernel::Point_3;
@@ -194,6 +187,9 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   Regions regions;
   region_growing.detect(std::back_inserter(regions));
 
+  // Print number of detected shapes
+  vtkWarningMacro(<< regions.end() - regions.begin() << " shapes detected.");
+
   vtkTimerLog::MarkEndEvent("Detection");
 
   vtkIdType numPolys = input->GetNumberOfPolys();
@@ -221,8 +217,17 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   return 1;
 }
 
+//----------------------------------------------------------------------------
+/** @brief Convert a polydata to a CGAL compatible data structure
+*
+*  @param polyData  input data structure
+*  @param tmesh     output data structure
+*  @tparam MeshType must be a CGAL surface mesh
+*
+*  @return bool Success (true) or failure (false)
+*/
 template <typename MeshType>
-bool vtkCGALRegionGrowing::vtkPolyDataToPolygonMesh(vtkPolyData* poly_data, MeshType& tmesh)
+bool vtkCGALRegionGrowing::vtkPolyDataToPolygonMesh(vtkPolyData *polyData, MeshType& tmesh)
 {
   typedef typename boost::property_map<MeshType, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<MeshType, CGAL::vertex_point_t>::type Point;
@@ -231,15 +236,15 @@ bool vtkCGALRegionGrowing::vtkPolyDataToPolygonMesh(vtkPolyData* poly_data, Mesh
   VPMap vpmap = get(CGAL::vertex_point, tmesh);
 
   // get nb of points and cells
-  vtkIdType nb_points = poly_data->GetNumberOfPoints();
-  vtkIdType nb_cells = poly_data->GetNumberOfCells();
+  vtkIdType nb_points = polyData->GetNumberOfPoints();
+  vtkIdType nb_cells = polyData->GetNumberOfCells();
 
   //extract points
   std::vector<VertexDescriptor> vertex_map(nb_points);
   for (vtkIdType i = 0; i < nb_points; ++i)
   {
     double coords[3];
-    poly_data->GetPoint(i, coords);
+    polyData->GetPoint(i, coords);
 
     VertexDescriptor v = add_vertex(tmesh);
     put(vpmap, v, Point(coords[0], coords[1], coords[2]));
@@ -249,11 +254,11 @@ bool vtkCGALRegionGrowing::vtkPolyDataToPolygonMesh(vtkPolyData* poly_data, Mesh
   //extract cells
   for (vtkIdType i = 0; i < nb_cells; ++i)
   {
-    if (poly_data->GetCellType(i) != 5
-      && poly_data->GetCellType(i) != 7
-      && poly_data->GetCellType(i) != 9) //only supported cells are triangles, quads and polygons
+    if (polyData->GetCellType(i) != 5
+      && polyData->GetCellType(i) != 7
+      && polyData->GetCellType(i) != 9) //only supported cells are triangles, quads and polygons
       continue;
-    vtkCell* cell_ptr = poly_data->GetCell(i);
+    vtkCell *cell_ptr = polyData->GetCell(i);
 
     vtkIdType nb_vertices = cell_ptr->GetNumberOfPoints();
     if (nb_vertices < 3)

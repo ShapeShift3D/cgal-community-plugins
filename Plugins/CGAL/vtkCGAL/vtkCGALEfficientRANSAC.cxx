@@ -1,15 +1,3 @@
-/**
-* \class vtkCGALEfficientRANSAC
-* 
-* \brief todo
-* 
-* 
-* 
-* Inputs: todo
-* Output: todo
-* 
-*/
-
 #include <vtkCGALEfficientRANSAC.h>
 
 // -- VTK
@@ -30,29 +18,22 @@
 
 #include <CGAL/Shape_detection/Efficient_RANSAC.h>
 
-#define ITERATIVE_METHOD
-
-// -----------------------------------------------------------------------------
-// Declare the plugin
+//----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkCGALEfficientRANSAC);
 
-// -----------------------------------------------------------------------------
-// Constructor
-// TODO: description
+//----------------------------------------------------------------------------
 vtkCGALEfficientRANSAC::vtkCGALEfficientRANSAC()
 {
+  this->UserDefinedParameters = 0;
   this->NumberOfIterations = 1;
-  this->UseParameters = 0;
   this->MinPoints = 200;
-
   this->Probability = 0.05;
   this->Epsilon = 0.002;
   this->ClusterEpsilon = 0.01;
   this->MaxNormalDeviation = 0.9;
 }
 
-// -----------------------------------------------------------------------------
-// TODO: description
+//----------------------------------------------------------------------------
 int vtkCGALEfficientRANSAC::RequestData(
   vtkInformation *vtkNotUsed(request),
   vtkInformationVector **inputVector,
@@ -78,14 +59,16 @@ int vtkCGALEfficientRANSAC::RequestData(
 }
 
 //----------------------------------------------------------------------------
-/** @brief todo
+/** @brief Proceed to detect the regions contained within the input dataset.
 *
-*  @param todo
-*  @param todo
-*  @return bool Success (true) or failure (false)
+*  @param input       source data structure
+*  @param output      copy of the input data structure with relevant data arrays appended
+*  @tparam CGalKernel must be a CGAL kernel compatible type
+*
+*  @return int Success (1) or failure (0)
 */
 template <class CGalKernel>
-int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
+int vtkCGALEfficientRANSAC::Detection(vtkPolyData *input, vtkPolyData *output)
 {
   // Type declarations
   using CGalOrientedPoint = typename std::pair<CGalKernel::Point_3, CGalKernel::Vector_3>;
@@ -119,11 +102,9 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   // Register planar shapes via template method
   ransac.add_shape_factory<Plane>();
 
-  // TODO: Use detect() with callback so we can see the progress
-
   // Set parameters for shape detection.
   Efficient_ransac::Parameters parameters;
-  if (this->UseParameters)
+  if (this->UserDefinedParameters)
   {
     // Set probability to miss the largest primitive at each iteration
     parameters.probability = this->Probability;
@@ -153,11 +134,6 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   // an iterator range to the detected shapes.
   Efficient_ransac::Shape_range shapes = ransac.shapes();
 
-#ifndef ITERATIVE_METHOD
-  // Detect registered shapes with default parameters
-  ransac.detect(parameters);
-  shapes = ransac.shapes();
-#else
   // Perform detection several times and choose result with the highest coverage
   FT best_coverage = 0;
   for (std::size_t i = 0; i < this->NumberOfIterations; ++i)
@@ -185,7 +161,6 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
       shapes = ransac.shapes();
     }
   }
-#endif // !ITERATIVE_METHOD
 
   // Print number of detected shapes
   vtkWarningMacro(<< ransac.shapes().end() - ransac.shapes().begin() << " shapes detected.");
@@ -246,20 +221,24 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 }
 
 //----------------------------------------------------------------------------
-/** @brief todo
+/** @brief Convert a polydata to a CGAL compatible data structure
 *
-*  @param todo
-*  @param todo
+*  @param polyData                  input data structure
+*  @param orientedPoints            output data structure
+*  @tparam CGalKernel               must be a CGAL kernel compatible type
+*  @tparam CGalOrientedPointVector  must be a vector of pairs { Point_3, Vector_3 }
+*                                   using the corresponding CGAL kernel
+* 
 *  @return bool Success (true) or failure (false)
 */
 template <class CGalKernel, typename CGalOrientedPointVector>
 bool vtkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints(
-  vtkPolyData* polyData, CGalOrientedPointVector& orientedPoints)
+  vtkPolyData *polyData, CGalOrientedPointVector& orientedPoints)
 {
   using Point = typename CGalKernel::Point_3;
   using Vector = typename CGalKernel::Vector_3;
 
-  vtkDataArray* normals = polyData->GetPointData()->GetNormals();
+  vtkDataArray *normals = polyData->GetPointData()->GetNormals();
   if (!normals)
   {
     return false;

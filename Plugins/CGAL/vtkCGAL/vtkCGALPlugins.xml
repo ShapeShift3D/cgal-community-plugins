@@ -995,14 +995,15 @@
                 <EnumerationDomain name="enum">
                     <Entry text="EPEC"              value="1" />
                     <Entry text="EPEC_SQRT"         value="2" />
-                    <Entry text="EPEC_ROOT"         value="3" />
+                    <Entry text="EPEC_KTH_ROOT"     value="3" />
                     <Entry text="EPEC_ROOT_OF"      value="4" />
                     <Entry text="EPIC"              value="5" />
                     <Entry text="Cartesian"         value="6" />
                     <Entry text="Simple_cartesian"  value="7" />
                 </EnumerationDomain>
                 <Documentation>
-					Set the kernel.
+					Set the kernel. Depending on the CGAL kernel used,
+                    the compute time may very a lot and so the output regions.
                 </Documentation>
             </IntVectorProperty>
             <DoubleVectorProperty name="MaxDistanceToPlane"
@@ -1055,15 +1056,21 @@
                                default_values="1">
                 <IntRangeDomain min="1" name="range" />
                 <Documentation>
-                    The algorithm will perform detection several times and choose result
-                    with the highest coverage (i.e. ratio of the points assigned to a shape.)
+                    The algorithm will perform detection several times
+                    and choose resultwith the highest coverage
+                    (i.e. ratio of the points assigned to a shape).
                 </Documentation>
             </IntVectorProperty>
-            <IntVectorProperty name="UseParameters"
-                             command="SetUseParameters"
+            <IntVectorProperty name="UserDefinedParameters"
+                             command="SetUserDefinedParameters"
                              number_of_elements="1"
                              default_values="0">
                 <BooleanDomain name="bool" />
+                <Documentation>
+                    If not checked, the algorithm will evaluate default
+                    values based on the mesh parameters (size, ...).
+                    Otherwise the user has the ability define detection parameters.
+                </Documentation>
             </IntVectorProperty>
             <IntVectorProperty name="MinPoints"
                                command="SetMinPoints"
@@ -1073,12 +1080,11 @@
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
-                                           property="UseParameters"
+                                           property="UserDefinedParameters"
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set the minimum number of points criteria.
-                    Minimum number of points in a shape.
+                    Set the minimum number of points in a shape.
                 </Documentation>
             </IntVectorProperty>
             <DoubleVectorProperty name="Probability"
@@ -1089,11 +1095,11 @@
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
-                                           property="UseParameters"
+                                           property="UserDefinedParameters"
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set probability to miss the largest primitive at each iteration. Probability to control search endurance.
+                    Set the probability to miss the largest primitive at each iteration. Probability to control search endurance.
                     A lower probability provides a higher reliability and determinism at the cost of longer running time due to a higher search endurance.
                 </Documentation>
             </DoubleVectorProperty>
@@ -1105,11 +1111,11 @@
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
-                                           property="UseParameters"
+                                           property="UserDefinedParameters"
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set maximum acceptable Euclidean distance between a point and a shape.
+                    Set the maximum acceptable Euclidean distance between a point and a shape.
                 </Documentation>
             </DoubleVectorProperty>
             <DoubleVectorProperty name="ClusterEpsilon"
@@ -1120,11 +1126,11 @@
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
-                                           property="UseParameters"
+                                           property="UserDefinedParameters"
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set maximum acceptable Euclidean distance between points, which are assumed to be neighbors.
+                    Set the maximum acceptable Euclidean distance between points, which are assumed to be neighbors.
                 </Documentation>
             </DoubleVectorProperty>
             <DoubleVectorProperty name="MaxNormalDeviation"
@@ -1135,12 +1141,12 @@
                 <Hints>
                   <PropertyWidgetDecorator type="GenericDecorator"
                                            mode="visibility"
-                                           property="UseParameters"
+                                           property="UserDefinedParameters"
                                            value="1" />
                 </Hints>
                 <Documentation>
-                    Set maximum threshold on the dot product between the estimated shape's normal and
-                    the point's normal, that is the cosine of the angle (cos(25°) = 0.9). 
+                    Set the maximum threshold on the dot product between the estimated shape's normal and
+                    the point's normal, that is the cosine of the angle (cos(25°) = 0.9).
                 </Documentation>
             </DoubleVectorProperty>
         </SourceProxy>
