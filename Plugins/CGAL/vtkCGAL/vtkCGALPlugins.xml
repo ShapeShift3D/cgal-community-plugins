@@ -980,20 +980,35 @@
                 long_help="Remeshes a dataset.">
                 This filter will remesh the given data set. It takes a PolyData 
                 as input, and returns a PolyData containing the remeshed input.
+                An optional input can be supplied to limit the remeshing zone.
             </Documentation>
-            <InputProperty
-                name="Mesh"
-                port_index="0"
-                command="SetInputConnection">
+            <InputProperty name="Mesh"
+                           port_index="0"
+                           command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
                     <Group name="sources"/>
                     <Group name="filters"/>
                 </ProxyGroupDomain>
                 <DataTypeDomain name="input_type">
-                    <DataType value="vtkDataSet"/>
+                    <DataType value="vtkPolyData"/>
                 </DataTypeDomain>
                 <Documentation>
-                    The input Meshes.
+                    The input Mesh.
+                </Documentation>
+            </InputProperty>
+            <InputProperty name="Mesh Region (optional)"
+                           port_index="1"
+                           command="SetInputConnection"
+                           optional="1">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData"/>
+                </DataTypeDomain>
+                <Documentation>
+                    A subset of the input mesh to be remeshed.
                 </Documentation>
             </InputProperty>
             <DoubleVectorProperty name="TargetEdgeLength"

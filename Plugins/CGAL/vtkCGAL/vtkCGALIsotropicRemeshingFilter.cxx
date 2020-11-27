@@ -1,4 +1,5 @@
 #include <vtkCGALIsotropicRemeshingFilter.h>
+#include <vtkCGALUtilities.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkTimerLog.h>
@@ -7,11 +8,10 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 
-// Declare the plugin
 vtkStandardNewMacro(vtkCGALIsotropicRemeshingFilter);
 
 namespace PMP = CGAL::Polygon_mesh_processing;
-// Useful typedefs
+
 typedef CGAL::Simple_cartesian<double>                              K;
 typedef CGAL::Surface_mesh<K::Point_3>                              Mesh;
 typedef boost::property_map<Mesh, CGAL::vertex_point_t>::type       VPMap;
@@ -46,7 +46,7 @@ vtkCGALIsotropicRemeshingFilter::vtkCGALIsotropicRemeshingFilter()
   this->NumberOfIterations = 1;
   this->PreserveBorderEdges = 1;
 
-  SetNumberOfInputPorts(1);
+  SetNumberOfInputPorts(2);
   SetNumberOfOutputPorts(1);
 }
 
@@ -56,16 +56,24 @@ vtkCGALIsotropicRemeshingFilter::vtkCGALIsotropicRemeshingFilter()
 // Calls the CGAL::isotropic_remeshing algorithm
 // Fills the output vtkPolyData from the result.
 int vtkCGALIsotropicRemeshingFilter::RequestData(
-  vtkInformation *,
+  vtkInformation *vtkNotUsed(request),
   vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
   //  Get the input and output data objects.
-  //  Get the info objects
-  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
+  vtkInformation *inInfo0 = inputVector[0]->GetInformationObject(0);
+  vtkInformation *inInfo1 = inputVector[1]->GetInformationObject(0);
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
-  //  Get the input
-  vtkPolyData *polydata = vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+  vtkPolyData *inputMesh = vtkPolyData::SafeDownCast(
+    inInfo0->Get(vtkDataObject::DATA_OBJECT()));
+
+  vtkPolyData* inputMeshRegion = nullptr;
+  if (this->GetNumberOfInputConnections(1) > 0)
+  {
+    vtkPolyData::SafeDownCast(
+      inInfo1->Get(vtkDataObject::DATA_OBJECT()));
+  }
 
   /********************************************
    * Create a SurfaceMesh from the input mesh *
@@ -76,47 +84,58 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
   VPMap vpmap = get(CGAL::vertex_point, mesh);
 
   //  Get nb of points and cells
-  vtkIdType nb_points = polydata->GetNumberOfPoints();
-  vtkIdType nb_cells = polydata->GetNumberOfCells();
+  vtkIdType nb_points = inputMesh->GetNumberOfPoints();
+  vtkIdType nb_cells = inputMesh->GetNumberOfCells();
 
   // Extract points
   std::vector<vertex_descriptor> vertex_map(nb_points);
-  for (vtkIdType i=0; i<nb_points; ++i)
+  for (vtkIdType i = 0; i < nb_points; ++i)
   {
     double coords[3];
-    polydata->GetPoint(i, coords);
+    inputMesh->GetPoint(i, coords);
     vertex_descriptor v = add_vertex(mesh);
     put(vpmap, v, K::Point_3(coords[0], coords[1], coords[2]));
     vertex_map[i] = v;
   }
 
   // Extract cells
-  for (vtkIdType i = 0; i<nb_cells; ++i)
+  for (vtkIdType i = 0; i < nb_cells; ++i)
   {
-    vtkCell *cell_ptr = polydata->GetCell(i);
+    vtkCell *cell_ptr = inputMesh->GetCell(i);
     vtkIdType nb_vertices = cell_ptr->GetNumberOfPoints();
     std::vector<vertex_descriptor> vr(nb_vertices);
-    for (vtkIdType k=0; k<nb_vertices; ++k)
+    for (vtkIdType k = 0; k < nb_vertices; ++k)
+    {
       vr[k] = vertex_map[cell_ptr->GetPointId(k)];
+    }
     CGAL::Euler::add_face(vr, mesh);
   }
 
   std::vector<vertex_descriptor> isolated_vertices;
   for(Mesh::vertex_iterator vit = mesh.vertices_begin();
-      vit != mesh.vertices_end();
-      ++vit)
+      vit != mesh.vertices_end(); ++vit)
   {
-    if(mesh.is_isolated(*vit))
+    if (mesh.is_isolated(*vit))
+    {
       isolated_vertices.push_back(*vit);
+    }
   }
 
-  for (std::size_t i=0; i < isolated_vertices.size(); ++i)
+  for (std::size_t i = 0; i < isolated_vertices.size(); ++i)
+  {
     mesh.remove_vertex(isolated_vertices[i]);
+  }
 
   if(!is_triangle_mesh(mesh))
   {
     vtkErrorMacro("The input mesh must be triangulated ");
     return 0;
+  }
+
+  Mesh meshRegion;
+  if (inputMeshRegion != nullptr)
+  {
+    vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputMeshRegion, meshRegion);
   }
 
   vtkTimerLog::MarkEndEvent("Converting VTK -> CGAL");
@@ -128,10 +147,15 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
   {
     vtkTimerLog::MarkStartEvent("CGAL splitting border");
 
+    // From https://doc.cgal.org/latest/Polygon_mesh_processing/group__PMP__meshing__grp.html
+    // Precondition: if constraints protection is activated,
+    // the constrained edges must not be longer than 4/3 * TargetEdgeLength
+    double constrainedEdgeLength = 4.0 * this->TargetEdgeLength / 3.0;
+
     std::vector<edge_descriptor> border;
     PMP::border_halfedges(faces(mesh), mesh,
       boost::make_function_output_iterator(halfedge2edge(mesh, border)));
-    PMP::split_long_edges(border, this->TargetEdgeLength, mesh);
+    PMP::split_long_edges(border, constrainedEdgeLength, mesh);
 
     vtkTimerLog::MarkEndEvent("CGAL splitting border");
   }
@@ -159,7 +183,8 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
    **********************************/
   vtkTimerLog::MarkStartEvent("Converting CGAL -> VTK");
 
-  vtkPolyData *output = vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPolyData *output = vtkPolyData::SafeDownCast(
+    outInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkNew<vtkPoints> const vtk_points;
   vtkNew<vtkCellArray> const vtk_cells;
   vtk_points->Allocate(mesh.number_of_vertices());
@@ -203,11 +228,12 @@ void vtkCGALIsotropicRemeshingFilter::PrintSelf(
   os << "TargetEdgeLength        : " << this->TargetEdgeLength << std::endl;
   os << "TargetEdgeLengthInfo    : " << this->TargetEdgeLengthInfo << std::endl;
   os << "NumberOfIterations      : " << this->NumberOfIterations << std::endl;
+  os << "PreserveBorderEdges     : " << this->PreserveBorderEdges << std::endl;
 }
 
 // ------------------------------------------------------------------------------
 int vtkCGALIsotropicRemeshingFilter::RequestInformation(
-  vtkInformation *,
+  vtkInformation *vtkNotUsed(request),
   vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
@@ -228,6 +254,18 @@ int vtkCGALIsotropicRemeshingFilter::RequestInformation(
                               (bounds[4]-bounds[5]) * (bounds[4]-bounds[5]));
 
   this->TargetEdgeLengthInfo = 0.01 * diagonal;
+
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+int vtkCGALIsotropicRemeshingFilter::FillInputPortInformation(
+  int port, vtkInformation *info)
+{
+  if (port == 1)
+  {
+    info->Set(vtkAlgorithm::INPUT_IS_OPTIONAL(), 1);
+  }
 
   return 1;
 }

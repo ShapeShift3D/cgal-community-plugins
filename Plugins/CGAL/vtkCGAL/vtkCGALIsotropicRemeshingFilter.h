@@ -34,6 +34,8 @@ protected:
   // Computes the bbox's diagonal length to set the default target edge length.
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
+  int FillInputPortInformation(int, vtkInformation*) override;
+
 private:
   double TargetEdgeLength;
   double TargetEdgeLengthInfo;
