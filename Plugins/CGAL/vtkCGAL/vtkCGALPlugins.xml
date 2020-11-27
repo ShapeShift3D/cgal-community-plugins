@@ -996,33 +996,42 @@
                     The input Meshes.
                 </Documentation>
             </InputProperty>
-            <DoubleVectorProperty name="Length"
-                                  command="SetLength"
-                                  label="Target Edge Length"
+            <DoubleVectorProperty name="TargetEdgeLength"
+                                  command="SetTargetEdgeLength"
                                   number_of_elements="1"
-                                  default_values="0"
-                                  information_property="LengthInfo">
+                                  default_values="0.0"
+                                  information_property="TargetEdgeLengthInfo">
                 <DoubleRangeDomain name="range" min="0.0" />
                 <Documentation>
                     The target length for the new edges of the mesh (default is 1% of the bounding box).
                 </Documentation>
             </DoubleVectorProperty>
-            <DoubleVectorProperty name="LengthInfo"
-                                  command="GetLengthInfo"
+            <DoubleVectorProperty name="TargetEdgeLengthInfo"
+                                  command="GetTargetEdgeLengthInfo"
                                   information_only="1">
-              <SimpleDoubleInformationHelper />
+                <SimpleDoubleInformationHelper />
             </DoubleVectorProperty>
-            <IntVectorProperty name="MainIterations"
-                               command="SetMainIterations"
-                               label="#Main Iterations"
+            <IntVectorProperty name="NumberOfIterations"
+                               command="SetNumberOfIterations"
                                number_of_elements="1"
                                default_values="1">
-                  <Documentation>
-                      The number of iterations for the sequence of atomic operations performed (edge splits,
-                      edge collapses, edge flips, tangential relaxation and projection to the initial surface
-                      to generate a smooth mesh with a prescribed edge length).
-                  </Documentation>
-              </IntVectorProperty>
+                <IntRangeDomain name="range" min="1" />
+                <Documentation>
+                    The number of iterations for the sequence of atomic operations performed (edge splits,
+                    edge collapses, edge flips, tangential relaxation and projection to the initial surface
+                    to generate a smooth mesh with a prescribed edge length).
+                </Documentation>
+            </IntVectorProperty>
+            <IntVectorProperty name="PreserveBorderEdges"
+                               command="SetPreserveBorderEdges"
+                               default_values="1"
+                               number_of_elements="1">
+                <Documentation>
+                    Toggles border edges preservation.
+                    The boundary edges will be considered as constrained and protected.
+                </Documentation>
+                <BooleanDomain name="bool" />
+            </IntVectorProperty>
             <Hints>
                 <ShowInMenu category="CGAL" />
             </Hints>

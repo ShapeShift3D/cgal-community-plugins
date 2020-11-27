@@ -1,35 +1,31 @@
 #ifndef vtkCGALIsotropicRemeshingFilter_h
 #define vtkCGALIsotropicRemeshingFilter_h
-// Gives access to macros for communication with the UI
-#include "vtkFiltersCoreModule.h" 
-#include "vtkGeometryFilter.h"
-#include <vtkCGALModule.h>
 
-// Inherit from the desired filter
+#include <vtkCGALModule.h>
+#include <vtkGeometryFilter.h>
+#include <vtkFiltersCoreModule.h>
+
 class VTKCGAL_EXPORT vtkCGALIsotropicRemeshingFilter : public vtkGeometryFilter
 {
 public:
-  // VTK requirements
-  static vtkCGALIsotropicRemeshingFilter* New();
+  static vtkCGALIsotropicRemeshingFilter *New();
   vtkTypeMacro(vtkCGALIsotropicRemeshingFilter, vtkGeometryFilter);
-  // Prints the values of the specific data
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  // Communicate with the UI
-  vtkSetMacro(Length, double);
-  vtkGetMacro(Length, double);
-  vtkSetMacro(LengthInfo, double);
-  vtkGetMacro(LengthInfo, double);
-  vtkSetMacro(MainIterations, int);
-  vtkGetMacro(MainIterations, int);
+  vtkSetClampMacro(TargetEdgeLength, double, 0.0, VTK_DOUBLE_MAX);
+  vtkGetMacro(TargetEdgeLength, double);
 
-  // Pipeline functions:
+  vtkGetMacro(TargetEdgeLengthInfo, double);
+
+  vtkSetClampMacro(NumberOfIterations, int, 1, VTK_INT_MAX);
+  vtkGetMacro(NumberOfIterations, int);
+
+  vtkSetMacro(PreserveBorderEdges, vtkTypeBool);
+  vtkGetMacro(PreserveBorderEdges, vtkTypeBool);
+  vtkBooleanMacro(PreserveBorderEdges, vtkTypeBool);
+
   // Performs the isotropic remeshing algorithm and fills the output object here.
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *)override;
-  // Specifies the type of the input objects
-  int FillInputPortInformation(int, vtkInformation *info)override;
-  // Specifies the type of the output object.
-  int FillOutputPortInformation(int, vtkInformation *info)override;
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
 
 protected:
   vtkCGALIsotropicRemeshingFilter();
@@ -39,13 +35,13 @@ protected:
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
 private:
-  // Data set by the UI and used by the algorithm
-  double Length;
-  double LengthInfo;
-  int MainIterations;
+  double TargetEdgeLength;
+  double TargetEdgeLengthInfo;
 
-  // needed but not implemented
-  vtkCGALIsotropicRemeshingFilter(const vtkCGALIsotropicRemeshingFilter&);
-  void operator=(const vtkCGALIsotropicRemeshingFilter&);
+  int NumberOfIterations;
+  vtkTypeBool PreserveBorderEdges;
+
+  vtkCGALIsotropicRemeshingFilter(const vtkCGALIsotropicRemeshingFilter&) = delete;
+  void operator=(const vtkCGALIsotropicRemeshingFilter&) = delete;
 };
 #endif
