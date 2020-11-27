@@ -982,35 +982,51 @@
                 as input, and returns a PolyData containing the remeshed input.
                 An optional input can be supplied to limit the remeshing zone.
             </Documentation>
-            <InputProperty name="Mesh"
+            <InputProperty name="Input"
                            port_index="0"
                            command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
-                    <Group name="sources"/>
-                    <Group name="filters"/>
+                    <Group name="sources" />
+                    <Group name="filters" />
                 </ProxyGroupDomain>
                 <DataTypeDomain name="input_type">
-                    <DataType value="vtkPolyData"/>
+                    <DataType value="vtkPolyData" />
                 </DataTypeDomain>
+                <InputArrayDomain name="MeshingMaskArray"
+                                  attribute_type="cell"
+                                  number_of_components="1"
+                                  optional="1" />
                 <Documentation>
                     The input Mesh.
                 </Documentation>
             </InputProperty>
-            <InputProperty name="Mesh Region (optional)"
-                           port_index="1"
-                           command="SetInputConnection"
-                           optional="1">
-                <ProxyGroupDomain name="groups">
-                    <Group name="sources"/>
-                    <Group name="filters"/>
-                </ProxyGroupDomain>
-                <DataTypeDomain name="input_type">
-                    <DataType value="vtkPolyData"/>
-                </DataTypeDomain>
+            <StringVectorProperty name="MeshingMaskArrayName"
+                                  command="SetMeshingMaskArrayName"
+                                  label="Meshing Mask"
+                                  default_values="None"
+                                  number_of_elements="1">
+                <ArrayListDomain name="array_list"
+                                 none_string="None"
+                                 data_type="VTK_SIGNED_CHAR"
+                                 input_domain_name="MeshingMaskArray">
+                    <RequiredProperties>
+                        <Property name="Input" function="Input" />
+                    </RequiredProperties>
+                </ArrayListDomain>
                 <Documentation>
-                    A subset of the input mesh to be remeshed.
+                    Specifies the meshing mask array name.
                 </Documentation>
-            </InputProperty>
+            </StringVectorProperty>
+            <IntVectorProperty name="PreserveBorder"
+                               command="SetPreserveBorder"
+                               default_values="1"
+                               number_of_elements="1">
+                <Documentation>
+                    Toggles border edges preservation.
+                    The boundary edges will be considered as constrained and preserved.
+                </Documentation>
+                <BooleanDomain name="bool" />
+            </IntVectorProperty>
             <DoubleVectorProperty name="TargetEdgeLength"
                                   command="SetTargetEdgeLength"
                                   number_of_elements="1"
@@ -1036,16 +1052,6 @@
                     edge collapses, edge flips, tangential relaxation and projection to the initial surface
                     to generate a smooth mesh with a prescribed edge length).
                 </Documentation>
-            </IntVectorProperty>
-            <IntVectorProperty name="PreserveBorderEdges"
-                               command="SetPreserveBorderEdges"
-                               default_values="1"
-                               number_of_elements="1">
-                <Documentation>
-                    Toggles border edges preservation.
-                    The boundary edges will be considered as constrained and protected.
-                </Documentation>
-                <BooleanDomain name="bool" />
             </IntVectorProperty>
             <Hints>
                 <ShowInMenu category="CGAL" />

@@ -1,5 +1,4 @@
 #include <vtkCGALIsotropicRemeshingFilter.h>
-#include <vtkCGALUtilities.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkTimerLog.h>
@@ -21,7 +20,7 @@ typedef boost::graph_traits<Mesh>::edge_descriptor                  edge_descrip
 typedef boost::graph_traits<Mesh>::face_descriptor                  face_descriptor;
 typedef boost::graph_traits<Mesh>::halfedge_descriptor              halfedge_descriptor;
 
-// -----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 struct halfedge2edge
 {
   halfedge2edge(const Mesh& m, std::vector<edge_descriptor>& edges)
@@ -35,7 +34,7 @@ struct halfedge2edge
   std::vector<edge_descriptor>& m_edges;
 };
 
-// -----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Constructor
 // Fills the number of input and output objects.
 // Initializes the members that need it.
@@ -44,36 +43,36 @@ vtkCGALIsotropicRemeshingFilter::vtkCGALIsotropicRemeshingFilter()
   this->TargetEdgeLength = 0.0;
   this->TargetEdgeLengthInfo = 0.0;
   this->NumberOfIterations = 1;
-  this->PreserveBorderEdges = 1;
-
-  SetNumberOfInputPorts(2);
-  SetNumberOfOutputPorts(1);
+  this->PreserveBorder = 1;
+  this->MeshingMaskArrayName = nullptr;
 }
 
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+vtkCGALIsotropicRemeshingFilter::~vtkCGALIsotropicRemeshingFilter()
+{
+  if (this->MeshingMaskArrayName)
+  {
+    delete this->MeshingMaskArrayName;
+    this->MeshingMaskArrayName = nullptr;
+  }
+}
+
+//-----------------------------------------------------------------------------
 // Gets the input
 // Creates CGAL::Surface_mesh from vtkPolydata
 // Calls the CGAL::isotropic_remeshing algorithm
 // Fills the output vtkPolyData from the result.
 int vtkCGALIsotropicRemeshingFilter::RequestData(
-  vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **inputVector,
-  vtkInformationVector *outputVector)
+  vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector,
+  vtkInformationVector* outputVector)
 {
-  //  Get the input and output data objects.
-  vtkInformation *inInfo0 = inputVector[0]->GetInformationObject(0);
-  vtkInformation *inInfo1 = inputVector[1]->GetInformationObject(0);
-  vtkInformation *outInfo = outputVector->GetInformationObject(0);
+  // Get the input and output data objects.
+  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
+  vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
-  vtkPolyData *inputMesh = vtkPolyData::SafeDownCast(
-    inInfo0->Get(vtkDataObject::DATA_OBJECT()));
-
-  vtkPolyData* inputMeshRegion = nullptr;
-  if (this->GetNumberOfInputConnections(1) > 0)
-  {
-    vtkPolyData::SafeDownCast(
-      inInfo1->Get(vtkDataObject::DATA_OBJECT()));
-  }
+  vtkPolyData* inputMesh = vtkPolyData::SafeDownCast(
+    inInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   /********************************************
    * Create a SurfaceMesh from the input mesh *
@@ -83,7 +82,7 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
   Mesh mesh;
   VPMap vpmap = get(CGAL::vertex_point, mesh);
 
-  //  Get nb of points and cells
+  // Get nb of points and cells
   vtkIdType nb_points = inputMesh->GetNumberOfPoints();
   vtkIdType nb_cells = inputMesh->GetNumberOfCells();
 
@@ -101,7 +100,7 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
   // Extract cells
   for (vtkIdType i = 0; i < nb_cells; ++i)
   {
-    vtkCell *cell_ptr = inputMesh->GetCell(i);
+    vtkCell* cell_ptr = inputMesh->GetCell(i);
     vtkIdType nb_vertices = cell_ptr->GetNumberOfPoints();
     std::vector<vertex_descriptor> vr(nb_vertices);
     for (vtkIdType k = 0; k < nb_vertices; ++k)
@@ -132,18 +131,12 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
     return 0;
   }
 
-  Mesh meshRegion;
-  if (inputMeshRegion != nullptr)
-  {
-    vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputMeshRegion, meshRegion);
-  }
-
   vtkTimerLog::MarkEndEvent("Converting VTK -> CGAL");
 
   /*****************************
    * Process border edges *
    *****************************/
-  if (this->PreserveBorderEdges)
+  if (this->PreserveBorder)
   {
     vtkTimerLog::MarkStartEvent("CGAL splitting border");
 
@@ -165,7 +158,7 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
    *****************************/
   vtkTimerLog::MarkStartEvent("CGAL isotropic remeshing");
 
-  if (this->PreserveBorderEdges)
+  if (this->PreserveBorder)
   {
     PMP::isotropic_remeshing(faces(mesh), this->TargetEdgeLength, mesh,
       PMP::parameters::number_of_iterations(this->NumberOfIterations).protect_constraints(true));
@@ -183,7 +176,7 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
    **********************************/
   vtkTimerLog::MarkStartEvent("Converting CGAL -> VTK");
 
-  vtkPolyData *output = vtkPolyData::SafeDownCast(
+  vtkPolyData* output = vtkPolyData::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkNew<vtkPoints> const vtk_points;
   vtkNew<vtkCellArray> const vtk_cells;
@@ -219,53 +212,43 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
   return 1;
 }
 
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void vtkCGALIsotropicRemeshingFilter::PrintSelf(
   std::ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 
-  os << "TargetEdgeLength        : " << this->TargetEdgeLength << std::endl;
-  os << "TargetEdgeLengthInfo    : " << this->TargetEdgeLengthInfo << std::endl;
-  os << "NumberOfIterations      : " << this->NumberOfIterations << std::endl;
-  os << "PreserveBorderEdges     : " << this->PreserveBorderEdges << std::endl;
+  os << indent << "TargetEdgeLength     : " << this->TargetEdgeLength << std::endl;
+  os << indent << "TargetEdgeLengthInfo : " << this->TargetEdgeLengthInfo << std::endl;
+  os << indent << "NumberOfIterations   : " << this->NumberOfIterations << std::endl;
+  os << indent << "PreserveBorder       : " << this->PreserveBorder << std::endl;
+  os << indent << "MeshingMaskArrayName : "
+    << (this->MeshingMaskArrayName ? this->MeshingMaskArrayName : "(none)") << std::endl;
 }
 
-// ------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkCGALIsotropicRemeshingFilter::RequestInformation(
-  vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **inputVector,
-  vtkInformationVector *outputVector)
+  vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector,
+  vtkInformationVector* outputVector)
 {
-  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
-  vtkInformation *outInfo = outputVector->GetInformationObject(0);
+  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
+  vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
   // Sets the bounds of the output.
   outInfo->Set(vtkDataObject::BOUNDING_BOX(),
                inInfo->Get(vtkDataObject::BOUNDING_BOX()), 6);
 
-  vtkPolyData *input= vtkPolyData::SafeDownCast(
+  vtkPolyData* input= vtkPolyData::SafeDownCast(
         inInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   // Computes the initial target length:
-  double *bounds = input->GetBounds();
+  double* bounds = input->GetBounds();
   double diagonal = std::sqrt((bounds[0]-bounds[1]) * (bounds[0]-bounds[1]) +
                               (bounds[2]-bounds[3]) * (bounds[2]-bounds[3]) +
                               (bounds[4]-bounds[5]) * (bounds[4]-bounds[5]));
 
   this->TargetEdgeLengthInfo = 0.01 * diagonal;
-
-  return 1;
-}
-
-//----------------------------------------------------------------------------
-int vtkCGALIsotropicRemeshingFilter::FillInputPortInformation(
-  int port, vtkInformation *info)
-{
-  if (port == 1)
-  {
-    info->Set(vtkAlgorithm::INPUT_IS_OPTIONAL(), 1);
-  }
 
   return 1;
 }
