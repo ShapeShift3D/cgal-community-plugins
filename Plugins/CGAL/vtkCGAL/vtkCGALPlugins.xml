@@ -980,7 +980,7 @@
                 long_help="Remeshes a dataset.">
                 This filter will remesh the given data set. It takes a PolyData 
                 as input, and returns a PolyData containing the remeshed input.
-                An optional input can be supplied to limit the remeshing zone.
+                An optional input array can be supplied to mask the remeshing zone.
             </Documentation>
             <InputProperty name="Input"
                            port_index="0"
@@ -1007,7 +1007,6 @@
                                   number_of_elements="1">
                 <ArrayListDomain name="array_list"
                                  none_string="None"
-                                 data_type="VTK_SIGNED_CHAR"
                                  input_domain_name="MeshingMaskArray">
                     <RequiredProperties>
                         <Property name="Input" function="Input" />
@@ -1017,13 +1016,13 @@
                     Specifies the meshing mask array name.
                 </Documentation>
             </StringVectorProperty>
-            <IntVectorProperty name="PreserveBorder"
-                               command="SetPreserveBorder"
+            <IntVectorProperty name="ProtectConstraints"
+                               command="SetProtectConstraints"
                                default_values="1"
                                number_of_elements="1">
                 <Documentation>
-                    Toggles border edges preservation.
-                    The boundary edges will be considered as constrained and preserved.
+                    Toggles border constraints protection.
+                    The boundary edges will be considered as constrained and protected.
                 </Documentation>
                 <BooleanDomain name="bool" />
             </IntVectorProperty>
@@ -1034,7 +1033,7 @@
                                   information_property="TargetEdgeLengthInfo">
                 <DoubleRangeDomain name="range" min="0.0" />
                 <Documentation>
-                    The target length for the new edges of the mesh (default is 1% of the bounding box).
+                    The target length for the new edges of the mesh (default is 1% of the bounding box diagonal).
                 </Documentation>
             </DoubleVectorProperty>
             <DoubleVectorProperty name="TargetEdgeLengthInfo"

@@ -1,6 +1,10 @@
+#include <vtkAppendPolyData.h>
 #include <vtkCGALIsotropicRemeshingFilter.h>
+#include <vtkCleanPolyData.h>
+#include <vtkDataSetSurfaceFilter.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
+#include <vtkThreshold.h>
 #include <vtkTimerLog.h>
 
 #include <CGAL/Surface_mesh.h>
@@ -11,39 +15,35 @@ vtkStandardNewMacro(vtkCGALIsotropicRemeshingFilter);
 
 namespace PMP = CGAL::Polygon_mesh_processing;
 
-typedef CGAL::Simple_cartesian<double>                              K;
-typedef CGAL::Surface_mesh<K::Point_3>                              Mesh;
-typedef boost::property_map<Mesh, CGAL::vertex_point_t>::type       VPMap;
-typedef boost::property_map_value<Mesh, CGAL::vertex_point_t>::type Point_3;
-typedef boost::graph_traits<Mesh>::vertex_descriptor                vertex_descriptor;
-typedef boost::graph_traits<Mesh>::edge_descriptor                  edge_descriptor;
-typedef boost::graph_traits<Mesh>::face_descriptor                  face_descriptor;
-typedef boost::graph_traits<Mesh>::halfedge_descriptor              halfedge_descriptor;
+typedef CGAL::Simple_cartesian<double>                                      K;
+typedef CGAL::Surface_mesh<K::Point_3>                                      SurfaceMesh;
+typedef boost::property_map<SurfaceMesh, CGAL::vertex_point_t>::type        VPMap;
+typedef boost::property_map_value<SurfaceMesh, CGAL::vertex_point_t>::type  Point_3;
+typedef boost::graph_traits<SurfaceMesh>::vertex_descriptor                 vertex_descriptor;
+typedef boost::graph_traits<SurfaceMesh>::edge_descriptor                   edge_descriptor;
+typedef boost::graph_traits<SurfaceMesh>::face_descriptor                   face_descriptor;
+typedef boost::graph_traits<SurfaceMesh>::halfedge_descriptor               halfedge_descriptor;
 
-//-----------------------------------------------------------------------------
 struct halfedge2edge
 {
-  halfedge2edge(const Mesh& m, std::vector<edge_descriptor>& edges)
+  halfedge2edge(const SurfaceMesh& m, std::vector<edge_descriptor>& edges)
     : m_mesh(m), m_edges(edges)
   {}
   void operator()(const halfedge_descriptor& h) const
   {
     m_edges.push_back(edge(h, m_mesh));
   }
-  const Mesh& m_mesh;
+  const SurfaceMesh& m_mesh;
   std::vector<edge_descriptor>& m_edges;
 };
 
 //-----------------------------------------------------------------------------
-// Constructor
-// Fills the number of input and output objects.
-// Initializes the members that need it.
 vtkCGALIsotropicRemeshingFilter::vtkCGALIsotropicRemeshingFilter()
 {
   this->TargetEdgeLength = 0.0;
   this->TargetEdgeLengthInfo = 0.0;
   this->NumberOfIterations = 1;
-  this->PreserveBorder = 1;
+  this->ProtectConstraints = 1;
   this->MeshingMaskArrayName = nullptr;
 }
 
@@ -58,10 +58,6 @@ vtkCGALIsotropicRemeshingFilter::~vtkCGALIsotropicRemeshingFilter()
 }
 
 //-----------------------------------------------------------------------------
-// Gets the input
-// Creates CGAL::Surface_mesh from vtkPolydata
-// Calls the CGAL::isotropic_remeshing algorithm
-// Fills the output vtkPolyData from the result.
 int vtkCGALIsotropicRemeshingFilter::RequestData(
   vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector,
@@ -71,27 +67,67 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
-  vtkPolyData* inputMesh = vtkPolyData::SafeDownCast(
+  vtkPolyData* input = vtkPolyData::SafeDownCast(
     inInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+  vtkPolyData* output = vtkPolyData::SafeDownCast(
+    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+  /********************************************
+   * Preprocess input
+   ********************************************/
+  vtkTimerLog::MarkStartEvent("Mesh preprocessing");
+
+  bool masking = false;
+
+  auto innerMesh = vtkSmartPointer<vtkPolyData>::New();
+  auto outerMesh = vtkSmartPointer<vtkPolyData>::New();
+  if (this->MeshingMaskArrayName &&
+    std::strcmp(this->MeshingMaskArrayName, "None") != 0)
+  {
+    masking = true;
+
+    auto threshold = vtkSmartPointer<vtkThreshold>::New();
+    threshold->SetInputData(input);
+    threshold->SetInputArrayToProcess(
+      0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_CELLS, this->MeshingMaskArrayName);
+    threshold->ThresholdByLower(0.0);
+
+    auto surface = vtkSmartPointer<vtkDataSetSurfaceFilter>::New();
+    surface->SetInputConnection(threshold->GetOutputPort());
+
+    surface->Update();
+    outerMesh->DeepCopy(surface->GetOutput());
+
+    threshold->InvertOn();
+    surface->Update();
+    innerMesh->DeepCopy(surface->GetOutput());
+  }
+  else
+  {
+    innerMesh->DeepCopy(input);
+  }
+
+  vtkTimerLog::MarkEndEvent("Mesh preprocessing");
 
   /********************************************
    * Create a SurfaceMesh from the input mesh *
    ********************************************/
   vtkTimerLog::MarkStartEvent("Converting VTK -> CGAL");
 
-  Mesh mesh;
+  SurfaceMesh mesh;
   VPMap vpmap = get(CGAL::vertex_point, mesh);
 
   // Get nb of points and cells
-  vtkIdType nb_points = inputMesh->GetNumberOfPoints();
-  vtkIdType nb_cells = inputMesh->GetNumberOfCells();
+  vtkIdType nb_points = innerMesh->GetNumberOfPoints();
+  vtkIdType nb_cells = innerMesh->GetNumberOfCells();
 
   // Extract points
   std::vector<vertex_descriptor> vertex_map(nb_points);
   for (vtkIdType i = 0; i < nb_points; ++i)
   {
     double coords[3];
-    inputMesh->GetPoint(i, coords);
+    innerMesh->GetPoint(i, coords);
     vertex_descriptor v = add_vertex(mesh);
     put(vpmap, v, K::Point_3(coords[0], coords[1], coords[2]));
     vertex_map[i] = v;
@@ -100,7 +136,7 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
   // Extract cells
   for (vtkIdType i = 0; i < nb_cells; ++i)
   {
-    vtkCell* cell_ptr = inputMesh->GetCell(i);
+    vtkCell* cell_ptr = innerMesh->GetCell(i);
     vtkIdType nb_vertices = cell_ptr->GetNumberOfPoints();
     std::vector<vertex_descriptor> vr(nb_vertices);
     for (vtkIdType k = 0; k < nb_vertices; ++k)
@@ -111,7 +147,7 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
   }
 
   std::vector<vertex_descriptor> isolated_vertices;
-  for(Mesh::vertex_iterator vit = mesh.vertices_begin();
+  for(SurfaceMesh::vertex_iterator vit = mesh.vertices_begin();
       vit != mesh.vertices_end(); ++vit)
   {
     if (mesh.is_isolated(*vit))
@@ -136,7 +172,7 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
   /*****************************
    * Process border edges *
    *****************************/
-  if (this->PreserveBorder)
+  if (!masking && this->ProtectConstraints)
   {
     vtkTimerLog::MarkStartEvent("CGAL splitting border");
 
@@ -158,7 +194,8 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
    *****************************/
   vtkTimerLog::MarkStartEvent("CGAL isotropic remeshing");
 
-  if (this->PreserveBorder)
+  // When masking is used, we want to preserve the border topology
+  if (masking || this->ProtectConstraints)
   {
     PMP::isotropic_remeshing(faces(mesh), this->TargetEdgeLength, mesh,
       PMP::parameters::number_of_iterations(this->NumberOfIterations).protect_constraints(true));
@@ -176,8 +213,6 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
    **********************************/
   vtkTimerLog::MarkStartEvent("Converting CGAL -> VTK");
 
-  vtkPolyData* output = vtkPolyData::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkNew<vtkPoints> const vtk_points;
   vtkNew<vtkCellArray> const vtk_cells;
   vtk_points->Allocate(mesh.number_of_vertices());
@@ -203,11 +238,31 @@ int vtkCGALIsotropicRemeshingFilter::RequestData(
     vtk_cells->InsertNextCell(cell);
   }
 
-  output->SetPoints(vtk_points);
-  output->SetPolys(vtk_cells);
-  output->Squeeze();
-
   vtkTimerLog::MarkEndEvent("Converting CGAL -> VTK");
+
+  if (masking)
+  {
+    auto remeshed = vtkSmartPointer<vtkPolyData>::New();
+    remeshed->SetPoints(vtk_points);
+    remeshed->SetPolys(vtk_cells);
+    remeshed->Squeeze();
+
+    auto append = vtkSmartPointer<vtkAppendPolyData>::New();
+    append->AddInputData(outerMesh);
+    append->AddInputData(remeshed);
+
+    auto clean = vtkSmartPointer<vtkCleanPolyData>::New();
+    clean->SetInputConnection(append->GetOutputPort());
+    clean->Update();
+
+    output->DeepCopy(clean->GetOutput());
+  }
+  else
+  {
+    output->SetPoints(vtk_points);
+    output->SetPolys(vtk_cells);
+    output->Squeeze();
+  }
 
   return 1;
 }
@@ -221,12 +276,20 @@ void vtkCGALIsotropicRemeshingFilter::PrintSelf(
   os << indent << "TargetEdgeLength     : " << this->TargetEdgeLength << std::endl;
   os << indent << "TargetEdgeLengthInfo : " << this->TargetEdgeLengthInfo << std::endl;
   os << indent << "NumberOfIterations   : " << this->NumberOfIterations << std::endl;
-  os << indent << "PreserveBorder       : " << this->PreserveBorder << std::endl;
+  os << indent << "ProtectConstraints   : " << this->ProtectConstraints << std::endl;
   os << indent << "MeshingMaskArrayName : "
     << (this->MeshingMaskArrayName ? this->MeshingMaskArrayName : "(none)") << std::endl;
 }
 
 //------------------------------------------------------------------------------
+/** @brief Computes the bbox's diagonal length to set the default target edge length.
+*
+*  @param vtkNotUsed(request)
+*  @param inputVector
+*  @tparam inputVector
+*
+*  @return int Success (1) or failure (0)
+*/
 int vtkCGALIsotropicRemeshingFilter::RequestInformation(
   vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector,
