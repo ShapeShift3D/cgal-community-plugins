@@ -17,6 +17,7 @@ set(classes
   vtkCGALBoolean
   vtkCGALBoolean2DMesher
   vtkCGALBoolean3DMesher
+  vtkCGALIsotropicRemeshingFilter
   vtkCGALPolygonOrientOperator
   vtkCGALPolygonSetOrientedSideClassifier
   vtkCGALPolygonSetToPolyLineSet
