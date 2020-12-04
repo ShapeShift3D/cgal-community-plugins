@@ -1,7 +1,7 @@
 #find_package(CGAL REQUIRED)
 
 if (NOT TARGET CGAL)
-  vtk_module_find_package(PACKAGE CGAL PRIVATE)
+  vtk_module_find_package(PACKAGE CGAL VERSION 5.1.1 CONFIG_MODE PRIVATE)
 endif ()
 
 if (NOT TARGET Eigen3)
@@ -18,11 +18,13 @@ set(classes
   vtkCGALBoolean2DMesher
   vtkCGALBoolean3DMesher
   vtkCGALIsotropicRemeshingFilter
+  vtkCGALEfficientRANSAC
   vtkCGALPolygonOrientOperator
   vtkCGALPolygonSetOrientedSideClassifier
   vtkCGALPolygonSetToPolyLineSet
   vtkCGALPolygonUtilities
   vtkCGALPolyLineSetToPolygonSet
+  vtkCGALRegionGrowing
   vtkCGALSelfIntersectionMeasurer
   vtkCGALUtilities)
 

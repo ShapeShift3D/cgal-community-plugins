@@ -31,13 +31,13 @@ public:
     typedef CGAL::Surface_mesh<K0::Point_3>                     SurfaceMesh0;
     typedef CGAL::Mesh_polyhedron_3<K0>::type                   Polyhedron0;
 
-    // KErnel 1
+    // Kernel 1
     typedef CGAL::Simple_cartesian<double>                      K1;
     typedef CGAL::Surface_mesh<K1::Point_3>                     SurfaceMesh1;
     typedef CGAL::Polyhedron_3<K1>                              Polyhedron1;
 
     // Kernel 2
-    typedef CGAL::Exact_predicates_exact_constructions_kernel	K2;
+    typedef CGAL::Exact_predicates_exact_constructions_kernel   K2;
     typedef CGAL::Surface_mesh<K2::Point_3>                     SurfaceMesh2;
     typedef CGAL::Polyhedron_3<K2>                              Polyhedron2;
 
@@ -47,12 +47,11 @@ public:
     typedef CGAL::Polyhedron_3<K3>                              Polyhedron3;
     typedef CGAL::Surface_mesh<K3::Point_3>                     SurfaceMesh3;
 
-   
     // Converters from VTK to CGAL
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh0& tmesh);
 
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron0& tmesh);
-    
+
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh1& tmesh);
 
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron1& tmesh);
