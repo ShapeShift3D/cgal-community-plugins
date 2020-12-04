@@ -1,6 +1,6 @@
 # cgal-community-plugins
 
-### cgal compatiblity 
+### cgal compatibility 
 
 - minimum version : CGAL 5.1.1 
 
