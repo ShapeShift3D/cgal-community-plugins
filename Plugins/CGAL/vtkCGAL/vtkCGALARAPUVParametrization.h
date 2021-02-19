@@ -34,6 +34,15 @@ public:
     vtkGetMacro(MaximumNumberOfIterations, int);
     //@}
 
+    //@{
+    /**
+     * Minimal energy difference between two iterations for the minimization process to continue.
+     */
+    vtkSetMacro(SkipPostprocess, bool);
+    vtkGetMacro(SkipPostprocess, bool);
+    vtkBooleanMacro(SkipPostprocess, bool);
+    //@}
+
 protected:
     vtkCGALARAPUVParametrization();
     ~vtkCGALARAPUVParametrization();
@@ -52,8 +61,12 @@ private:
     template <typename SurfaceMesh, typename VertexUVMap>
     bool UpdatePointCoordinates(SurfaceMesh& sm, VertexUVMap& uv_map, vtkPolyData* polyData);
 
+    template<typename SurfaceMesh, typename VertexUVMap>
+    bool UVMapToPolyData(SurfaceMesh& sm, VertexUVMap& uv_map, vtkPolyData* polyData);
+
     double Lambda;
     double Tolerance;
     int MaximumNumberOfIterations;
+    bool SkipPostprocess;
 };
 #endif

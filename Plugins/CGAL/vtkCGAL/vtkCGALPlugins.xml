@@ -87,6 +87,18 @@
                 Maximal number of iterations in the energy minimization process.
             </Documentation>
         </IntVectorProperty>
+
+            <IntVectorProperty command="SetSkipPostprocess"
+                               name="SkipPostprocess"
+                               label="Skip Postprocess"
+                               default_values="0"
+                               number_of_elements="1"
+                               panel_visibility="advanced">
+                <Documentation>
+                    Removes postprocess of ARAP parametrization. Helpful when unwrap result has overlaps.
+                </Documentation>
+                <BooleanDomain name="bool" />
+            </IntVectorProperty>
         </Proxy>
         <!-- ==================================================================== -->
         <Proxy name="CGALLSCMUVParametrization"

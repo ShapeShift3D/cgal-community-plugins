@@ -54,6 +54,7 @@ vtkCGALARAPUVParametrization::vtkCGALARAPUVParametrization()
 	this->Lambda = 1000;
 	this->MaximumNumberOfIterations = 50;
 	this->Tolerance = 1e-6;
+    this->SkipPostprocess = false;
 
 	this->ScalingMode = 1;
 	this->UVScaling = 1;
@@ -105,7 +106,8 @@ int vtkCGALARAPUVParametrization::RequestData(vtkInformation*,
 			CGAL::Eigen_solver_traits<Eigen::SparseLU<CGAL::Eigen_sparse_matrix<double>::EigenType>>(),
 			this->Lambda,
 			this->MaximumNumberOfIterations,
-			this->Tolerance),
+			this->Tolerance, 
+			this->SkipPostprocess),
 		bhd,
 		uv_map);
 
@@ -115,13 +117,11 @@ int vtkCGALARAPUVParametrization::RequestData(vtkInformation*,
 	}
 
 	vtkNew<vtkPolyData> out;
-	out->DeepCopy(inputMesh);
-
-	if (!UpdatePointCoordinates<Surface_Mesh, UV_pmap>(surfaceMesh, uv_map, out))
-	{
-		vtkErrorMacro("Failed to update point coordinates.");
-		return 0;
-	}
+    if (!UVMapToPolyData<Surface_Mesh, UV_pmap>(surfaceMesh, uv_map, out))
+    {
+        vtkErrorMacro("Failed to update point coordinates.");
+        return 0;
+    }
 
 	if (!Superclass::ScaleUV(inputMesh, out))
 	{
@@ -165,4 +165,60 @@ bool vtkCGALARAPUVParametrization::UpdatePointCoordinates(SurfaceMesh& sm, Verte
 	}
 	else
 		return true;
+}
+
+//---------------------------------------------------
+template<typename SurfaceMesh, typename VertexUVMap>
+bool vtkCGALARAPUVParametrization::UVMapToPolyData(
+  SurfaceMesh& sm, VertexUVMap& uv_map, vtkPolyData* polyData)
+{
+  std::size_t vertices_counter = 0, faces_counter = 0;
+  typedef boost::unordered_map<vertex_descriptor, std::size_t> Vertex_index_map;
+  Vertex_index_map vium;
+  boost::associative_property_map<Vertex_index_map> vimap(vium);
+
+  vtkNew<vtkPoints> pts;
+  pts->SetNumberOfPoints(sm.number_of_vertices());
+  vtkDataArray* ptArray = pts->GetData();
+
+  // Process
+  typename boost::graph_traits<SurfaceMesh>::vertex_iterator vit, vend;
+  boost::tie(vit, vend) = CGAL::vertices(sm);
+
+  while (vit != vend)
+  {
+    vertex_descriptor& vd = *vit++;
+    const Point_2& coord = uv_map[vd];
+    ptArray->SetTuple3(vertices_counter, coord[0], coord[1], 0);
+
+    put(vimap, vd, vertices_counter++);
+  }
+
+  polyData->SetPoints(pts);
+
+  vtkNew<vtkCellArray> cellsArray;
+
+  BOOST_FOREACH (face_descriptor fd, faces(sm))
+  {
+    halfedge_descriptor hd = halfedge(fd, sm);
+
+    cellsArray->InsertNextCell(3);
+
+    BOOST_FOREACH (vertex_descriptor vd, vertices_around_face(hd, sm))
+    {
+      size_t& vert = vimap[vd];
+      cellsArray->InsertCellPoint(vert);
+    }
+    faces_counter++;
+  }
+
+  polyData->SetPolys(cellsArray);
+
+  if (vertices_counter != sm.number_of_vertices())
+  {
+    vtkErrorMacro("Mismatch on number of treated UV points.");
+    return false;
+  }
+  else
+    return true;
 }

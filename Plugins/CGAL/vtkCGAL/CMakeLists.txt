@@ -52,6 +52,12 @@ if(CGAL_FOUND)
          ON)
 
   vtk_module_definitions(CGAL::vtkCGAL PRIVATE NOMINMAX)
+
+  # Add debug flag for the ARAP algorithm
+  option(CGAL_DEBUG_SMP_ARAP "Enables debugging mode for CGAL's ARAP" OFF)
+  if(CGAL_DEBUG_SMP_ARAP)
+    vtk_module_definitions(CGAL::vtkCGAL PRIVATE CGAL_SMP_ARAP_DEBUG CGAL_PARAMETERIZATION_ARAP_VERBOSE)
+  endif(CGAL_DEBUG_SMP_ARAP)
   
   # Link with CGAL
   vtk_module_link(CGAL::vtkCGAL PUBLIC CGAL::CGAL)
