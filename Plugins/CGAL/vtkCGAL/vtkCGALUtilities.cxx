@@ -198,8 +198,8 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType&
 
 //----------------------------------------------------------------------------
 
-/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the VTK_io_plugin.cpp
-*          located at https://github.com/CGAL/cgal/blob/master/Polyhedron/demo/Polyhedron/Plugins/IO/VTK_io_plugin.cpp
+/** @brief Converts a vtkPolyData (VTK) into a Polyhedron (CGAL). Code taken from the vtkPointSet_to_polygon_mesh
+*          located at https://github.com/CGAL/cgal/blob/9e0dfe81ba6327951637c2768363f8917d7ea12d/BGL/include/CGAL/boost/graph/IO/VTK.h
 *          This method does not write into our PolyData structure. Hence, we do not need to copy them before calling this function.
 *
 *  @param polyData The input PolyData
