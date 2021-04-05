@@ -1,49 +1,69 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(CGAL-Community-Plugins)
+if (NOT TARGET CGAL)
+  vtk_module_find_package(PACKAGE CGAL VERSION 5.1.1 CONFIG_MODE PRIVATE)
+endif ()
 
-if (NOT ParaView_BINARY_DIR)
-  find_package(ParaView REQUIRED)
-endif()
+set(classes
+  stkCGAL3DPolyhedralMesher
+  stkCGALAbstractUVParametrization
+  stkCGALARAPUVParametrization
+  stkCGALLSCMUVParametrization
+  stkCGALBoolean
+  stkCGALBoolean2DMesher
+  stkCGALBoolean3DMesher
+  stkCGALIsotropicRemeshingFilter
+  stkCGALEfficientRANSAC
+  stkCGALPolygonOrientOperator
+  stkCGALPolygonSetOrientedSideClassifier
+  stkCGALPolygonSetToPolyLineSet
+  stkCGALPolygonUtilities
+  stkCGALPolyLineSetToPolygonSet
+  stkCGALRegionGrowing
+  stkCGALSelfIntersectionMeasurer
+  stkCGALUtilities
+)
 
-include(GNUInstallDirs)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
+set(headers
+  stkPointCloudScalarSizingField.h
+)
 
-if(PARAVIEW_USE_FILE)
-  # ParaView 5.6
-  # ------------
-  #If the plugin is used internally we don't need to include.
-  if (NOT ParaView_BINARY_DIR)
-      include(${PARAVIEW_USE_FILE})
-  endif(NOT ParaView_BINARY_DIR)
-  add_subdirectory(Plugins/CGAL)
-else()
-  # ParaView 6 or later
-  # --------------------
-  #  `paraview_plugin_build` uses `add_subdirectory` so it has to be in a sub-directory
-  paraview_plugin_scan(
-    PLUGIN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Plugins/CGAL/paraview.plugin"
-    ENABLE_BY_DEFAULT ON
-    HIDE_PLUGINS_FROM_CACHE ON
-    PROVIDES_PLUGINS  plugins
-    REQUIRES_MODULES  required_modules
-    )
+vtk_module_add_module(ParaView::stkCGAL
+  CLASSES ${classes}
+  PRIVATE_HEADERS ${headers}
+)
+
+set(xml_files
+  Resources/cgal_filters.xml
+  Resources/cgal_sources.xml
+)
+
+paraview_add_server_manager_xmls(
+    XMLS  ${xml_files})
+
+#message("CGAL_FOUND? : " ${CGAL_FOUND})
+if(CGAL_FOUND)
+  include( ${CGAL_USE_FILE} )
   
-  foreach (module IN LISTS required_modules)
-    if (NOT TARGET "${module}")
-      message("Missing required module: ${module}")
-      return ()
-    endif ()
-  endforeach ()
+  # Activate concurrency ? (turned ON by default)
+  option(CGAL_ACTIVATE_CONCURRENCY
+         "Enable concurrency"
+         ON)
 
-  #Message("CMAKE_INSTALL_BINDIR" "${CMAKE_INSTALL_BINDIR}")
-  #Message("CMAKE_INSTALL_LIBDIR" "${CMAKE_INSTALL_LIBDIR}")
-  #Message("PARAVIEW_PLUGIN_SUBDIR" "${PARAVIEW_PLUGIN_SUBDIR}")
+  vtk_module_definitions(ParaView::stkCGAL PRIVATE NOMINMAX)
+
+  # Add debug flag for the ARAP algorithm
+  option(CGAL_DEBUG_SMP_ARAP "Enables debugging mode for CGAL's ARAP" OFF)
+  if(CGAL_DEBUG_SMP_ARAP)
+    vtk_module_definitions(ParaView::stkCGAL PRIVATE CGAL_SMP_ARAP_DEBUG CGAL_PARAMETERIZATION_ARAP_VERBOSE)
+  endif(CGAL_DEBUG_SMP_ARAP)
   
-  paraview_plugin_build(
-    RUNTIME_DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    LIBRARY_DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    LIBRARY_SUBDIRECTORY "${PARAVIEW_PLUGIN_SUBDIR}"
-    PLUGINS ${plugins})
-endif()
+  # Link with CGAL
+  vtk_module_link(ParaView::stkCGAL PUBLIC CGAL::CGAL)
+   
+  if(CGAL_ACTIVATE_CONCURRENCY)
+    find_package(TBB REQUIRED)
+    if(TBB_FOUND)
+      vtk_module_definitions(ParaView::stkCGAL PRIVATE CGAL_LINKED_WITH_TBB)
+      vtk_module_link(ParaView::stkCGAL PRIVATE TBB::tbbmalloc TBB::tbb)
+    endif(TBB_FOUND)
+  endif(CGAL_ACTIVATE_CONCURRENCY)
+endif(CGAL_FOUND)

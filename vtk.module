@@ -1,0 +1,18 @@
+NAME
+  ParaView::stkCGAL
+LIBRARY_NAME
+  stkCGAL
+DESCRIPTION
+  CGAL sources and filters
+DEPENDS
+  VTK::CommonCore
+  VTK::CommonExecutionModel
+  VTK::CommonSystem
+PRIVATE_DEPENDS
+  VTK::FiltersCore
+  VTK::FiltersGeneral
+  VTK::FiltersGeometry
+  VTK::FiltersExtraction
+  ParaView::stkEigen
+TEST_DEPENDS
+  VTK::TestingCore
