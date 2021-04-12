@@ -1,14 +1,18 @@
 #ifndef stkCGAL3DPolyhedralMesher_h
 #define stkCGAL3DPolyhedralMesher_h
 
-#include "vtkPolyDataAlgorithm.h"
+#include "vtkUnstructuredGridAlgorithm.h"
 #include <stkCGALModule.h>
+#include <string>
 
-class STKCGAL_EXPORT stkCGAL3DPolyhedralMesher : public vtkPolyDataAlgorithm
+class vtkPolyData;
+class vtkPointSet;
+
+class STKCGAL_EXPORT stkCGAL3DPolyhedralMesher : public vtkUnstructuredGridAlgorithm
 {
 public:
   static stkCGAL3DPolyhedralMesher* New();
-  vtkTypeMacro(stkCGAL3DPolyhedralMesher, vtkPolyDataAlgorithm);
+  vtkTypeMacro(stkCGAL3DPolyhedralMesher, vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
   
   //@{
@@ -164,16 +168,21 @@ public:
   vtkBooleanMacro(Exude, bool);
   //@}
 
+  // Getters
   vtkPolyData* GetInteriorSurfaces();
   vtkPolyData* GetBoundingDomain();
   vtkPointSet* GetSizingField();
+   
+  // Setters
+  void SetInteriorSurfaces(vtkPolyData* interiorSurfaces);
+  void SetBoundingDomain(vtkPolyData* boundingDomain);
+  void SetSizingField(vtkPointSet* sizingField);
 
 protected:
   stkCGAL3DPolyhedralMesher();
   ~stkCGAL3DPolyhedralMesher(){}
   
   virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
-  virtual int FillOutputPortInformation(int, vtkInformation *info) override;
   virtual int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:

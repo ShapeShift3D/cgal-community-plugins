@@ -338,6 +338,21 @@ int stkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
 }
 
 //----------------------------------------------------------------------------
+void stkCGAL3DPolyhedralMesher::SetInteriorSurfaces(vtkPolyData* interiorSurfaces) {
+  this->SetInputData(0, interiorSurfaces);
+}
+
+//----------------------------------------------------------------------------
+void stkCGAL3DPolyhedralMesher::SetBoundingDomain(vtkPolyData* boundingDomain) {
+  this->SetInputData(1, boundingDomain);
+}
+
+//----------------------------------------------------------------------------
+void stkCGAL3DPolyhedralMesher::SetSizingField(vtkPointSet* sizingField) {
+  this->SetInputData(2, sizingField);
+}
+
+//----------------------------------------------------------------------------
 int stkCGAL3DPolyhedralMesher::FillInputPortInformation(int port, vtkInformation* info)
 {
     if (port == 0 || port == 1)
@@ -351,12 +366,4 @@ int stkCGAL3DPolyhedralMesher::FillInputPortInformation(int port, vtkInformation
     }
 
     return 1;
-}
-
-
-// ------------------------------------------------------------------------------
-int stkCGAL3DPolyhedralMesher::FillOutputPortInformation(int, vtkInformation *info)
-{
-  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkUnstructuredGrid");
-  return 1;
 }
