@@ -42,6 +42,19 @@ if (Eigen3_FOUND)
   vtk_module_link(CGAL::vtkCGAL PUBLIC Eigen3::Eigen)
 endif(Eigen3_FOUND)
 
+find_package(Ceres CONFIG REQUIRED)
+
+# message("${CERES_INCLUDE_DIRS}")
+
+if(CERES_FOUND AND NOT TARGET CGAL::Ceres_support)
+  add_library(CGAL::Ceres_support INTERFACE IMPORTED)
+  set_target_properties(CGAL::Ceres_support PROPERTIES
+    INTERFACE_COMPILE_DEFINITIONS "CGAL_PMP_USE_CERES_SOLVER"
+    INTERFACE_LINK_LIBRARIES "ceres")
+endif()
+
+# find_package(OpenBLAS CONFIG REQUIRED)
+
 #message("CGAL_FOUND? : " ${CGAL_FOUND})
 if(CGAL_FOUND)
   include( ${CGAL_USE_FILE} )
@@ -70,3 +83,14 @@ if(CGAL_FOUND)
     endif(TBB_FOUND)
   endif(CGAL_ACTIVATE_CONCURRENCY)
 endif(CGAL_FOUND)
+
+if(TARGET Ceres)
+  message("Hi!")
+  vtk_module_definitions(CGAL::vtkCGAL PUBLIC CGAL_PMP_USE_CERES_SOLVER)
+  vtk_module_link(CGAL::vtkCGAL PRIVATE Ceres::ceres)
+endif(TARGET Ceres)
+
+
+if(TARGET CGAL::Ceres_support)
+  vtk_module_link(CGAL::vtkCGAL PUBLIC CGAL::Ceres_support)
+endif(TARGET CGAL::Ceres_support)
