@@ -498,8 +498,182 @@
         </Proxy>
     <!-- ==================================================================== -->
     </ProxyGroup>
+    <ProxyGroup name="boolean_meshers">
+        <SourceProxy name="CGALPolygonMeshSmoothingOperator"
+                     class="vtkCGALPolygonMeshSmoothingOperator"
+                     label="(CGAL) Polygon Mesh Smoothing Operator">
+            <Documentation
+                    short_help="Generates a polyhedral mesh inside a bounding polyhedron domain."
+                    long_help="Generates a polyhedral mesh inside a bounding polyhedron domain under a set of features given by a polyhedral surface.">
+            </Documentation>
+
+            <InputProperty
+                    name="Mesh"
+                    port_index="0"
+                    command="SetInputConnection">
+                <Documentation>
+                    Interior surface part of the bounding domain.
+                </Documentation>
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData"/>
+                </DataTypeDomain>
+            </InputProperty>
+
+            <IntVectorProperty name="NbOfIterations"
+                               command="SetNbOfIterations"
+                               label="Number of Iterations"
+                               number_of_elements="1"
+                               default_values="10">
+                <Documentation>
+                    Number of smoothing iterations
+                </Documentation>
+            </IntVectorProperty>
+
+            <DoubleVectorProperty name="DihedralAngleEdgeConstraint"
+                                  command="SetDihedralAngleEdgeConstraint"
+                                  label="Dihedral Angle Edge Constraint"
+                                  number_of_elements="1"
+                                  default_values="60">
+                <Documentation>
+                    Dihedral Angle under which satisfying edges will be constrained.
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <IntVectorProperty name="UseSafetyConstraints"
+                               command="SetUseSafetyConstraints"
+                               label="Use Safety Constraints"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, vertex moves that would worsen the mesh are ignored.
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="ProjectPointsOntoSurface"
+                               command="SetProjectPointsOntoSurface"
+                               label="Project Points Onto Surface"
+                               number_of_elements="1"
+                               default_values="1">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, points are projected onto the initial surface after each iteration.
+                </Documentation>
+            </IntVectorProperty>
+            
+            <Hints>
+                <ShowInMenu category="CGAL" />
+            </Hints>
+        </SourceProxy>
+    </ProxyGroup>
     <!-- ==================================================================== -->
-    <ProxyGroup name="filters">
+    <ProxyGroup name="mesh_smoothing_operators">
+        <Proxy name="CGALPolygonMeshSmoothingOperator"
+                     class="vtkCGALPolygonMeshSmoothingOperator"
+                     label="Smoothing Operator #1">
+            <Documentation
+                    short_help="Smooths a triangulated region of a polydata by attempting to make the triangle angle and area distributions as uniform as possible by moving non-constrained vertices."
+                    long_help="Smooths a triangulated region of a polydata by attempting to make the triangle angle and area distributions as uniform as possible by moving non-constrained vertices. 
+                    Constraints are determined by the chosen dihedral angle of the edges. Angle-based smoothing does not change the combinatorial information of the mesh.
+                    Area-based smoothing might change the combinatorial information, unless specified otherwise.">
+                    It is also possible to make the smoothing algorithm "safer" by rejecting moves that, when applied, would
+                     worsen the quality of the mesh, e.g. that would decrease the value of the smallest angle around a
+                     vertex or create self-intersections.
+                    
+                     To use the area-based smoothing, Ceres needs to be binded to the CGAL library. This implies the
+                     need to also bind LAPACK and BLAS.
+            </Documentation>
+
+            <InputProperty
+                    name="Mesh"
+                    port_index="0"
+                    command="SetInputConnection">
+                <Documentation>
+                    Interior surface part of the bounding domain.
+                </Documentation>
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources"/>
+                    <Group name="filters"/>
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData"/>
+                </DataTypeDomain>
+            </InputProperty>
+
+            <IntVectorProperty name="UseAngleSmoothing"
+                               command="SetUseAngleSmoothing"
+                               label="Use Angle Smoothing"
+                               number_of_elements="1"
+                               default_values="1">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, angle-based smoothing will be used.
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="UseAreaSmoothing"
+                               command="SetUseAreaSmoothing"
+                               label="Use Area Smoothing"
+                               number_of_elements="1"
+                               default_values="0"
+                               panel_visibility="advanced">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, area-based smoothing will be used. Requires linking to Ceres library to work.
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="NumberOfIterations"
+                               command="SetNumberOfIterations"
+                               label="Number of Iterations"
+                               number_of_elements="1"
+                               default_values="10">
+                <Documentation>
+                    Number of smoothing iterations
+                </Documentation>
+            </IntVectorProperty>
+
+            <DoubleVectorProperty name="DihedralAngleEdgeConstraint"
+                                  command="SetDihedralAngleEdgeConstraint"
+                                  label="Dihedral Angle Edge Constraint"
+                                  number_of_elements="1"
+                                  default_values="60">
+                <Documentation>
+                    Dihedral Angle under which satisfying edges will be constrained.
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <IntVectorProperty name="UseSafetyConstraints"
+                               command="SetUseSafetyConstraints"
+                               label="Use Safety Constraints"
+                               number_of_elements="1"
+                               default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, vertex moves that would worsen the mesh are ignored.
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty name="ProjectPointsOntoSurface"
+                               command="SetProjectPointsOntoSurface"
+                               label="Project Points Onto Surface"
+                               number_of_elements="1"
+                               default_values="1">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, points are projected onto the initial surface after each iteration.
+                </Documentation>
+            </IntVectorProperty>
+            
+            <Hints>
+                <ShowInMenu category="CGAL" />
+            </Hints>
+        </Proxy>
+        <!-- ==================================================================== -->
         <SourceProxy name="CGAL3DPolyhedralMesher"
                      class="vtkCGAL3DPolyhedralMesher"
                      label="CGAL 3D Polyhedral Mesher">
