@@ -12,9 +12,9 @@
 #include <vtkTimerLog.h>
 
 // -- CGAL
-#include <CGAL/property_map.h>
-#include <CGAL/Point_with_normal_3.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Point_with_normal_3.h>
+#include <CGAL/property_map.h>
 
 #include <CGAL/Shape_detection/Efficient_RANSAC.h>
 
@@ -34,20 +34,16 @@ vtkCGALEfficientRANSAC::vtkCGALEfficientRANSAC()
 }
 
 //----------------------------------------------------------------------------
-int vtkCGALEfficientRANSAC::RequestData(
-  vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **inputVector,
-  vtkInformationVector *outputVector)
+int vtkCGALEfficientRANSAC::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   // Get the info objects
-  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
-  vtkInformation *outInfo = outputVector->GetInformationObject(0);
+  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
+  vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
   // Get the input and output
-  vtkPolyData *input = vtkPolyData::SafeDownCast(
-    inInfo->Get(vtkDataObject::DATA_OBJECT()));
-  vtkPolyData *output = vtkPolyData::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPolyData* input = vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPolyData* output = vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   // Copy input data to the output
   output->CopyStructure(input);
@@ -60,15 +56,15 @@ int vtkCGALEfficientRANSAC::RequestData(
 
 //----------------------------------------------------------------------------
 /** @brief Proceed to detect the regions contained within the input dataset.
-*
-*  @param input       source data structure
-*  @param output      copy of the input data structure with relevant data arrays appended
-*  @tparam CGalKernel must be a CGAL kernel compatible type
-*
-*  @return int Success (1) or failure (0)
-*/
-template <class CGalKernel>
-int vtkCGALEfficientRANSAC::Detection(vtkPolyData *input, vtkPolyData *output)
+ *
+ *  @param input       source data structure
+ *  @param output      copy of the input data structure with relevant data arrays appended
+ *  @tparam CGalKernel must be a CGAL kernel compatible type
+ *
+ *  @return int Success (1) or failure (0)
+ */
+template<class CGalKernel>
+int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 {
   // Type declarations
   using CGalOrientedPoint = typename std::pair<CGalKernel::Point_3, CGalKernel::Vector_3>;
@@ -78,8 +74,8 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData *input, vtkPolyData *output)
   using Point_map = typename CGAL::First_of_pair_property_map<CGalOrientedPoint>;
   using Normal_map = typename CGAL::Second_of_pair_property_map<CGalOrientedPoint>;
 
-  using Traits = typename CGAL::Shape_detection::Efficient_RANSAC_traits<
-    CGalKernel, CGalOrientedPointVector, Point_map, Normal_map>;
+  using Traits = typename CGAL::Shape_detection::Efficient_RANSAC_traits<CGalKernel,
+    CGalOrientedPointVector, Point_map, Normal_map>;
   using Efficient_ransac = typename CGAL::Shape_detection::Efficient_RANSAC<Traits>;
   using Plane = typename CGAL::Shape_detection::Plane<Traits>;
 
@@ -87,7 +83,8 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData *input, vtkPolyData *output)
 
   // Points with normals
   CGalOrientedPointVector points;
-  if (!vtkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints<CGalKernel, CGalOrientedPointVector>(input, points))
+  if (!vtkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints<CGalKernel, CGalOrientedPointVector>(
+        input, points))
   {
     vtkErrorMacro("Failed to convert input mesh. Make sure to supply points normals.");
     return 0;
@@ -146,13 +143,17 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData *input, vtkPolyData *output)
     vtkTimerLog::MarkEndEvent("Detection iteration");
 
     // Compute coverage, i.e. ratio of the points assigned to a shape
-    FT coverage =
-      FT(points.size() - ransac.number_of_unassigned_points()) / FT(points.size());
+    FT coverage = FT(points.size() - ransac.number_of_unassigned_points()) / FT(points.size());
 
     // Print number of assigned shapes and unassigned points
-    vtkWarningMacro(<< "Iteration #" << i
-      << " | " << ransac.shapes().end() - ransac.shapes().begin() << " primitives"
-      << " | " << coverage << " coverage");
+    vtkWarningMacro(<< "Iteration #" << i << " | "
+                    << ransac.shapes().end() - ransac.shapes().begin() << " primitives"
+                    << " | " << coverage << " coverage");
+
+    vtkWarningMacro("Probabilty=" << parameters.probability << ", MinPoints="
+                                  << parameters.min_points << ", epsilon=" << parameters.epsilon
+                                  << ", cluster_epsilon=" << parameters.cluster_epsilon
+                                  << ", normal_threshold=" << parameters.normal_threshold);
 
     // Choose result with the highest coverage
     if (coverage > best_coverage)
@@ -188,16 +189,14 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData *input, vtkPolyData *output)
     boost::shared_ptr<Efficient_ransac::Shape> shape = *it;
 
     // Iterate through point indices assigned to each detected shape
-    std::vector<std::size_t>::const_iterator
-      index_it = (*it)->indices_of_assigned_points().begin();
+    std::vector<std::size_t>::const_iterator index_it = (*it)->indices_of_assigned_points().begin();
 
     while (index_it != (*it)->indices_of_assigned_points().end())
     {
       // Retrieve point.
       const CGalOrientedPoint& p = *(points.begin() + (*index_it));
 
-      regionsArray->SetValue(
-        static_cast<vtkIdType>(*index_it), regionIndex);
+      regionsArray->SetValue(static_cast<vtkIdType>(*index_it), regionIndex);
 
       // Set Euclidean distance between point and shape
       distancesArray->SetValue(
@@ -222,23 +221,23 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData *input, vtkPolyData *output)
 
 //----------------------------------------------------------------------------
 /** @brief Convert a polydata to a CGAL compatible data structure
-*
-*  @param polyData                  input data structure
-*  @param orientedPoints            output data structure
-*  @tparam CGalKernel               must be a CGAL kernel compatible type
-*  @tparam CGalOrientedPointVector  must be a vector of pairs { Point_3, Vector_3 }
-*                                   using the corresponding CGAL kernel
-* 
-*  @return bool Success (true) or failure (false)
-*/
-template <class CGalKernel, typename CGalOrientedPointVector>
+ *
+ *  @param polyData                  input data structure
+ *  @param orientedPoints            output data structure
+ *  @tparam CGalKernel               must be a CGAL kernel compatible type
+ *  @tparam CGalOrientedPointVector  must be a vector of pairs { Point_3, Vector_3 }
+ *                                   using the corresponding CGAL kernel
+ *
+ *  @return bool Success (true) or failure (false)
+ */
+template<class CGalKernel, typename CGalOrientedPointVector>
 bool vtkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints(
-  vtkPolyData *polyData, CGalOrientedPointVector& orientedPoints)
+  vtkPolyData* polyData, CGalOrientedPointVector& orientedPoints)
 {
   using Point = typename CGalKernel::Point_3;
   using Vector = typename CGalKernel::Vector_3;
 
-  vtkDataArray *normals = polyData->GetPointData()->GetNormals();
+  vtkDataArray* normals = polyData->GetPointData()->GetNormals();
   if (!normals)
   {
     return false;
@@ -252,8 +251,7 @@ bool vtkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints(
     polyData->GetPoint(i, p);
     normals->GetTuple(i, v);
 
-    orientedPoints.push_back(std::make_pair(
-      Point(p[0], p[1], p[2]), Vector(v[0], v[1], v[2])));
+    orientedPoints.push_back(std::make_pair(Point(p[0], p[1], p[2]), Vector(v[0], v[1], v[2])));
   }
 
   return true;

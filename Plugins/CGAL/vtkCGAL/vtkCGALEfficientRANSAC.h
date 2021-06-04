@@ -75,7 +75,7 @@ public:
   * Set/Get Epsilon. The maximum acceptable Euclidean distance between a point and a shape.
   */
   vtkGetMacro(Epsilon, double);
-  vtkSetClampMacro(Epsilon, double, 0, VTK_DOUBLE_MAX);
+  vtkSetClampMacro(Epsilon, double, -1, VTK_DOUBLE_MAX);
   //@}
 
   //@{
@@ -84,13 +84,13 @@ public:
   * which are assumed to be neighbors.
   */
   vtkGetMacro(ClusterEpsilon, double);
-  vtkSetClampMacro(ClusterEpsilon, double, 0, VTK_DOUBLE_MAX);
+  vtkSetClampMacro(ClusterEpsilon, double, -1, VTK_DOUBLE_MAX);
   //@}
 
   //@{
   /**
   * Set/Get MaxNormalDeviation. The maximum threshold on the dot product between the estimated
-  * shape's normal and the point's normal, that is the cosine of the angle (cos(25°) = 0.9). 
+  * shape's normal and the point's normal, that is the cosine of the angle (cos(25deg) = 0.9). 
   */
   vtkGetMacro(MaxNormalDeviation, double);
   vtkSetClampMacro(MaxNormalDeviation, double, 0.0, 1.0);
