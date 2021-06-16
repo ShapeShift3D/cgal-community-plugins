@@ -1237,7 +1237,7 @@
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <SourceProxy name="CGALEfficientRANSAC"
+        <!-- <SourceProxy name="CGALEfficientRANSAC"
                class="vtkCGALEfficientRANSAC"
                label="CGAL Shape Detection - Efficient RANSAC">
             <Documentation long_help="todo."
@@ -1355,6 +1355,6 @@
 		    <Hints> 
                 <ShowInMenu category="CGAL"/>
             </Hints>
-        </SourceProxy>
+        </SourceProxy> -->
     </ProxyGroup>
 </ServerManagerConfiguration>

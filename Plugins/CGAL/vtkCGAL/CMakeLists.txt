@@ -18,7 +18,7 @@ set(classes
   vtkCGALBoolean2DMesher
   vtkCGALBoolean3DMesher
   vtkCGALIsotropicRemeshingFilter
-  vtkCGALEfficientRANSAC
+  #vtkCGALEfficientRANSAC
   vtkCGALPolygonMeshSmoothingOperator
   vtkCGALPolygonOrientOperator
   vtkCGALPolygonSetOrientedSideClassifier

@@ -63,7 +63,7 @@ int vtkCGALEfficientRANSAC::RequestData(vtkInformation* vtkNotUsed(request),
  *
  *  @return int Success (1) or failure (0)
  */
-template<class CGalKernel>
+template<typename CGalKernel>
 int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 {
   // Type declarations
