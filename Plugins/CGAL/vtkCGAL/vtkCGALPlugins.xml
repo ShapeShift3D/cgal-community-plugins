@@ -496,79 +496,6 @@
                 <ShowInMenu category="CGAL"/>
             </Hints>
         </Proxy>
-    <!-- ==================================================================== -->
-    </ProxyGroup>
-    <ProxyGroup name="boolean_meshers">
-        <SourceProxy name="CGALPolygonMeshSmoothingOperator"
-                     class="vtkCGALPolygonMeshSmoothingOperator"
-                     label="(CGAL) Polygon Mesh Smoothing Operator">
-            <Documentation
-                    short_help="Generates a polyhedral mesh inside a bounding polyhedron domain."
-                    long_help="Generates a polyhedral mesh inside a bounding polyhedron domain under a set of features given by a polyhedral surface.">
-            </Documentation>
-
-            <InputProperty
-                    name="Mesh"
-                    port_index="0"
-                    command="SetInputConnection">
-                <Documentation>
-                    Interior surface part of the bounding domain.
-                </Documentation>
-                <ProxyGroupDomain name="groups">
-                    <Group name="sources"/>
-                    <Group name="filters"/>
-                </ProxyGroupDomain>
-                <DataTypeDomain name="input_type">
-                    <DataType value="vtkPolyData"/>
-                </DataTypeDomain>
-            </InputProperty>
-
-            <IntVectorProperty name="NbOfIterations"
-                               command="SetNbOfIterations"
-                               label="Number of Iterations"
-                               number_of_elements="1"
-                               default_values="10">
-                <Documentation>
-                    Number of smoothing iterations
-                </Documentation>
-            </IntVectorProperty>
-
-            <DoubleVectorProperty name="DihedralAngleEdgeConstraint"
-                                  command="SetDihedralAngleEdgeConstraint"
-                                  label="Dihedral Angle Edge Constraint"
-                                  number_of_elements="1"
-                                  default_values="60">
-                <Documentation>
-                    Dihedral Angle under which satisfying edges will be constrained.
-                </Documentation>
-            </DoubleVectorProperty>
-
-            <IntVectorProperty name="UseSafetyConstraints"
-                               command="SetUseSafetyConstraints"
-                               label="Use Safety Constraints"
-                               number_of_elements="1"
-                               default_values="0">
-                <BooleanDomain name="bool" />
-                <Documentation>
-                    If true, vertex moves that would worsen the mesh are ignored.
-                </Documentation>
-            </IntVectorProperty>
-
-            <IntVectorProperty name="ProjectPointsOntoSurface"
-                               command="SetProjectPointsOntoSurface"
-                               label="Project Points Onto Surface"
-                               number_of_elements="1"
-                               default_values="1">
-                <BooleanDomain name="bool" />
-                <Documentation>
-                    If true, points are projected onto the initial surface after each iteration.
-                </Documentation>
-            </IntVectorProperty>
-            
-            <Hints>
-                <ShowInMenu category="CGAL" />
-            </Hints>
-        </SourceProxy>
     </ProxyGroup>
     <!-- ==================================================================== -->
     <ProxyGroup name="mesh_smoothing_operators">
@@ -673,7 +600,9 @@
                 <ShowInMenu category="CGAL" />
             </Hints>
         </Proxy>
+    </ProxyGroup>
         <!-- ==================================================================== -->
+    <ProxyGroup name="filters">
         <SourceProxy name="CGAL3DPolyhedralMesher"
                      class="vtkCGAL3DPolyhedralMesher"
                      label="CGAL 3D Polyhedral Mesher">
