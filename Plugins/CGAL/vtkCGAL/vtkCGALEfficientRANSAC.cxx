@@ -67,17 +67,18 @@ template<class CGalKernel>
 int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 {
   // Type declarations
-  using CGalOrientedPoint = typename std::pair<CGalKernel::Point_3, CGalKernel::Vector_3>;
-  using CGalOrientedPointVector = typename std::vector<CGalOrientedPoint>;
+  typedef std::pair<CGalKernel::Point_3, CGalKernel::Vector_3> CGalOrientedPoint;
+  typedef std::vector<CGalOrientedPoint> CGalOrientedPointVector;
 
-  using FT = typename CGalKernel::FT;
-  using Point_map = typename CGAL::First_of_pair_property_map<CGalOrientedPoint>;
-  using Normal_map = typename CGAL::Second_of_pair_property_map<CGalOrientedPoint>;
+  typedef typename CGalKernel::FT FT;
+  typedef CGAL::First_of_pair_property_map<CGalOrientedPoint> Point_map;
+  typedef CGAL::Second_of_pair_property_map<CGalOrientedPoint> Normal_map;
 
-  using Traits = typename CGAL::Shape_detection::Efficient_RANSAC_traits<CGalKernel,
-    CGalOrientedPointVector, Point_map, Normal_map>;
-  using Efficient_ransac = typename CGAL::Shape_detection::Efficient_RANSAC<Traits>;
-  using Plane = typename CGAL::Shape_detection::Plane<Traits>;
+  typedef CGAL::Shape_detection::Efficient_RANSAC_traits<CGalKernel,
+    CGalOrientedPointVector, Point_map, Normal_map> Traits;
+  typedef CGAL::Shape_detection::Efficient_RANSAC<Traits> Efficient_ransac;
+  typedef CGAL::Shape_detection::Plane<Traits> CGALPlane;
+  typedef CGAL::Shape_detection::Shape_base<Traits> CGALShape;
 
   vtkTimerLog::MarkStartEvent("Preprocessing");
 
@@ -97,7 +98,7 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   ransac.set_input(points);
 
   // Register planar shapes via template method
-  ransac.add_shape_factory<Plane>();
+  ransac.add_shape_factory<CGALPlane>();
 
   // Set parameters for shape detection.
   Efficient_ransac::Parameters parameters;
@@ -186,7 +187,7 @@ int vtkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   Efficient_ransac::Shape_range::iterator it = shapes.begin();
   while (it != shapes.end())
   {
-    boost::shared_ptr<Efficient_ransac::Shape> shape = *it;
+    boost::shared_ptr<CGALShape> shape = *it;
 
     // Iterate through point indices assigned to each detected shape
     std::vector<std::size_t>::const_iterator index_it = (*it)->indices_of_assigned_points().begin();
