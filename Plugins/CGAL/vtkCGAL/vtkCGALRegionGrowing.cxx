@@ -65,12 +65,6 @@ int vtkCGALRegionGrowing::RequestData(
   vtkPolyData *output = vtkPolyData::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  // Copy input data to the output
-  // output->CopyStructure(input);
-  // output->GetCellData()->PassData(input->GetCellData());
-  // output->GetFieldData()->PassData(input->GetFieldData());
-  // output->GetPointData()->PassData(input->GetPointData());
-
   switch (this->KernelValue)
   {
     case KernelEnum::EPEC:
@@ -252,7 +246,7 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData *input, vtkPolyData *output)
 	alignNormalsFilter->SetComputePointNormals(true);
 	alignNormalsFilter->Update();
 
-  vtkSmartPointer<vtkDataArray> cellsNormalArray = alignNormalsFilter->GetOutput()->GetCellData()->GetArray(0);
+  vtkDataArray* cellsNormalArray = alignNormalsFilter->GetOutput()->GetCellData()->GetArray("Normals");
 
   vtkSmartPointer<vtkDataArray> regionNormal;
   regionNormal.TakeReference(cellsNormalArray->NewInstance());
@@ -291,17 +285,17 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData *input, vtkPolyData *output)
 
     for (const auto index : region)
      {
-        regionNormal->SetTuple(static_cast<vtkIdType>(index),normalAvg);
+        regionNormal->SetTuple3(static_cast<vtkIdType>(index),normalAvg[0],normalAvg[1],normalAvg[2]);
 
         // Flag the Region if it needs to be removed expect the unassinged region
         // Take the dot product and mark the cell that needs to be removed
         if( vtkMath::Dot(normalAvg,y_axis_downward) >= .98 && vtkMath::Dot(normalAvg,y_axis_downward) <=1.0 )
         {
-            removeCell->SetValue(static_cast<vtkIdType>(index),1);
+            removeCell->SetTuple1(static_cast<vtkIdType>(index),1);
         }
         else if (vtkMath::Dot(normalAvg,y_axis_downward) <= -.98 && vtkMath::Dot(normalAvg,y_axis_downward) >=-1.0)
         {
-            removeCell->SetValue(static_cast<vtkIdType>(index),1);
+            removeCell->SetTuple1(static_cast<vtkIdType>(index),1);
         }
      }
     regionIndex++;
@@ -309,13 +303,11 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData *input, vtkPolyData *output)
     // Remove the region that meets the criteria (e.g normal pointing in upward direction)
 
   }
-  output->CopyStructure(input);
-  output->GetCellData()->PassData(alignNormalsFilter->GetOutput()->GetCellData());
-  output->GetFieldData()->PassData(alignNormalsFilter->GetOutput()->GetFieldData());
-  output->GetPointData()->PassData(alignNormalsFilter->GetOutput()->GetPointData());
- // output->GetCellData()->SetScalars(regionsArray);
-  output->GetCellData()->SetScalars(removeCell);
-  output->GetCellData()->SetVectors(regionNormal);
+  output->ShallowCopy(alignNormalsFilter->GetOutput());
+  output->GetCellData()->AddArray(regionsArray);
+  output->GetCellData()->SetScalars(regionsArray);
+  output->GetCellData()->AddArray(removeCell);
+  output->GetCellData()->AddArray(regionNormal);
  
   return 1;
 }
