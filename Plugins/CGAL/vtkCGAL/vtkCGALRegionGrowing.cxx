@@ -9,6 +9,9 @@
 #include <vtkPointData.h>
 #include <vtkSmartPointer.h>
 #include <vtkTimerLog.h>
+#include <vtkMath.h>
+#include <vtkPolyDataNormals.h>
+#include <vtkDataArray.h>
 
 // -- CGAL
 #include <CGAL/memory.h>
@@ -23,6 +26,7 @@
 //#include <CGAL/Simple_homogeneous.h>
 
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/Regularization/regularize_planes.h>
 
 #include <CGAL/Shape_detection/Region_growing/Region_growing.h>
 #include <CGAL/Shape_detection/Region_growing/Region_growing_on_polygon_mesh.h>
@@ -31,6 +35,7 @@
 #include <cstdlib>
 #include <iterator>
 #include <vector>
+#include <algorithm>
 
 //----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkCGALRegionGrowing);
@@ -61,10 +66,10 @@ int vtkCGALRegionGrowing::RequestData(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   // Copy input data to the output
-  output->CopyStructure(input);
-  output->GetCellData()->PassData(input->GetCellData());
-  output->GetFieldData()->PassData(input->GetFieldData());
-  output->GetPointData()->PassData(input->GetPointData());
+  // output->CopyStructure(input);
+  // output->GetCellData()->PassData(input->GetCellData());
+  // output->GetFieldData()->PassData(input->GetFieldData());
+  // output->GetPointData()->PassData(input->GetPointData());
 
   switch (this->KernelValue)
   {
@@ -187,13 +192,35 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData *input, vtkPolyData *output)
   Regions regions;
   region_growing.detect(std::back_inserter(regions));
 
+  // CGAL::regularize_planes(points,
+  //                         vertex_to_point_map, //point_map
+  //                         planes,
+  //                         plane_map,
+  //                         regions, //index_map
+  //                         true,//regularize_parallelism,
+  //                         true, //regularize_orthogonality
+  //                         true, //regularize_coplanarity
+  //                         false, //	regularize_axis_symmetry
+  //                         5.0, //tolerance_angle 
+  //                         0.1 //tolerance_coplanarity 
+  //                         );
+
+  
   // Print number of detected shapes
   vtkWarningMacro(<< regions.end() - regions.begin() << " shapes detected.");
 
+  Region unassigned_cells;
+  region_growing.unassigned_items(std::back_inserter(unassigned_cells));
+  // Print number of unassigned items
+  vtkWarningMacro(<<unassigned_cells.size() <<" Unassigned cells");  
+
+  // Algorithm Coverage (No of cells assigned/total no. of cells)
+  vtkWarningMacro(<<"Algorithm Coverage: "<<((input->GetNumberOfCells()- unassigned_cells.size())/static_cast<double> (input->GetNumberOfCells())*100.00)<<"%" ); 
+ 
   vtkTimerLog::MarkEndEvent("Detection");
 
   vtkIdType numPolys = input->GetNumberOfPolys();
-  auto regionsArray = vtkIntArray::New();
+  auto regionsArray = vtkSmartPointer<vtkIntArray>::New();
   regionsArray->SetName("regions");
   regionsArray->SetNumberOfComponents(1);
   regionsArray->SetNumberOfTuples(numPolys);
@@ -211,9 +238,85 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData *input, vtkPolyData *output)
     regionIndex++;
   }
 
-  output->GetCellData()->SetScalars(regionsArray);
-  regionsArray->Delete();
+  //output->GetCellData()->SetScalars(regionsArray);
+  //regionsArray->Delete();
 
+  vtkNew<vtkPolyDataNormals> alignNormalsFilter;
+	alignNormalsFilter->SetInputData(input);
+	alignNormalsFilter->SetAutoOrientNormals(true);
+	alignNormalsFilter->SetConsistency(true);
+	alignNormalsFilter->SetFlipNormals(false);
+	alignNormalsFilter->SetNonManifoldTraversal(true);
+	alignNormalsFilter->SetSplitting(false);
+	alignNormalsFilter->SetComputeCellNormals(true);
+	alignNormalsFilter->SetComputePointNormals(true);
+	alignNormalsFilter->Update();
+
+  vtkSmartPointer<vtkDataArray> cellsNormalArray = alignNormalsFilter->GetOutput()->GetCellData()->GetArray(0);
+
+  vtkSmartPointer<vtkDataArray> regionNormal;
+  regionNormal.TakeReference(cellsNormalArray->NewInstance());
+  regionNormal->SetName("regionsNormal");
+  regionNormal->SetNumberOfComponents(3);
+  regionNormal->SetNumberOfTuples(numPolys);
+  regionNormal->Fill(0.0);
+
+  auto removeCell = vtkSmartPointer<vtkIntArray>::New();
+  removeCell->SetName("removeCell");
+  removeCell->SetNumberOfComponents(1);
+  removeCell->SetNumberOfTuples(numPolys);
+  removeCell->Fill(-1);
+
+  vtkWarningMacro(<<cellsNormalArray->GetTuple(static_cast<vtkIdType>(1))[0] <<" " <<cellsNormalArray->GetTuple(static_cast<vtkIdType>(1))[1] <<" " <<cellsNormalArray->GetTuple(static_cast<vtkIdType>(1))[2]);
+
+  regionIndex = 0;
+  for (const auto& region : regions)
+  {
+    //  Average vector of each region expect the ussasigned one 
+    //  Iterate through all region items.
+    double normalSum[3] = {0.0,0.0,0.0};
+    double normalAvg[3] = {0.0,0.0,0.0};
+    double y_axis_downward[3] = {0.0,-1.0,0.0};
+    for (const auto index : region)
+     {
+        double* cellNormal = cellsNormalArray->GetTuple(static_cast<vtkIdType>(index));
+        vtkMath::Add(cellNormal,normalSum,normalSum);
+     }
+    
+    normalAvg[0]=normalSum[0]/region.size();
+    normalAvg[1]=normalSum[1]/region.size();
+    normalAvg[2]=normalSum[2]/region.size();
+
+    vtkMath::Normalize(normalAvg);
+
+    for (const auto index : region)
+     {
+        regionNormal->SetTuple(static_cast<vtkIdType>(index),normalAvg);
+
+        // Flag the Region if it needs to be removed expect the unassinged region
+        // Take the dot product and mark the cell that needs to be removed
+        if( vtkMath::Dot(normalAvg,y_axis_downward) >= .98 && vtkMath::Dot(normalAvg,y_axis_downward) <=1.0 )
+        {
+            removeCell->SetValue(static_cast<vtkIdType>(index),1);
+        }
+        else if (vtkMath::Dot(normalAvg,y_axis_downward) <= -.98 && vtkMath::Dot(normalAvg,y_axis_downward) >=-1.0)
+        {
+            removeCell->SetValue(static_cast<vtkIdType>(index),1);
+        }
+     }
+    regionIndex++;
+
+    // Remove the region that meets the criteria (e.g normal pointing in upward direction)
+
+  }
+  output->CopyStructure(input);
+  output->GetCellData()->PassData(alignNormalsFilter->GetOutput()->GetCellData());
+  output->GetFieldData()->PassData(alignNormalsFilter->GetOutput()->GetFieldData());
+  output->GetPointData()->PassData(alignNormalsFilter->GetOutput()->GetPointData());
+ // output->GetCellData()->SetScalars(regionsArray);
+  output->GetCellData()->SetScalars(removeCell);
+  output->GetCellData()->SetVectors(regionNormal);
+ 
   return 1;
 }
 
