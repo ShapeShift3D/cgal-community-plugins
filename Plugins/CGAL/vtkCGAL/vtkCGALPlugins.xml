@@ -1232,12 +1232,55 @@
                     The minimum number of mesh faces a region must have.
                 </Documentation>
             </IntVectorProperty>
+
+            <!-- TODO : Create a plugin -->
+            <DoubleVectorProperty name="NormalThresholdAngle"
+                               command="SetNormalThresholdAngle"
+                               number_of_elements="1"
+                               default_values="20.0">
+                <Documentation>
+                    Maxium acceptable between a vector and average normal of the region
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <IntVectorProperty name="PlaneNormalOrientationVectorMode" command="SetPlaneNormalOrientationVectorMode" label="PlaneNormal Vector" number_of_elements="1" default_values="2">
+				<EnumerationDomain name="enum">
+					<Entry value="1" text="X" />
+					<Entry value="2" text="Y" />
+					<Entry value="3" text="Z" />
+					<Entry value="4" text="User-Defined" />
+				</EnumerationDomain>
+				<Documentation>
+					This property normal of the plane for detection
+				</Documentation>
+			</IntVectorProperty>
+
+			<DoubleVectorProperty name="UserDefinedPlaneNormalVector" command="SetUserDefinedPlaneNormalVector" label="User-Defined Vector" number_of_elements="3" default_values="0 0 0">
+                <Hints>
+					<PropertyWidgetDecorator type="GenericDecorator" mode="visibility" property="PlaneNormalOrientationVectorMode" value="4" />
+				</Hints>
+			</DoubleVectorProperty>
+
+            <PropertyGroup label="Region Growing">
+				<Property name="Kernel" />
+                <Property name="MaxDistanceToPlane" />
+                <Property name="MaxAcceptedAngle" />
+                <Property name="MinRegionSize" />
+			</PropertyGroup>
+
+            <PropertyGroup label="Plane Identification">
+				<Property name="NormalThresholdAngle" />
+                <Property name="PlaneNormalOrientationVectorMode" />
+                <Property name="UserDefinedPlaneNormalVector" />
+			</PropertyGroup>
+            <!-- TODO : Create a plugin -->
+
 		    <Hints> 
                 <ShowInMenu category="CGAL"/>
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <!-- <SourceProxy name="CGALEfficientRANSAC"
+        <SourceProxy name="CGALEfficientRANSAC"
                class="vtkCGALEfficientRANSAC"
                label="CGAL Shape Detection - Efficient RANSAC">
             <Documentation long_help="todo."
@@ -1355,6 +1398,6 @@
 		    <Hints> 
                 <ShowInMenu category="CGAL"/>
             </Hints>
-        </SourceProxy> -->
+        </SourceProxy>
     </ProxyGroup>
 </ServerManagerConfiguration>

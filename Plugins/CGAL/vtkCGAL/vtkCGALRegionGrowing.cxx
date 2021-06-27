@@ -33,10 +33,10 @@
 
 // -- STL
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <iterator>
 #include <vector>
-#include <cmath>
 
 //----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkCGALRegionGrowing);
@@ -50,6 +50,12 @@ vtkCGALRegionGrowing::vtkCGALRegionGrowing()
   this->MinRegionSize = 5;
   this->MaxDistanceToPlane = 1.0;
   this->MaxAcceptedAngle = 45.0;
+  // TODO : Create a plugin
+  this->NormalThresholdAngle = 20.0;
+  this->PlaneNormalOrientationVectorMode = vtkCGALRegionGrowing::PlaneNormalModes::Y;
+  this->UserDefinedPlaneNormalVector[0] = 0.0;
+  this->UserDefinedPlaneNormalVector[1] = 0.0;
+  this->UserDefinedPlaneNormalVector[2] = 0.0;
 }
 
 //----------------------------------------------------------------------------
@@ -252,7 +258,7 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
                   << cellsNormalArray->GetTuple(static_cast<vtkIdType>(1))[2]);
 
   regionIndex = 0;
-  double normal_threshold = 0.00;
+  // double normal_threshold = 0.00;
   bool remove_region = 0;
 
   for (const auto& region : regions)
@@ -261,7 +267,7 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
     //  Iterate through all region items.
     double normalSum[3] = { 0.0, 0.0, 0.0 };
     double normalAvg[3] = { 0.0, 0.0, 0.0 };
-    double y_axis_downward[3] = { 0.0, -1.0, 0.0 };
+    double planeNormal[3] = { 0.0, 0.0, 0.0 };
 
     for (const auto index : region)
     {
@@ -275,18 +281,51 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
 
     vtkMath::Normalize(normalAvg);
 
-    normal_threshold = 10.00;
+    // normal_threshold = 10.00;
     remove_region = 0;
 
-    if (vtkMath::Dot(normalAvg, y_axis_downward) >= cos( normal_threshold * PI / 180.0) &&
-      vtkMath::Dot(normalAvg, y_axis_downward) <= 1.0)
+    // Adjust tangent vector according to mode
+    
+    switch (this->PlaneNormalOrientationVectorMode)
     {
-     remove_region =1;
+      case PlaneNormalModes::X:
+      {
+        planeNormal[0] = 1.0;
+        break;
+      }
+      case PlaneNormalModes::Y:
+      {
+        planeNormal[1] = 1.0;
+        break;
+      }
+      case PlaneNormalModes::Z:
+      {
+        planeNormal[2] = 1.0;
+        break;
+      }
+      case PlaneNormalModes::USER_DEFINED:
+      {
+        planeNormal[0] = this->UserDefinedPlaneNormalVector[0];
+        planeNormal[1] = this->UserDefinedPlaneNormalVector[1];
+        planeNormal[2] = this->UserDefinedPlaneNormalVector[2];
+        break;
+      }
+      default:
+      {
+        vtkErrorMacro("Unknown plane normal orientation vector mode.");
+        return 0;
+      }
     }
-    else if (vtkMath::Dot(normalAvg, y_axis_downward) <= -cos( normal_threshold * PI / 180.0) &&
-      vtkMath::Dot(normalAvg, y_axis_downward) >= -1.0)
+
+    if (vtkMath::Dot(normalAvg, planeNormal) >= cos(NormalThresholdAngle * PI / 180.0) &&
+      vtkMath::Dot(normalAvg, planeNormal) <= 1.0)
     {
-      remove_region =1;
+      remove_region = 1;
+    }
+    else if (vtkMath::Dot(normalAvg, planeNormal) <= -cos(NormalThresholdAngle * PI / 180.0) &&
+      vtkMath::Dot(normalAvg, planeNormal) >= -1.0)
+    {
+      remove_region = 1;
     }
 
     for (const auto index : region)
@@ -302,9 +341,8 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
       }
     }
 
-    remove_region =0;
+    remove_region = 0;
     regionIndex++;
-    
   }
   output->ShallowCopy(alignNormalsFilter->GetOutput());
   output->GetCellData()->AddArray(regionsArray);

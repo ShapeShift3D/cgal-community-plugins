@@ -80,6 +80,32 @@ public:
   vtkSetMacro(MaxAcceptedAngle, double);
   //@}
 
+  //TODO : Create a plugin
+   //@{
+  /**
+  * Set/Get MaxAcceptedAngle. The maximum accepted angle between the face normal and the normal of a plane.
+  */
+  vtkGetMacro(NormalThresholdAngle, double);
+  vtkSetClampMacro(NormalThresholdAngle, double,0.0,90.0);
+  //@}
+
+  typedef enum {
+		X = 1,
+		Y,
+		Z,
+		USER_DEFINED,
+	} PlaneNormalModes;
+
+  vtkGetMacro(PlaneNormalOrientationVectorMode, int);
+	vtkSetClampMacro(PlaneNormalOrientationVectorMode, int, PlaneNormalModes::X, PlaneNormalModes::USER_DEFINED);
+  virtual void SetHorizontalPlaneOrientationToX(void) { this->SetPlaneNormalOrientationVectorMode(vtkCGALRegionGrowing::PlaneNormalModes::X); }
+	virtual void SetHorizontalPlaneOrientationToY(void) { this->SetPlaneNormalOrientationVectorMode(vtkCGALRegionGrowing::PlaneNormalModes::Y); }
+	virtual void SetHorizontalPlaneOrientationToZ(void) { this->SetPlaneNormalOrientationVectorMode(vtkCGALRegionGrowing::PlaneNormalModes::Z); }
+	virtual void SetHorizontalPlaneOrientationToUserDefined(void) { this->SetPlaneNormalOrientationVectorMode(vtkCGALRegionGrowing::PlaneNormalModes::USER_DEFINED); }
+
+	vtkGetVector3Macro(UserDefinedPlaneNormalVector, double);
+	vtkSetVector3Macro(UserDefinedPlaneNormalVector, double);
+
 protected:
   vtkCGALRegionGrowing();
   ~vtkCGALRegionGrowing() {}
@@ -99,6 +125,10 @@ protected:
   int MinRegionSize;
   double MaxDistanceToPlane;
   double MaxAcceptedAngle;
+  //Modification
+  double NormalThresholdAngle;
+  int PlaneNormalOrientationVectorMode;
+	double UserDefinedPlaneNormalVector[3];
 
 private:
   vtkCGALRegionGrowing(const vtkCGALRegionGrowing&) = delete;
