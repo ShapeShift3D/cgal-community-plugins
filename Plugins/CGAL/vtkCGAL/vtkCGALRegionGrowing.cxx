@@ -189,16 +189,13 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   Regions regions;
   region_growing.detect(std::back_inserter(regions));
 
-  // Print number of detected shapes
-  vtkWarningMacro(<< regions.end() - regions.begin() << " shapes detected.");
-
   Region unassigned_cells;
   region_growing.unassigned_items(std::back_inserter(unassigned_cells));
-  // Print number of unassigned items
-  vtkWarningMacro(<< unassigned_cells.size() << " Unassigned cells");
 
-  // Algorithm Coverage (No of cells assigned/total no. of cells)
-  vtkWarningMacro(<< "Algorithm Coverage: "
+  // Print info
+  vtkWarningMacro(<< regions.end() - regions.begin() << " shapes detected"
+                  << "|" << unassigned_cells.size() << " unassigned cells"
+                  << "|" << "Algorithm Coverage: "
                   << ((input->GetNumberOfCells() - unassigned_cells.size()) /
                        static_cast<double>(input->GetNumberOfCells()) * 100.00)
                   << "%");
@@ -222,9 +219,6 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
     }
     regionIndex++;
   }
-
-  // output->GetCellData()->SetScalars(regionsArray);
-  // regionsArray->Delete();
 
   vtkNew<vtkPolyDataNormals> alignNormalsFilter;
   alignNormalsFilter->SetInputData(input);
@@ -253,22 +247,48 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   removeCell->SetNumberOfTuples(numPolys);
   removeCell->Fill(-1);
 
-  vtkWarningMacro(<< cellsNormalArray->GetTuple(static_cast<vtkIdType>(1))[0] << " "
-                  << cellsNormalArray->GetTuple(static_cast<vtkIdType>(1))[1] << " "
-                  << cellsNormalArray->GetTuple(static_cast<vtkIdType>(1))[2]);
-
   regionIndex = 0;
-  // double normal_threshold = 0.00;
   bool remove_region = 0;
+  double planeNormal[3] = { 0.0, 0.0, 0.0 };
+
+  // Adjust tangent vector according to mode
+  switch (this->PlaneNormalOrientationVectorMode)
+  {
+    case PlaneNormalModes::X:
+    {
+      planeNormal[0] = 1.0;
+      break;
+    }
+    case PlaneNormalModes::Y:
+    {
+      planeNormal[1] = 1.0;
+      break;
+    }
+    case PlaneNormalModes::Z:
+    {
+      planeNormal[2] = 1.0;
+      break;
+    }
+    case PlaneNormalModes::USER_DEFINED:
+    {
+      planeNormal[0] = this->UserDefinedPlaneNormalVector[0];
+      planeNormal[1] = this->UserDefinedPlaneNormalVector[1];
+      planeNormal[2] = this->UserDefinedPlaneNormalVector[2];
+      break;
+    }
+    default:
+    {
+      vtkErrorMacro("Unknown plane normal orientation vector mode.");
+      return 0;
+    }
+  }
 
   for (const auto& region : regions)
   {
-    //  Average vector of each region expect the ussasigned one
-    //  Iterate through all region items.
     double normalSum[3] = { 0.0, 0.0, 0.0 };
     double normalAvg[3] = { 0.0, 0.0, 0.0 };
-    double planeNormal[3] = { 0.0, 0.0, 0.0 };
 
+    // Calculate average normal vector for each region
     for (const auto index : region)
     {
       double* cellNormal = cellsNormalArray->GetTuple(static_cast<vtkIdType>(index));
@@ -279,43 +299,9 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
     normalAvg[1] = normalSum[1] / region.size();
     normalAvg[2] = normalSum[2] / region.size();
 
+    // Label the region if average normal vector is along the desired planeNormal vector
     vtkMath::Normalize(normalAvg);
-
-    // normal_threshold = 10.00;
-    remove_region = 0;
-
-    // Adjust tangent vector according to mode
-    
-    switch (this->PlaneNormalOrientationVectorMode)
-    {
-      case PlaneNormalModes::X:
-      {
-        planeNormal[0] = 1.0;
-        break;
-      }
-      case PlaneNormalModes::Y:
-      {
-        planeNormal[1] = 1.0;
-        break;
-      }
-      case PlaneNormalModes::Z:
-      {
-        planeNormal[2] = 1.0;
-        break;
-      }
-      case PlaneNormalModes::USER_DEFINED:
-      {
-        planeNormal[0] = this->UserDefinedPlaneNormalVector[0];
-        planeNormal[1] = this->UserDefinedPlaneNormalVector[1];
-        planeNormal[2] = this->UserDefinedPlaneNormalVector[2];
-        break;
-      }
-      default:
-      {
-        vtkErrorMacro("Unknown plane normal orientation vector mode.");
-        return 0;
-      }
-    }
+    vtkMath::Normalize(planeNormal);
 
     if (vtkMath::Dot(normalAvg, planeNormal) >= cos(NormalThresholdAngle * PI / 180.0) &&
       vtkMath::Dot(normalAvg, planeNormal) <= 1.0)
@@ -328,15 +314,13 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
       remove_region = 1;
     }
 
-    for (const auto index : region)
+    if (remove_region == 1)
     {
-      regionNormal->SetTuple3(
-        static_cast<vtkIdType>(index), normalAvg[0], normalAvg[1], normalAvg[2]);
-
-      // Flag all cells of the Region if it needs to be removed expect the unassinged region
-      // Take the dot product and mark the cell that needs to be removed
-      if (remove_region == 1)
+      for (const auto index : region)
       {
+        regionNormal->SetTuple3(
+          static_cast<vtkIdType>(index), normalAvg[0], normalAvg[1], normalAvg[2]);
+
         removeCell->SetTuple1(static_cast<vtkIdType>(index), 1);
       }
     }
@@ -344,6 +328,7 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
     remove_region = 0;
     regionIndex++;
   }
+
   output->ShallowCopy(alignNormalsFilter->GetOutput());
   output->GetCellData()->AddArray(regionsArray);
   output->GetCellData()->SetScalars(regionsArray);
