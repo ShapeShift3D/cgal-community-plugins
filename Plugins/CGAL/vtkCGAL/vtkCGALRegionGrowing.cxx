@@ -195,7 +195,8 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   // Print info
   vtkWarningMacro(<< regions.end() - regions.begin() << " shapes detected"
                   << "|" << unassigned_cells.size() << " unassigned cells"
-                  << "|" << "Algorithm Coverage: "
+                  << "|"
+                  << "Algorithm Coverage: "
                   << ((input->GetNumberOfCells() - unassigned_cells.size()) /
                        static_cast<double>(input->GetNumberOfCells()) * 100.00)
                   << "%");
@@ -314,13 +315,12 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
       remove_region = 1;
     }
 
-    if (remove_region == 1)
+    for (const auto index : region)
     {
-      for (const auto index : region)
+      regionNormal->SetTuple3(
+        static_cast<vtkIdType>(index), normalAvg[0], normalAvg[1], normalAvg[2]);
+      if (remove_region == 1)
       {
-        regionNormal->SetTuple3(
-          static_cast<vtkIdType>(index), normalAvg[0], normalAvg[1], normalAvg[2]);
-
         removeCell->SetTuple1(static_cast<vtkIdType>(index), 1);
       }
     }
