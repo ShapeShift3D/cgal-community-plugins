@@ -3,6 +3,7 @@
 // -- VTK
 #include <vtkCellData.h>
 #include <vtkDataArray.h>
+#include <vtkDoubleArray.h>
 #include <vtkFieldData.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
@@ -12,6 +13,7 @@
 #include <vtkPolyDataNormals.h>
 #include <vtkSmartPointer.h>
 #include <vtkTimerLog.h>
+#include <vtkTriangle.h>
 
 // -- CGAL
 #include <CGAL/Cartesian.h>
@@ -248,6 +250,18 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   removeCell->SetNumberOfTuples(numPolys);
   removeCell->Fill(-1);
 
+  auto regionArea = vtkSmartPointer<vtkDoubleArray>::New();
+  regionArea->SetName("regionArea");
+  regionArea->SetNumberOfComponents(1);
+  regionArea->SetNumberOfTuples(numPolys);
+  regionArea->Fill(0.0);
+
+  auto regionStdDeviation = vtkSmartPointer<vtkDoubleArray>::New();
+  regionStdDeviation->SetName("regionStdDeviation");
+  regionStdDeviation->SetNumberOfComponents(1);
+  regionStdDeviation->SetNumberOfTuples(numPolys);
+  regionStdDeviation->Fill(0.0);
+
   regionIndex = 0;
   bool remove_region = 0;
   double planeNormal[3] = { 0.0, 0.0, 0.0 };
@@ -288,11 +302,12 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   {
     double normalSum[3] = { 0.0, 0.0, 0.0 };
     double normalAvg[3] = { 0.0, 0.0, 0.0 };
+    double* cellNormal;
 
     // Calculate average normal vector for each region
     for (const auto index : region)
     {
-      double* cellNormal = cellsNormalArray->GetTuple(static_cast<vtkIdType>(index));
+      cellNormal = cellsNormalArray->GetTuple(static_cast<vtkIdType>(index));
       vtkMath::Add(cellNormal, normalSum, normalSum);
     }
 
@@ -315,14 +330,64 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
       remove_region = 1;
     }
 
+    double area = 0.0;
+    double p0[3] = { 0.0, 0.0, 0.0 };
+    double p1[3] = { 0.0, 0.0, 0.0 };
+    double p2[3] = { 0.0, 0.0, 0.0 };
+    double angle;
+    double dotProduct;
+    double variance = 0.0;
+    double stdDeviation = 0.0;
+
     for (const auto index : region)
     {
-      regionNormal->SetTuple3(
-        static_cast<vtkIdType>(index), normalAvg[0], normalAvg[1], normalAvg[2]);
+
       if (remove_region == 1)
       {
         removeCell->SetTuple1(static_cast<vtkIdType>(index), 1);
       }
+
+      // Surface Area of a region
+      vtkCell* triangle = alignNormalsFilter->GetOutput()->GetCell(static_cast<vtkIdType>(index));
+
+      triangle->GetPoints()->GetPoint(0, p0);
+      triangle->GetPoints()->GetPoint(1, p1);
+      triangle->GetPoints()->GetPoint(2, p2);
+      area += vtkTriangle::TriangleArea(p0, p1, p2);
+
+      // Standard Deviation
+      // Mean is zero
+      cellNormal = cellsNormalArray->GetTuple(static_cast<vtkIdType>(index));
+
+      dotProduct = vtkMath::Dot(normalAvg, cellNormal);
+
+      // Safe acos() with clamping 
+      if (dotProduct <= -1.0)
+      {
+        angle = 180.0;
+      }
+      else if (dotProduct >= 1.0)
+      {
+        angle = 0.0;
+      }
+      else
+      {
+        angle = acos(dotProduct) * ( 180.0/ PI);
+      }
+
+      variance += pow(angle, 2);
+      stdDeviation = sqrt(variance / region.size());
+    }
+
+    // Store regionArea, standard deviation, normal vector of the angle in an array
+    // Normalize the values
+
+    for (const auto index : region)
+    {
+      regionNormal->SetTuple3(
+        static_cast<vtkIdType>(index), normalAvg[0], normalAvg[1], normalAvg[2]);
+      regionArea->SetTuple1(static_cast<vtkIdType>(index), area);
+      regionStdDeviation->SetTuple1(static_cast<vtkIdType>(index), stdDeviation);
     }
 
     remove_region = 0;
@@ -334,7 +399,8 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   output->GetCellData()->SetScalars(regionsArray);
   output->GetCellData()->AddArray(removeCell);
   output->GetCellData()->AddArray(regionNormal);
-
+  output->GetCellData()->AddArray(regionArea);
+  output->GetCellData()->AddArray(regionStdDeviation);
   return 1;
 }
 
