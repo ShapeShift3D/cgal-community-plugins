@@ -172,14 +172,23 @@ int stkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   Regions regions;
   region_growing.detect(std::back_inserter(regions));
 
-  // Print number of detected shapes
-  vtkWarningMacro(<< regions.end() - regions.begin() << " shapes detected.");
+  Region unassigned_cells;
+  region_growing.unassigned_items(std::back_inserter(unassigned_cells));
+
+  // Print number of detected shapes and algorithm coverage
+  vtkWarningMacro(<< regions.end() - regions.begin() << " shapes detected "
+                  << "|" << unassigned_cells.size() << " unassigned cells "
+                  << "|"
+                  << "Algorithm Coverage: "
+                  << ((input->GetNumberOfCells() - unassigned_cells.size()) /
+                       static_cast<double>(input->GetNumberOfCells()) * 100.00)
+                  << " %");
 
   vtkTimerLog::MarkEndEvent("Detection");
 
   vtkIdType numPolys = input->GetNumberOfPolys();
-  auto regionsArray = vtkIntArray::New();
-  regionsArray->SetName("regions");
+  auto regionsArray = vtkSmartPointer<vtkIntArray>::New();
+  regionsArray->SetName("Regions");
   regionsArray->SetNumberOfComponents(1);
   regionsArray->SetNumberOfTuples(numPolys);
   regionsArray->Fill(-1);
@@ -196,7 +205,6 @@ int stkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   }
 
   output->GetCellData()->SetScalars(regionsArray);
-  regionsArray->Delete();
 
   return 1;
 }
