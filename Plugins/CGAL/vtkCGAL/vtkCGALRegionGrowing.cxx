@@ -310,7 +310,6 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
       cellNormal = cellsNormalArray->GetTuple(static_cast<vtkIdType>(index));
       vtkMath::Add(cellNormal, normalSum, normalSum);
     }
-
     normalAvg[0] = normalSum[0] / region.size();
     normalAvg[1] = normalSum[1] / region.size();
     normalAvg[2] = normalSum[2] / region.size();
@@ -329,16 +328,38 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
     {
       remove_region = 1;
     }
-
     double area = 0.0;
     double p0[3] = { 0.0, 0.0, 0.0 };
     double p1[3] = { 0.0, 0.0, 0.0 };
     double p2[3] = { 0.0, 0.0, 0.0 };
-    double angle;
-    double dotProduct;
+    double angle=0.0;
+    double dotProduct=0.0;
+    double meanAngleSum=0.0;
+    double meanAngle=0.0;
     double variance = 0.0;
+    double varianceSum = 0.0;
     double stdDeviation = 0.0;
 
+    for (const auto index : region)
+    {
+       dotProduct = vtkMath::Dot(normalAvg, cellNormal);
+      // Safe acos() with clamping 
+      if (dotProduct <= -1.0)
+      {
+        angle = 180.0;
+      }
+      else if (dotProduct >= 1.0)
+      {
+        angle = 0.0;
+      }
+      else
+      {
+        angle = acos(dotProduct) * ( 180.0/ PI);
+      }
+      meanAngleSum += angle;
+    }
+
+    meanAngle = meanAngleSum/region.size(); 
     for (const auto index : region)
     {
 
@@ -349,18 +370,15 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
 
       // Surface Area of a region
       vtkCell* triangle = alignNormalsFilter->GetOutput()->GetCell(static_cast<vtkIdType>(index));
-
       triangle->GetPoints()->GetPoint(0, p0);
       triangle->GetPoints()->GetPoint(1, p1);
       triangle->GetPoints()->GetPoint(2, p2);
       area += vtkTriangle::TriangleArea(p0, p1, p2);
 
       // Standard Deviation
-      // Mean is zero
       cellNormal = cellsNormalArray->GetTuple(static_cast<vtkIdType>(index));
 
       dotProduct = vtkMath::Dot(normalAvg, cellNormal);
-
       // Safe acos() with clamping 
       if (dotProduct <= -1.0)
       {
@@ -375,10 +393,10 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
         angle = acos(dotProduct) * ( 180.0/ PI);
       }
 
-      variance += pow(angle, 2);
-      stdDeviation = sqrt(variance / region.size());
+      varianceSum += pow(angle-meanAngle, 2); 
     }
-
+    variance = varianceSum/ region.size();
+    stdDeviation = sqrt(variance);
     // Store regionArea, standard deviation, normal vector of the angle in an array
     // Normalize the values
 
