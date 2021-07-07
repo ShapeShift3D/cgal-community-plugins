@@ -220,7 +220,7 @@ int vtkCGALRegionGrowing::Detection(vtkPolyData *input, vtkPolyData *output)
     regionIndex++;
   }
 
-  output->GetCellData()->SetScalars(regionsArray);
+  output->GetCellData()->AddArray(regionsArray);
 
   return 1;
 }
