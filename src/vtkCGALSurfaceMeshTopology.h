@@ -13,7 +13,7 @@ protected:
   vtkCGALSurfaceMeshTopology();
   ~vtkCGALSurfaceMeshTopology() {}
 
-  int RequestData(
+  virtual int RequestData(
     vtkInformation *,
     vtkInformationVector **,
     vtkInformationVector *) override;
