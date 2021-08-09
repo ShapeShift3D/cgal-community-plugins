@@ -49,10 +49,10 @@ int vtkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         return 0;
     }        
         
-    CGAL::Surface_mesh_topology::Curves_on_surface_topology<Surface_Mesh> curves(cMesh, true);
+    CGAL::Surface_mesh_topology::Curves_on_surface_topology<Surface_Mesh> curves(cMesh);
     CGAL::Surface_mesh_topology::Euclidean_length_weight_functor<Surface_Mesh> wf(cMesh);
 
-    auto path = curves.compute_shortest_non_contractible_cycle(wf, true);
+    auto path = curves.compute_shortest_non_contractible_cycle(wf);
 
     if (path.is_empty()) {
         vtkErrorMacro("Un-holy mesh detected.");
