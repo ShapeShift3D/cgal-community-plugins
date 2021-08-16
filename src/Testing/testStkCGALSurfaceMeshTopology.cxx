@@ -58,7 +58,7 @@ TEST_CASE("filter should return the shortest loop") {
     arcP->GetPointData()->SetActiveScalars("radius");
 
     tubeFilter->SetInputConnection(arc->GetOutputPort());
-    tubeFilter->SetNumberOfSides(16);
+    tubeFilter->SetNumberOfSides(4);
     tubeFilter->SetVaryRadiusToVaryRadiusByAbsoluteScalar();
 
     triFilter->SetInputConnection(tubeFilter->GetOutputPort());
