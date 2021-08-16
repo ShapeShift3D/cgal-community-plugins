@@ -50,7 +50,7 @@ static void remove_seen_vtx(const Path &path,
                               std::unordered_set<Vertex_Index> &vertices) {
     std::cerr << "path len:" << path.length() << std::endl;
     for(auto i=0; i < path.length(); i++) {
-        Vertex_Index vtx = !path.get_flip()[i] ? mesh.target(path[i]) : mesh.source(path[i]);
+        Vertex_Index vtx = path.get_flip()[i] ? mesh.target(path[i]) : mesh.source(path[i]);
         std::cerr << "vtx:" << vtx << std::endl;
         vertices.erase(vtx);
     }
