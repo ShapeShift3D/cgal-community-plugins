@@ -11,23 +11,8 @@ endif ()
 # ParaView 6.0 or later
 set(classes
   vtkCGAL3DPolyhedralMesher
-  vtkCGALAbstractUVParametrization
-  vtkCGALARAPUVParametrization
-  vtkCGALLSCMUVParametrization
-  vtkCGALBoolean
-  vtkCGALBoolean2DMesher
-  vtkCGALBoolean3DMesher
-  vtkCGALIsotropicRemeshingFilter
-  #vtkCGALEfficientRANSAC
-  vtkCGALPolygonMeshSmoothingOperator
-  vtkCGALPolygonOrientOperator
-  vtkCGALPolygonSetOrientedSideClassifier
-  vtkCGALPolygonSetToPolyLineSet
-  vtkCGALPolygonUtilities
-  vtkCGALPolyLineSetToPolygonSet
-  vtkCGALRegionGrowing
-  vtkCGALSelfIntersectionMeasurer
-  vtkCGALUtilities)
+  vtkCGALUtilities
+)
 
 set(headers
   vtkPointCloudScalarSizingField.h)

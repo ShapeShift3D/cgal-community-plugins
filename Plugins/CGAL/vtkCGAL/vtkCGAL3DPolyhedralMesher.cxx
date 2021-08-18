@@ -1,41 +1,41 @@
 /**
-* \class vtkCGAL3DPolyhedralMesher
-*
-* \brief Generates a polyhedral mesh of the bounding domain based on features related to the interior surfaces.
-*        ODT and Lloyd optimization methods are supported. Exude and perturbe options are also supported, but can
-*        have an impact on the refinement criteria. See the official CGAL documentation for more information.
-*        
-*        Inputs: Interior Surfaces (port 0, vtkPolyData), Bounding Domain (port 1, vtkPolyData)
-*        Output: Polyhedral Domain with features (port 0, vtkUnstructuredGrid)
-*/
+ * \class vtkCGAL3DPolyhedralMesher
+ *
+ * \brief Generates a polyhedral mesh of the bounding domain based on features related to the
+ * interior surfaces. ODT and Lloyd optimization methods are supported. Exude and perturbe options
+ * are also supported, but can have an impact on the refinement criteria. See the official CGAL
+ * documentation for more information.
+ *
+ *        Inputs: Interior Surfaces (port 0, vtkPolyData), Bounding Domain (port 1, vtkPolyData)
+ *        Output: Polyhedral Domain with features (port 0, vtkUnstructuredGrid)
+ */
 
 #include "vtkCGAL3DPolyhedralMesher.h"
 
 //---------VTK----------------------------------
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
-#include <vtkPolyDataAlgorithm.h>
-#include <vtkUnstructuredGrid.h>
-#include <vtkPolyData.h>
-#include <vtkPoints.h>
 #include <vtkPointData.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
 #include <vtkProbeFilter.h>
 #include <vtkStaticPointLocator.h>
+#include <vtkUnstructuredGrid.h>
 
 #include <vtkTimerLog.h>
 
 //---------CGAL---------------------------------
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Mesh_polyhedron_3.h>
-#include <CGAL/Polyhedral_mesh_domain_with_features_3.h>
-#include <CGAL/Mesh_complex_3_in_triangulation_3.h>
-#include <CGAL/Mesh_triangulation_3.h>
-#include <CGAL/Mesh_criteria_3.h>
-#include <CGAL/Mesh_constant_domain_field_3.h>
+#include <CGAL/IO/Complex_3_in_triangulation_3_to_vtk.h>
 #include <CGAL/Labeled_mesh_domain_3.h>
+#include <CGAL/Mesh_complex_3_in_triangulation_3.h>
+#include <CGAL/Mesh_constant_domain_field_3.h>
+#include <CGAL/Mesh_criteria_3.h>
+#include <CGAL/Mesh_polyhedron_3.h>
+#include <CGAL/Mesh_triangulation_3.h>
+#include <CGAL/Polyhedral_mesh_domain_with_features_3.h>
 #include <CGAL/make_mesh_3.h>
 #include <CGAL/refine_mesh_3.h>
-#include <CGAL/IO/Complex_3_in_triangulation_3_to_vtk.h>
 
 //---------Module-------------------------------
 #include <vtkCGALUtilities.h>
@@ -50,98 +50,22 @@ typedef CGAL::Sequential_tag Concurrency_tag;
 vtkStandardNewMacro(vtkCGAL3DPolyhedralMesher);
 
 // ----------------------------------------------------------------------------
-vtkCGAL3DPolyhedralMesher::vtkCGAL3DPolyhedralMesher()
-{
-  this->SetNumberOfInputPorts(3);
-  this->SetNumberOfOutputPorts(1);
-  
-  // Mesh Criteria
-  this->EdgeSize = 0.025;
-  this->FacetAngle = 25;
-  this->FacetSize = 0.05;
-  this->FacetDistance = 0.005;
-  this->CellRadiusEdgeRatio = 3;
-  this->CellSize = 0.05;
-
-  // Constraint flags
-  this->TopologicalStructure = vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD;
-  this->ConfineSurfacePoints = true;
-  this->UseCustomSizingField = false;
-  this->CustomSizingFieldArrayName = "";
-
-  // Optimizer flags
-  this->Lloyd = true;
-  this->Odt = true;
-  this->Perturb = true;
-  this->Exude = true;
-}
-
-//----------------------------------------------------------------------------
-void vtkCGAL3DPolyhedralMesher::PrintSelf(ostream& os, vtkIndent indent)
-{
-  // TODO: Write PrintSelf
-  this->Superclass::PrintSelf(os, indent);
-}
-
-//----------------------------------------------------------------------------
-
-/** @brief Getter for interior surface
-*
-*  @return vtkPolyData* The interior surface features
-*/
-vtkPolyData* vtkCGAL3DPolyhedralMesher::GetInteriorSurfaces()
-{
-  if (this->GetNumberOfInputConnections(0) < 1) {
-    return nullptr;
-  }
-
-  return vtkPolyData::SafeDownCast(this->GetInputDataObject(0, 0));
-}
-
-//----------------------------------------------------------------------------
-
-/** @brief Getter for Bounding Domain
-*
-*  @return vtkPolyData*
-*/
-vtkPolyData* vtkCGAL3DPolyhedralMesher::GetBoundingDomain()
-{
-  if (this->GetNumberOfInputConnections(1) < 1) {
-    return nullptr;
-  }
-
-  return vtkPolyData::SafeDownCast(this->GetInputDataObject(1, 0));
-}
-
-//----------------------------------------------------------------------------
-
-/** @brief Getter for Sizing Field
-*
-*  @return vtkPointSet*
-*/
-vtkPointSet* vtkCGAL3DPolyhedralMesher::GetSizingField()
-{
-    if (this->GetNumberOfInputConnections(2) < 1) {
-        return nullptr;
-    }
-
-    return vtkPointSet::SafeDownCast(this->GetInputDataObject(2, 0));
-}
+vtkCGAL3DPolyhedralMesher::vtkCGAL3DPolyhedralMesher() = default;
 
 //----------------------------------------------------------------------------
 
 int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
-                      vtkInformationVector** inputVector,
-                      vtkInformationVector* outputVector)
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
-  vtkPolyData* inputInteriorSurfaces = vtkPolyData::GetData(inputVector[0]->GetInformationObject(0));
+  vtkPolyData* inputInteriorSurfaces =
+    vtkPolyData::GetData(inputVector[0]->GetInformationObject(0));
   vtkPolyData* inputBoundingDomain = vtkPolyData::GetData(inputVector[1]->GetInformationObject(0));
   vtkPointSet* inputSizingField = nullptr;
   if (this->GetNumberOfInputConnections(2) > 0)
     inputSizingField = vtkPointSet::GetData(inputVector[2]->GetInformationObject(0));
 
   vtkUnstructuredGrid* output = vtkUnstructuredGrid::GetData(outputVector->GetInformationObject(0));
-    
+
   if (inputInteriorSurfaces == nullptr)
   {
     vtkErrorMacro("Interior Surfaces input is null.");
@@ -177,7 +101,7 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
     vtkErrorMacro("Bounding Domain input does not cell structure.");
     return 0;
   }
-  
+
   // Check for sizing field
   vtkDataArray* sizingFieldArray = nullptr;
 
@@ -189,7 +113,8 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
       return 0;
     }
 
-    vtkAbstractArray* sizingFieldAbstractArray = inputSizingField->GetPointData()->GetAbstractArray(this->CustomSizingFieldArrayName.c_str());
+    vtkAbstractArray* sizingFieldAbstractArray =
+      inputSizingField->GetPointData()->GetAbstractArray(this->CustomSizingFieldArrayName.c_str());
     if (sizingFieldAbstractArray == nullptr)
     {
       vtkErrorMacro("Sizing field array not found.");
@@ -223,7 +148,7 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   Polyhedron* boundingDomain = new Polyhedron();
   vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputInteriorSurfaces, *interiorSurfaces);
   vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputBoundingDomain, *boundingDomain);
-  
+
   vtkTimerLog::MarkEndEvent("VTK To CGAL conversion");
   this->UpdateProgress(0.1);
 
@@ -237,11 +162,8 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   // Sizing Field
   stk::PointCloudScalarSizingField size;
 
-
   if (this->UseCustomSizingField)
   {
-    vtkDataArray* sizingFieldArray = vtkArrayDownCast<vtkDataArray>(inputSizingField->GetPointData()->GetAbstractArray(this->CustomSizingFieldArrayName.c_str()));
-
     size.SetUseDefaultCellSize(false);
     size.SetPointCloud(inputSizingField);
     size.SetSizingFieldArray(sizingFieldArray);
@@ -256,18 +178,19 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   typedef CGAL::Mesh_triangulation_3<Mesh_domain, CGAL::Default, Concurrency_tag>::type Tr;
   typedef CGAL::Mesh_criteria_3<Tr> Mesh_criteria;
 
-  Mesh_criteria criteria( CGAL::parameters::edge_size = this->EdgeSize,
-              CGAL::parameters::facet_angle = this->FacetAngle,
-              CGAL::parameters::facet_size = this->FacetSize,
-              CGAL::parameters::facet_distance = this->FacetDistance,
-              CGAL::parameters::cell_radius_edge_ratio = this->CellRadiusEdgeRatio,
-              CGAL::parameters::cell_size = size);
-
+  Mesh_criteria criteria(CGAL::parameters::edge_size = this->EdgeSize,
+    CGAL::parameters::facet_angle = this->FacetAngle,
+    CGAL::parameters::facet_size = this->FacetSize,
+    CGAL::parameters::facet_distance = this->FacetDistance,
+    CGAL::parameters::cell_radius_edge_ratio = this->CellRadiusEdgeRatio,
+    CGAL::parameters::cell_size = size);
 
   // C3t3 init
-  typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr, Mesh_domain::Corner_index, Mesh_domain::Curve_index> C3t3;
+  typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr, Mesh_domain::Corner_index,
+    Mesh_domain::Curve_index>
+    C3t3;
   C3t3 c3t3;
-  
+
   if (this->ConfineSurfacePoints)
   {
     CGAL::Mesh_3::internal::init_c3t3_with_features(c3t3, domain, criteria);
@@ -288,36 +211,36 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   }
 
   CGAL::parameters::internal::Manifold_options manifoldOption;
-  switch (this->TopologicalStructure) {
-  case vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD:
+  switch (this->TopologicalStructure)
   {
-    manifoldOption = CGAL::parameters::manifold();
-    break;
-  }
-  case vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD_WITH_BOUNDARY:
-  {
-    manifoldOption = CGAL::parameters::manifold_with_boundary();
-    break;
-  }
-  case vtkCGAL3DPolyhedralMesher::TopologicalStructures::NON_MANIFOLD:
-  {
-    manifoldOption = CGAL::parameters::non_manifold();
-    break;
-  }
-  default:
-  {
-    vtkErrorMacro("Unknown option.");
-    return 0;
-  }
+    case vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD:
+    {
+      manifoldOption = CGAL::parameters::manifold();
+      break;
+    }
+    case vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD_WITH_BOUNDARY:
+    {
+      manifoldOption = CGAL::parameters::manifold_with_boundary();
+      break;
+    }
+    case vtkCGAL3DPolyhedralMesher::TopologicalStructures::NON_MANIFOLD:
+    {
+      manifoldOption = CGAL::parameters::non_manifold();
+      break;
+    }
+    default:
+    {
+      vtkErrorMacro("Unknown option.");
+      return 0;
+    }
   }
 
   CGAL::refine_mesh_3<C3t3, Mesh_domain, Mesh_criteria>(c3t3, domain, criteria,
-            CGAL::parameters::internal::Lloyd_options(this->Lloyd),
-            CGAL::parameters::internal::Odt_options(this->Odt),
-            CGAL::parameters::internal::Perturb_options(this->Perturb), 
-            CGAL::parameters::internal::Exude_options(this->Exude),
-            CGAL::parameters::internal::Manifold_options(manifoldOption)
-  );
+    CGAL::parameters::internal::Lloyd_options(this->Lloyd),
+    CGAL::parameters::internal::Odt_options(this->Odt),
+    CGAL::parameters::internal::Perturb_options(this->Perturb),
+    CGAL::parameters::internal::Exude_options(this->Exude),
+    CGAL::parameters::internal::Manifold_options(manifoldOption));
 
   vtkTimerLog::MarkEndEvent("Mesh Generation");
 
@@ -334,29 +257,5 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   interiorSurfaces = nullptr;
   boundingDomain = nullptr;
 
-  return 1;
-}
-
-//----------------------------------------------------------------------------
-int vtkCGAL3DPolyhedralMesher::FillInputPortInformation(int port, vtkInformation* info)
-{
-    if (port == 0 || port == 1)
-    {
-        info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
-    }
-    else if (port == 2)
-    {
-        info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
-        info->Set(vtkAlgorithm::INPUT_IS_OPTIONAL(), 1);
-    }
-
-    return 1;
-}
-
-
-// ------------------------------------------------------------------------------
-int vtkCGAL3DPolyhedralMesher::FillOutputPortInformation(int, vtkInformation *info)
-{
-  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkUnstructuredGrid");
   return 1;
 }
