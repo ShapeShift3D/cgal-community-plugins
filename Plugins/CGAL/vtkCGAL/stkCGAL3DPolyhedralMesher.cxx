@@ -1,5 +1,5 @@
 /**
- * \class vtkCGAL3DPolyhedralMesher
+ * \class stkCGAL3DPolyhedralMesher
  *
  * \brief Generates a polyhedral mesh of the bounding domain based on features related to the
  * interior surfaces. ODT and Lloyd optimization methods are supported. Exude and perturbe options
@@ -10,7 +10,7 @@
  *        Output: Polyhedral Domain with features (port 0, vtkUnstructuredGrid)
  */
 
-#include "vtkCGAL3DPolyhedralMesher.h"
+#include "stkCGAL3DPolyhedralMesher.h"
 
 //---------VTK----------------------------------
 #include <vtkInformation.h>
@@ -47,14 +47,14 @@ typedef CGAL::Parallel_tag Concurrency_tag;
 typedef CGAL::Sequential_tag Concurrency_tag;
 #endif
 
-vtkStandardNewMacro(vtkCGAL3DPolyhedralMesher);
+vtkStandardNewMacro(stkCGAL3DPolyhedralMesher);
 
 // ----------------------------------------------------------------------------
-vtkCGAL3DPolyhedralMesher::vtkCGAL3DPolyhedralMesher() = default;
+stkCGAL3DPolyhedralMesher::stkCGAL3DPolyhedralMesher() = default;
 
 //----------------------------------------------------------------------------
 
-int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
+int stkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   vtkPolyData* inputInteriorSurfaces =
@@ -213,17 +213,17 @@ int vtkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   CGAL::parameters::internal::Manifold_options manifoldOption;
   switch (this->TopologicalStructure)
   {
-    case vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD:
+    case stkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD:
     {
       manifoldOption = CGAL::parameters::manifold();
       break;
     }
-    case vtkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD_WITH_BOUNDARY:
+    case stkCGAL3DPolyhedralMesher::TopologicalStructures::MANIFOLD_WITH_BOUNDARY:
     {
       manifoldOption = CGAL::parameters::manifold_with_boundary();
       break;
     }
-    case vtkCGAL3DPolyhedralMesher::TopologicalStructures::NON_MANIFOLD:
+    case stkCGAL3DPolyhedralMesher::TopologicalStructures::NON_MANIFOLD:
     {
       manifoldOption = CGAL::parameters::non_manifold();
       break;

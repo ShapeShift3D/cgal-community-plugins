@@ -10,7 +10,7 @@ endif ()
 
 # ParaView 6.0 or later
 set(classes
-  vtkCGAL3DPolyhedralMesher
+  stkCGAL3DPolyhedralMesher
   vtkCGALUtilities
 )
 
@@ -22,7 +22,7 @@ vtk_module_add_module(CGAL::vtkCGAL
   PRIVATE_HEADERS ${headers})
 
 paraview_add_server_manager_xmls(
-  XMLS  vtkCGALPlugins.xml)
+  XMLS  vtkCGALProxies.xml vtkCGALPlugins.xml)
 
 if (Eigen3_FOUND)
   vtk_module_link(CGAL::vtkCGAL PUBLIC Eigen3::Eigen)
