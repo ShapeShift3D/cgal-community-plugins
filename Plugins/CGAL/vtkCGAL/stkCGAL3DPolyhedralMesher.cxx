@@ -84,6 +84,15 @@ int stkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
     return 0;
   }
 
+  for (vtkIdType i = 0; i < inputInteriorSurfaces->GetNumberOfCells(); ++i)
+  {
+    if (inputInteriorSurfaces->GetCellType(i) != VTK_TRIANGLE)
+    {
+      vtkErrorMacro("Interior surface's cell" << i << " is not triangular.");
+      return 0;
+    }
+  }
+
   if (inputBoundingDomain == nullptr)
   {
     vtkErrorMacro("Bounding Domain input is null.");
@@ -100,6 +109,15 @@ int stkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   {
     vtkErrorMacro("Bounding Domain input does not cell structure.");
     return 0;
+  }
+
+  for (vtkIdType i = 0; i < inputBoundingDomain->GetNumberOfCells(); ++i)
+  {
+    if (inputBoundingDomain->GetCellType(i) != VTK_TRIANGLE)
+    {
+      vtkErrorMacro("Bounding domain's cell" << i << " is not triangular.");
+      return 0;
+    }
   }
 
   // Check for sizing field
