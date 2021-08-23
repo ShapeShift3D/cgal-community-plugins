@@ -151,6 +151,15 @@ int stkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
       vtkErrorMacro("Sizing Field array must only have 1 component.");
       return 0;
     }
+
+    for (vtkIdType i = 0; i < sizingFieldArray->GetNumberOfTuples(); ++i)
+    {
+      if (sizingFieldArray->GetTuple1(i) == 0.0)
+      {
+        vtkErrorMacro("A sizing field value of 0 at point " << i << " will result in failure. Aborting.");
+        return 0;
+      }
+    }
   }
 
   // Start
