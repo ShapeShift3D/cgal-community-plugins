@@ -1,7 +1,7 @@
 NAME
-  CGAL::vtkCGAL
+  CGAL::stkCGAL
 LIBRARY_NAME
-  vtkCGAL
+  stkCGAL
 DEPENDS
   VTK::FiltersCore
   VTK::FiltersGeometry

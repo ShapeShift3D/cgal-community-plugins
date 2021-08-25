@@ -1,9 +1,9 @@
 #pragma once
 
 #include <stkCGAL3DPolyhedralMesherInterface.h>
-#include <vtkCGALModule.h>
+#include <stkCGALModule.h>
 
-class VTKCGAL_EXPORT stkCGAL3DPolyhedralMesher : public stkCGAL3DPolyhedralMesherInterface
+class STKCGAL_EXPORT stkCGAL3DPolyhedralMesher : public stkCGAL3DPolyhedralMesherInterface
 {
 public:
   static stkCGAL3DPolyhedralMesher* New();
