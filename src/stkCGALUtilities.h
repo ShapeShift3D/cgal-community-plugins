@@ -1,5 +1,5 @@
-#ifndef vtkCGALUtilities_h
-#define vtkCGALUtilities_h
+#ifndef stkCGALUtilities_h
+#define stkCGALUtilities_h
 
 #include "vtkObject.h"
 #include <stkCGALModule.h>
@@ -20,11 +20,11 @@ class vtkPointSet;
 class vtkUnstructuredGrid;
 class vtkPolyData;
 
-class STKCGAL_EXPORT vtkCGALUtilities : public vtkObject
+class STKCGAL_EXPORT stkCGALUtilities : public vtkObject
 {
 public:
-    static vtkCGALUtilities* New();
-    vtkTypeMacro(vtkCGALUtilities, vtkObject);
+    static stkCGALUtilities* New();
+    vtkTypeMacro(stkCGALUtilities, vtkObject);
 
     // Kernel 0
     typedef CGAL::Exact_predicates_inexact_constructions_kernel K0;
@@ -79,12 +79,12 @@ public:
     static bool SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyData* poly);
 
 protected:
-    vtkCGALUtilities();
-    ~vtkCGALUtilities();
+    stkCGALUtilities();
+    ~stkCGALUtilities();
 
 private:
-    vtkCGALUtilities(const vtkCGALUtilities&) = delete;
-    void operator=(const vtkCGALUtilities&) = delete;
+    stkCGALUtilities(const stkCGALUtilities&) = delete;
+    void operator=(const stkCGALUtilities&) = delete;
    
     template <typename KernelType, typename MeshType>
     static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, MeshType& tmesh);

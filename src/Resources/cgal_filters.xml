@@ -21,7 +21,7 @@
         </SourceProxy>
         <!-- ==================================================================== -->
         <!-- <SourceProxy name="CGALARAPUVParametrization"
-                     class="vtkCGALARAPUVParametrization"
+                     class="stkCGALARAPUVParametrization"
                      label="CGAL ARAP UV Parametrization"
                      base_proxygroup="uv_parametrizations"
                      base_proxyname="CGALARAPUVParametrization">
@@ -35,7 +35,7 @@
         </SourceProxy> -->
         <!-- ==================================================================== -->
         <!-- <SourceProxy name="CGALLSCMUVParametrization"
-                     class="vtkCGALLSCMUVParametrization"
+                     class="stkCGALLSCMUVParametrization"
                      label="CGAL LSCM UV Parametrization"
                      base_proxygroup="uv_parametrizations"
                      base_proxyname="CGALLSCMUVParametrization">
@@ -49,7 +49,7 @@
         </SourceProxy> -->
         <!-- ==================================================================== -->
         <SourceProxy name="CGALBoolean"
-                     class="vtkCGALBoolean"
+                     class="stkCGALBoolean"
                      label="CGAL Boolean">
             <Documentation long_help="Applies a boolean operation on two PolyData inputs."
                            short_help="Applies a boolean operation on two PolyData inputs."> </Documentation>
@@ -109,7 +109,7 @@
         </SourceProxy>
         <!-- ==================================================================== -->
         <!-- <SourceProxy name="CGALBoolean3DMesher"
-                     class="vtkCGALBoolean3DMesher"
+                     class="stkCGALBoolean3DMesher"
                      label="CGAL Boolean 3D"
                      base_proxygroup="boolean_meshers"
                      base_proxyname="CGALBoolean3DMesher">
@@ -121,7 +121,7 @@
         </SourceProxy> -->
         <!-- ==================================================================== -->
         <SourceProxy name="CGALSelfIntersectionMeasurer"
-                     class="vtkCGALSelfIntersectionMeasurer"
+                     class="stkCGALSelfIntersectionMeasurer"
                      label="CGAL Self Intersection Measurer">
             <Documentation long_help="Finds self intersections inside a polygonal mesh and stores the information in an array."
                            short_help="Finds self intersections inside a polygonal mesh."> </Documentation>
@@ -180,7 +180,7 @@
         </SourceProxy>
         <!-- ==================================================================== -->
         <SourceProxy name="CGALPolygonOrientOperator"
-                     class="vtkCGALPolygonOrientOperator"
+                     class="stkCGALPolygonOrientOperator"
                      label="CGAL Polygon Orient Operator"
                      base_proxygroup="loop_operators"
                      base_proxyname="CGALPolygonOrientOperator">
@@ -198,7 +198,7 @@
         </SourceProxy>
         <!-- ==================================================================== -->
         <SourceProxy name="CGALBoolean2DMesher"
-                     class="vtkCGALBoolean2DMesher"
+                     class="stkCGALBoolean2DMesher"
                      label="CGAL Boolean 2D Mesher"
                      base_proxygroup="boolean_meshers"
                      base_proxyname="CGALBoolean2DMesher">
@@ -216,7 +216,7 @@
         </SourceProxy>
         <!-- ==================================================================== -->
         <SourceProxy name="CGALPolygonSetOrientedSideClassifier"
-                     class="vtkCGALPolygonSetOrientedSideClassifier"
+                     class="stkCGALPolygonSetOrientedSideClassifier"
                      label="CGAL Polygon Set Oriented Side Classifier"
                      base_proxygroup="point_classifiers"
                      base_proxyname="CGALPolygonSetOrientedSideClassifier">
@@ -234,7 +234,7 @@
         </SourceProxy>
         <!-- ==================================================================== -->
         <SourceProxy name="IsotropicRemeshingFilter"
-                     class="vtkCGALIsotropicRemeshingFilter"
+                     class="stkCGALIsotropicRemeshingFilter"
                      label="CGAL Isotropic Remeshing">
             <Documentation
                 short_help="Remeshes datasets."
@@ -319,7 +319,7 @@
         </SourceProxy>
         <!-- ==================================================================== -->
         <SourceProxy name="CGALRegionGrowing"
-               class="vtkCGALRegionGrowing"
+               class="stkCGALRegionGrowing"
                label="CGAL Shape Detection - Region Growing">
             <Documentation long_help="todo."
                        short_help="todo."> </Documentation>
@@ -384,7 +384,7 @@
         </SourceProxy>
         <!-- ==================================================================== -->
         <!-- <SourceProxy name="CGALEfficientRANSAC"
-               class="vtkCGALEfficientRANSAC"
+               class="stkCGALEfficientRANSAC"
                label="CGAL Shape Detection - Efficient RANSAC">
             <Documentation long_help="todo."
                        short_help="todo."> </Documentation>

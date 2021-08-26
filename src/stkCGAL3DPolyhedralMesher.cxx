@@ -38,8 +38,8 @@
 #include <CGAL/refine_mesh_3.h>
 
 //---------Module-------------------------------
-#include <vtkCGALUtilities.h>
-#include <vtkPointCloudScalarSizingField.h>
+#include <stkCGALUtilities.h>
+#include <stkPointCloudScalarSizingField.h>
 
 #ifdef CGAL_LINKED_WITH_TBB
 typedef CGAL::Parallel_tag Concurrency_tag;
@@ -173,8 +173,8 @@ int stkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   typedef CGAL::Mesh_polyhedron_3<K>::type Polyhedron;
   Polyhedron* interiorSurfaces = new Polyhedron();
   Polyhedron* boundingDomain = new Polyhedron();
-  vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputInteriorSurfaces, *interiorSurfaces);
-  vtkCGALUtilities::vtkPolyDataToPolygonMesh(inputBoundingDomain, *boundingDomain);
+  stkCGALUtilities::vtkPolyDataToPolygonMesh(inputInteriorSurfaces, *interiorSurfaces);
+  stkCGALUtilities::vtkPolyDataToPolygonMesh(inputBoundingDomain, *boundingDomain);
 
   vtkTimerLog::MarkEndEvent("VTK To CGAL conversion");
   this->UpdateProgress(0.1);

@@ -2,7 +2,7 @@
     <!-- ==================================================================== -->
     <ProxyGroup name="uv_parametrizations">
         <Proxy  name="CGALAbstractUVParametrization"
-                class="vtkCGALAbstractUVParametrization">
+                class="stkCGALAbstractUVParametrization">
             <Documentation>
                 Abstract class that should not be used directly.
             </Documentation>
@@ -53,7 +53,7 @@
         </Proxy>
         <!-- ==================================================================== -->
         <Proxy name="CGALARAPUVParametrization"
-                 class="vtkCGALARAPUVParametrization"
+                 class="stkCGALARAPUVParametrization"
                  label="ARAP #2"
                  base_proxygroup="uv_parametrizations"
                  base_proxyname="CGALAbstractUVParametrization">
@@ -103,7 +103,7 @@
         </Proxy>
         <!-- ==================================================================== -->
         <Proxy name="CGALLSCMUVParametrization"
-                 class="vtkCGALLSCMUVParametrization"
+                 class="stkCGALLSCMUVParametrization"
                  label="LSCM #2"
                  base_proxygroup="uv_parametrizations"
                  base_proxyname="CGALAbstractUVParametrization">
@@ -114,7 +114,7 @@
     <!-- ==================================================================== -->
     <ProxyGroup name="boolean_meshers">
         <Proxy name="CGALBoolean3DMesher"
-                     class="vtkCGALBoolean3DMesher"
+                     class="stkCGALBoolean3DMesher"
                      label="Boolean 3D #2">
             <Documentation long_help="Applies a boolean operation on two PolyData inputs."
                            short_help="Applies a boolean operation on two PolyData inputs."> </Documentation>
@@ -200,7 +200,7 @@
         </Proxy>
         <!-- ==================================================================== -->
         <Proxy name="CGALBoolean2DMesher"
-                     class="vtkCGALBoolean2DMesher"
+                     class="stkCGALBoolean2DMesher"
                      label="Boolean 2D #1">
             <Documentation long_help="Applies a 2d boolean operation on sets of PolyLine inputs."
                            short_help="Applies a 2d boolean operation on sets of PolyLine inputs."> </Documentation>
@@ -333,7 +333,7 @@
     <!-- ==================================================================== -->
     <ProxyGroup name="loop_operators">
         <Proxy name="CGALPolygonOrientOperator"
-                     class="vtkCGALPolygonOrientOperator"
+                     class="stkCGALPolygonOrientOperator"
                      label="CGAL Polygon Orient Operator">
             <Documentation long_help="Orders a polygon clockwise or counterclockwise."
                            short_help="Orders a polygon clockwise or counterclockwise."> </Documentation>
@@ -423,7 +423,7 @@
     <!-- ==================================================================== -->
     <ProxyGroup name="point_classifiers">
         <Proxy name="CGALPolygonSetOrientedSideClassifier"
-                     class="vtkCGALPolygonSetOrientedSideClassifier"
+                     class="stkCGALPolygonSetOrientedSideClassifier"
                      label="Polygon Set Oriented Side Classifier">
             <Documentation long_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set."
                            short_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set."> </Documentation>
@@ -503,7 +503,7 @@
     <!-- ==================================================================== -->
     <ProxyGroup name="mesh_smoothing_operators">
         <Proxy name="CGALPolygonMeshSmoothingOperator"
-                     class="vtkCGALPolygonMeshSmoothingOperator"
+                     class="stkCGALPolygonMeshSmoothingOperator"
                      label="Smoothing Operator #1">
             <Documentation
                     short_help="Smooths a triangulated region of a polydata by attempting to make the triangle angle and area distributions as uniform as possible by moving non-constrained vertices."

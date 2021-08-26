@@ -1,5 +1,5 @@
 /**
-* \class vtkPointCloudScalarSizingField
+* \class stkPointCloudScalarSizingField
 *
 * \brief Sizing field based on a point cloud
 *        

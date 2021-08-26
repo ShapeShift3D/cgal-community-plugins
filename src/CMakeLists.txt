@@ -10,18 +10,28 @@ vtk_module_find_package(PACKAGE Eigen3 VERSION 3.3 CONFIG_MODE PRIVATE)
 endif ()
 
 # Define content
-set(sources
-  stkCGAL3DPolyhedralMesher.cxx
-  vtkCGALUtilities.cxx
-)
-
-set(headers
-  stkCGAL3DPolyhedralMesher.h
-  vtkCGALUtilities.h
-)
+set(classes
+  stkCGAL3DPolyhedralMesher
+  stkCGALAbstractUVParametrization
+  stkCGALARAPUVParametrization
+  stkCGALLSCMUVParametrization
+  stkCGALBoolean
+  stkCGALBoolean2DMesher
+  stkCGALBoolean3DMesher
+  stkCGALIsotropicRemeshingFilter
+  #stkCGALEfficientRANSAC
+  stkCGALPolygonMeshSmoothingOperator
+  stkCGALPolygonOrientOperator
+  stkCGALPolygonSetOrientedSideClassifier
+  stkCGALPolygonSetToPolyLineSet
+  stkCGALPolygonUtilities
+  stkCGALPolyLineSetToPolygonSet
+  stkCGALRegionGrowing
+  stkCGALSelfIntersectionMeasurer
+  stkCGALUtilities)
 
 set(private_headers
-  vtkPointCloudScalarSizingField.h)
+  stkPointCloudScalarSizingField.h)
 
 # Namespace adaptive to how the module is built (as a pure module or as plugins)
 SET(NAMESPACE "")
@@ -36,8 +46,7 @@ endif(ENABLE_NONFREE_PLUGINS)
   
 
 vtk_module_add_module(${NAMESPACE}::stkCGAL
-  SOURCES ${sources}
-  HEADERS ${headers}
+  CLASSES ${classes}
   PRIVATE_HEADERS ${private_headers}
 )
 

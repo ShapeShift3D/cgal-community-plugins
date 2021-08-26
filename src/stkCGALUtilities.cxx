@@ -1,12 +1,12 @@
 /**
-* \class vtkCGALUtilities
+* \class stkCGALUtilities
 *
 * \brief Set of CGAL utility functions usable by other classes in this module.
 *        
 */
 
 
-#include "vtkCGALUtilities.h"
+#include "stkCGALUtilities.h"
 
 #include <vtkObjectFactory.h>
 #include <vtkUnstructuredGrid.h>
@@ -14,14 +14,14 @@
 
 #include <vtkAppendPolyData.h>
 
-vtkStandardNewMacro(vtkCGALUtilities);
+vtkStandardNewMacro(stkCGALUtilities);
 
 // ----------------------------------------------------------------------------
-vtkCGALUtilities::vtkCGALUtilities()
+stkCGALUtilities::stkCGALUtilities()
 {}
 
 // ----------------------------------------------------------------------------
-vtkCGALUtilities::~vtkCGALUtilities()
+stkCGALUtilities::~stkCGALUtilities()
 {}
 
 //----------------------------------------------------------------------------
@@ -34,13 +34,13 @@ vtkCGALUtilities::~vtkCGALUtilities()
 *  @param tmesh The resulting Surface Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh0& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh0& tmesh)
 {
     typedef typename boost::property_map<SurfaceMesh0, CGAL::vertex_point_t>::type VPMap;
     typedef typename boost::property_map_value<SurfaceMesh0, CGAL::vertex_point_t>::type Point_3;
     typedef typename boost::graph_traits<SurfaceMesh0>::vertex_descriptor vertex_descriptor;
 
-    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh0>(polyData, tmesh);
+    return stkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh0>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -53,13 +53,13 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
 *  @param tmesh The resulting Polygon Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron0& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron0& tmesh)
 {
     typedef typename boost::property_map<Polyhedron0, CGAL::vertex_point_t>::type VPMap;
     typedef typename boost::property_map_value<Polyhedron0, CGAL::vertex_point_t>::type Point_3;
     typedef typename boost::graph_traits<Polyhedron0>::vertex_descriptor vertex_descriptor;
 
-    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron0>(polyData, tmesh);
+    return stkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron0>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -72,13 +72,13 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
 *  @param tmesh The resulting Surface Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh1& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh1& tmesh)
 {
     typedef typename boost::property_map<SurfaceMesh1, CGAL::vertex_point_t>::type VPMap;
     typedef typename boost::property_map_value<SurfaceMesh1, CGAL::vertex_point_t>::type Point_3;
     typedef typename boost::graph_traits<SurfaceMesh1>::vertex_descriptor vertex_descriptor;
 
-    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh1>(polyData, tmesh);
+    return stkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh1>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -91,13 +91,13 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
 *  @param tmesh The resulting Polygon Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron1& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron1& tmesh)
 {
 	typedef typename boost::property_map<Polyhedron1, CGAL::vertex_point_t>::type VPMap;
 	typedef typename boost::property_map_value<Polyhedron1, CGAL::vertex_point_t>::type Point_3;
 	typedef typename boost::graph_traits<Polyhedron1>::vertex_descriptor vertex_descriptor;
 
-	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron1>(polyData, tmesh);
+	return stkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron1>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -110,13 +110,13 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
 *  @param tmesh The resulting Surface Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh2& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh2& tmesh)
 {
 	typedef typename boost::property_map<SurfaceMesh2, CGAL::vertex_point_t>::type VPMap;
 	typedef typename boost::property_map_value<SurfaceMesh2, CGAL::vertex_point_t>::type Point_3;
 	typedef typename boost::graph_traits<SurfaceMesh2>::vertex_descriptor vertex_descriptor;
 
-	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh2>(polyData, tmesh);
+	return stkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh2>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -129,13 +129,13 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
 *  @param tmesh The resulting Polygon Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron2& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron2& tmesh)
 {
 	typedef typename boost::property_map<Polyhedron2, CGAL::vertex_point_t>::type VPMap;
 	typedef typename boost::property_map_value<Polyhedron2, CGAL::vertex_point_t>::type Point_3;
 	typedef typename boost::graph_traits<Polyhedron2>::vertex_descriptor vertex_descriptor;
 
-	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron2>(polyData, tmesh);
+	return stkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron2>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -148,13 +148,13 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
 *  @param tmesh The resulting Polygon Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron3& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron3& tmesh)
 {
 	typedef typename boost::property_map<Polyhedron3, CGAL::vertex_point_t>::type VPMap;
 	typedef typename boost::property_map_value<Polyhedron3, CGAL::vertex_point_t>::type Point_3;
 	typedef typename boost::graph_traits<Polyhedron3>::vertex_descriptor vertex_descriptor;
 
-	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron3>(polyData, tmesh);
+	return stkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, Polyhedron3>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -167,13 +167,13 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
 *  @param tmesh The resulting Surface Mesh
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh3& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh3& tmesh)
 {
 	typedef typename boost::property_map<SurfaceMesh3, CGAL::vertex_point_t>::type VPMap;
 	typedef typename boost::property_map_value<SurfaceMesh3, CGAL::vertex_point_t>::type Point_3;
 	typedef typename boost::graph_traits<SurfaceMesh3>::vertex_descriptor vertex_descriptor;
 
-	return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh3>(polyData, tmesh);
+	return stkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, SurfaceMesh3>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -187,13 +187,13 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
 *  @return bool Success (true) or failure (false)
 */
 template <typename KernelType, typename MeshType>
-bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType& tmesh)
 {
     typedef typename boost::property_map<MeshType, CGAL::vertex_point_t>::type VPMap;
     typedef typename boost::property_map_value<MeshType, CGAL::vertex_point_t>::type Point_3;
     typedef typename boost::graph_traits<MeshType>::vertex_descriptor vertex_descriptor;
 
-    return vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, MeshType>(polyData, tmesh);
+    return stkCGALUtilities::vtkPolyDataToPolygonMeshImpl<VPMap, Point_3, vertex_descriptor, MeshType>(polyData, tmesh);
 }
 
 //----------------------------------------------------------------------------
@@ -207,7 +207,7 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType&
 *  @return bool Success (true) or failure (false)
 */
 template <typename VPMapType, typename PointType, typename VertexDescriptor, typename MeshType>
-bool vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh)
+bool stkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh)
 {
     VPMapType vpmap = get(CGAL::vertex_point, tmesh);
 
@@ -257,7 +257,7 @@ bool vtkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
 *  @param usg The output Unstructured Grid
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmesh, vtkUnstructuredGrid* usg)
+bool stkCGALUtilities::PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmesh, vtkUnstructuredGrid* usg)
 {
 	typedef typename boost::graph_traits<SurfaceMesh0>::vertex_descriptor   vertex_descriptor;
 	typedef typename boost::graph_traits<SurfaceMesh0>::face_descriptor     face_descriptor;
@@ -312,9 +312,9 @@ bool vtkCGALUtilities::PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmes
 *  @param usg The output Unstructured Grid
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh0& pmesh, vtkPolyData* poly)
+bool stkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh0& pmesh, vtkPolyData* poly)
 {
-	return vtkCGALUtilities::SurfaceMeshToPolyDataImpl<SurfaceMesh0>(pmesh, poly);
+	return stkCGALUtilities::SurfaceMeshToPolyDataImpl<SurfaceMesh0>(pmesh, poly);
 }
 
 //----------------------------------------------------------------------------
@@ -325,9 +325,9 @@ bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh0& pmesh, vtkPolyD
 *  @param usg The output Unstructured Grid
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh2& pmesh, vtkPolyData* poly)
+bool stkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh2& pmesh, vtkPolyData* poly)
 {
-	return vtkCGALUtilities::SurfaceMeshToPolyDataImpl<SurfaceMesh2>(pmesh, poly);
+	return stkCGALUtilities::SurfaceMeshToPolyDataImpl<SurfaceMesh2>(pmesh, poly);
 }
 
 //----------------------------------------------------------------------------
@@ -338,9 +338,9 @@ bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh2& pmesh, vtkPolyD
 *  @param usg The output Unstructured Grid
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh3& pmesh, vtkPolyData* poly)
+bool stkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh3& pmesh, vtkPolyData* poly)
 {
-	return vtkCGALUtilities::SurfaceMeshToPolyDataImpl<SurfaceMesh3>(pmesh, poly);
+	return stkCGALUtilities::SurfaceMeshToPolyDataImpl<SurfaceMesh3>(pmesh, poly);
 }
 
 //----------------------------------------------------------------------------
@@ -351,9 +351,9 @@ bool vtkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh3& pmesh, vtkPolyD
 *  @param usg The output Unstructured Grid
 *  @return bool Success (true) or failure (false)
 */
-bool vtkCGALUtilities::PolyhedronToPolyData(const Polyhedron3& pmesh, vtkPolyData* poly)
+bool stkCGALUtilities::PolyhedronToPolyData(const Polyhedron3& pmesh, vtkPolyData* poly)
 {
-	return vtkCGALUtilities::SurfaceMeshToPolyDataImpl<Polyhedron3>(pmesh, poly);
+	return stkCGALUtilities::SurfaceMeshToPolyDataImpl<Polyhedron3>(pmesh, poly);
 }
 
 //----------------------------------------------------------------------------
@@ -365,7 +365,7 @@ bool vtkCGALUtilities::PolyhedronToPolyData(const Polyhedron3& pmesh, vtkPolyDat
 *  @return bool Success (true) or failure (false)
 */
 template <typename MeshType>
-bool vtkCGALUtilities::SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyData* poly)
+bool stkCGALUtilities::SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyData* poly)
 {
 	typedef typename boost::graph_traits<MeshType>::vertex_descriptor   vertex_descriptor;
 	typedef typename boost::graph_traits<MeshType>::face_descriptor     face_descriptor;
