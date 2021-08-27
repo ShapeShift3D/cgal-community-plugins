@@ -22,9 +22,9 @@ set(classes
   #stkCGALPolygonMeshSmoothingOperator
   #stkCGALPolygonOrientOperator
   #stkCGALPolygonSetOrientedSideClassifier
-  #stkCGALPolygonSetToPolyLineSet
-  #stkCGALPolygonUtilities
-  #stkCGALPolyLineSetToPolygonSet
+  stkCGALPolygonSetToPolyLineSet
+  stkCGALPolygonUtilities
+  stkCGALPolyLineSetToPolygonSet
   #stkCGALRegionGrowing
   #stkCGALSelfIntersectionMeasurer
   stkCGALUtilities
