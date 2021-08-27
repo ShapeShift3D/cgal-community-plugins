@@ -10,8 +10,8 @@ public:
   vtkTypeMacro(stkCGAL3DPolyhedralMesher, stkCGAL3DPolyhedralMesherInterface);
 
 protected:
-  stkCGAL3DPolyhedralMesher();
-  ~stkCGAL3DPolyhedralMesher() {}
+  stkCGAL3DPolyhedralMesher() = default;
+  ~stkCGAL3DPolyhedralMesher() = default;
 
   virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 

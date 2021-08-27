@@ -49,11 +49,7 @@ typedef CGAL::Sequential_tag Concurrency_tag;
 
 vtkStandardNewMacro(stkCGAL3DPolyhedralMesher);
 
-// ----------------------------------------------------------------------------
-stkCGAL3DPolyhedralMesher::stkCGAL3DPolyhedralMesher() = default;
-
 //----------------------------------------------------------------------------
-
 int stkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {

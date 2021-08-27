@@ -12,26 +12,28 @@ endif ()
 # Define content
 set(classes
   stkCGAL3DPolyhedralMesher
-  stkCGALAbstractUVParametrization
   stkCGALARAPUVParametrization
   stkCGALLSCMUVParametrization
-  stkCGALBoolean
-  stkCGALBoolean2DMesher
-  stkCGALBoolean3DMesher
-  stkCGALIsotropicRemeshingFilter
+  stkCGALUVParametrizationUtilities
+  #stkCGALBoolean
+  #stkCGALBoolean2DMesher
+  #stkCGALBoolean3DMesher
+  #stkCGALIsotropicRemeshingFilter
   #stkCGALEfficientRANSAC
-  stkCGALPolygonMeshSmoothingOperator
-  stkCGALPolygonOrientOperator
-  stkCGALPolygonSetOrientedSideClassifier
-  stkCGALPolygonSetToPolyLineSet
-  stkCGALPolygonUtilities
-  stkCGALPolyLineSetToPolygonSet
-  stkCGALRegionGrowing
-  stkCGALSelfIntersectionMeasurer
-  stkCGALUtilities)
+  #stkCGALPolygonMeshSmoothingOperator
+  #stkCGALPolygonOrientOperator
+  #stkCGALPolygonSetOrientedSideClassifier
+  #stkCGALPolygonSetToPolyLineSet
+  #stkCGALPolygonUtilities
+  #stkCGALPolyLineSetToPolygonSet
+  #stkCGALRegionGrowing
+  #stkCGALSelfIntersectionMeasurer
+  stkCGALUtilities
+)
 
 set(private_headers
-  stkPointCloudScalarSizingField.h)
+  stkPointCloudScalarSizingField.h
+)
 
 # Namespace adaptive to how the module is built (as a pure module or as plugins)
 SET(NAMESPACE "")
