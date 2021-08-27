@@ -17,8 +17,8 @@ set(classes
   stkCGALUVParametrizationUtilities
   stkCGALBoolean2DMesher
   stkCGALBoolean3DMesher
+  stkCGALEfficientRANSAC
   #stkCGALIsotropicRemeshingFilter
-  #stkCGALEfficientRANSAC
   #stkCGALPolygonMeshSmoothingOperator
   #stkCGALPolygonOrientOperator
   #stkCGALPolygonSetOrientedSideClassifier
