@@ -21,7 +21,7 @@ set(classes
   stkCGALIsotropicRemeshingFilter
   stkCGALPolygonMeshSmoothingOperator
   stkCGALPolygonOrientOperator
-  #stkCGALPolygonSetOrientedSideClassifier
+  stkCGALPolygonSetOrientedSideClassifier
   stkCGALPolygonSetToPolyLineSet
   stkCGALPolygonUtilities
   stkCGALPolyLineSetToPolygonSet
