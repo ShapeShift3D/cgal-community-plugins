@@ -1,10 +1,11 @@
 #pragma once
 
-#include <stkCGALPolygonMeshSmoothingOperatorInterface.h>
 #include <stkCGALModule.h>
+#include <stkCGALPolygonMeshSmoothingOperatorInterface.h>
 
 // Inherit from the desired filter
-class STKCGAL_EXPORT stkCGALPolygonMeshSmoothingOperator : public stkCGALPolygonMeshSmoothingOperatorInterface
+class STKCGAL_EXPORT stkCGALPolygonMeshSmoothingOperator
+  : public stkCGALPolygonMeshSmoothingOperatorInterface
 {
 public:
   static stkCGALPolygonMeshSmoothingOperator* New();
@@ -14,9 +15,7 @@ protected:
   stkCGALPolygonMeshSmoothingOperator() = default;
   ~stkCGALPolygonMeshSmoothingOperator() = default;
 
-  virtual int RequestData(vtkInformation*, 
-                            vtkInformationVector**, 
-                            vtkInformationVector*) override;
+  virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
   // needed but not implemented

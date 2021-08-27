@@ -25,6 +25,15 @@
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 
+//---------CGAL---------------------------------
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/detect_features.h>
+#include <CGAL/Polygon_mesh_processing/smooth_mesh.h>
+#include <CGAL/Surface_mesh.h>
+
+//---------Module--------------------------------------------------
+#include <stkCGALUtilities.h>
+
 vtkStandardNewMacro(stkCGALPolygonMeshSmoothingOperator);
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
@@ -69,8 +78,9 @@ int stkCGALPolygonMeshSmoothingOperator::RequestData(
   EIFMap eif = get(CGAL::edge_is_feature, mesh);
   PMP::detect_sharp_edges(mesh, this->DihedralAngleEdgeConstraint, eif);
 
-  // It could also be possible to constrain vertices based on an input array. 
-  // See https://doc.cgal.org/latest/Polygon_mesh_processing/group__PMP__meshing__grp.html#gaa0551d546f6ab2cd9402bea12d8332a3
+  // It could also be possible to constrain vertices based on an input array.
+  // See
+  // https://doc.cgal.org/latest/Polygon_mesh_processing/group__PMP__meshing__grp.html#gaa0551d546f6ab2cd9402bea12d8332a3
 
   // int sharp_counter = 0;
   // for (edge_descriptor e : edges(mesh))

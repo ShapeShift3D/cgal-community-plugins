@@ -19,8 +19,8 @@ set(classes
   stkCGALBoolean3DMesher
   stkCGALEfficientRANSAC
   stkCGALIsotropicRemeshingFilter
-  #stkCGALPolygonMeshSmoothingOperator
-  #stkCGALPolygonOrientOperator
+  stkCGALPolygonMeshSmoothingOperator
+  stkCGALPolygonOrientOperator
   #stkCGALPolygonSetOrientedSideClassifier
   stkCGALPolygonSetToPolyLineSet
   stkCGALPolygonUtilities
