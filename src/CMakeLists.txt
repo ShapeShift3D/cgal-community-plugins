@@ -25,7 +25,7 @@ set(classes
   stkCGALPolygonSetToPolyLineSet
   stkCGALPolygonUtilities
   stkCGALPolyLineSetToPolygonSet
-  #stkCGALRegionGrowing
+  stkCGALRegionGrowing
   #stkCGALSelfIntersectionMeasurer
   stkCGALUtilities
 )
