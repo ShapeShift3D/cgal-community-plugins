@@ -15,9 +15,8 @@ set(classes
   stkCGALARAPUVParametrization
   stkCGALLSCMUVParametrization
   stkCGALUVParametrizationUtilities
-  #stkCGALBoolean
-  #stkCGALBoolean2DMesher
-  #stkCGALBoolean3DMesher
+  stkCGALBoolean2DMesher
+  stkCGALBoolean3DMesher
   #stkCGALIsotropicRemeshingFilter
   #stkCGALEfficientRANSAC
   #stkCGALPolygonMeshSmoothingOperator
