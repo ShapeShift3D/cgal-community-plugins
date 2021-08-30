@@ -1,9 +1,5 @@
-#find_package(CGAL REQUIRED)
-
 # Find dependencies
-if (NOT TARGET CGAL)
-  vtk_module_find_package(PACKAGE CGAL VERSION 5.1.1 CONFIG_MODE PRIVATE)
-endif ()
+vtk_module_find_package(PACKAGE CGAL VERSION 5.1.1 CONFIG_MODE PRIVATE)
 
 if (NOT TARGET Eigen3)
 vtk_module_find_package(PACKAGE Eigen3 VERSION 3.3 CONFIG_MODE PRIVATE)
