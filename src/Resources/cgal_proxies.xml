@@ -152,7 +152,7 @@
             <IntVectorProperty name="Mode"
                                command="SetMode"
                                number_of_elements="1"
-                               default_values="0">
+                               default_values="1">
                 <EnumerationDomain name="enum">
                     <Entry value="1"
                            text="Union"/>

@@ -15,11 +15,7 @@ protected:
   stkCGALBoolean3DMesher() = default;
   ~stkCGALBoolean3DMesher() = default;
 
-  int Mode;
   virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
-
-  bool SkipPreconditions;
-  bool ComputeSurfaceIntersection;
 
 private:
   stkCGALBoolean3DMesher(const stkCGALBoolean3DMesher&) = delete;
