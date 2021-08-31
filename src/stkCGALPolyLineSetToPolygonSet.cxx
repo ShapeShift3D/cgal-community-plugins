@@ -1,22 +1,6 @@
-/**
- * \class stkCGALPolyLineSetToPolygonSet
- *
- * \brief
- *
- *		 Conditions for valid polygons:
- *
- *		 Closed Boundary - the polygon's outer boundary must be a connected sequence of
- *curves, that start and end at the same vertex. Simplicity - the polygon must be simple.
- *		 Orientation - the polygon's outer boundary must be counter-clockwise oriented.
- *
- * Inputs: inputMeshA (port == 0, vtkPolyData), inputMeshB (port == 1, vtkPolyData)
- * Output: output (port == 0, vtkUnstructuredGrid)
- *
- */
-
-//---------VTK----------------------------------
 #include "stkCGALPolyLineSetToPolygonSet.h"
 
+//---------VTK----------------------------------
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkSmartPointer.h>
@@ -34,22 +18,17 @@
 //---------Module--------------------------------------------------
 #include <stkCGALPolygonUtilities.h>
 
-//----------
-// Declare the plugin
 vtkStandardNewMacro(stkCGALPolyLineSetToPolygonSet);
 
 // -----------------------------------------------------------------------------
-// Constructor
-// Fills the number of input and output objects.
-// Initializes the members that need it.
 stkCGALPolyLineSetToPolygonSet::stkCGALPolyLineSetToPolygonSet()
+  : Plane(Planes::XY)
+  , PwhIdArrayName("PolygonWithHolesId")
+  , DebugMode(false)
+  , PrintPoints(false)
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
-  this->Plane = stkCGALPolyLineSetToPolygonSet::Planes::XY;
-  this->PwhIdArrayName = "PolygonWithHolesId";
-  this->DebugMode = false;
-  this->PrintPoints = false;
 }
 
 //---------------------------------------------------
@@ -70,10 +49,6 @@ Polygon_set_2* stkCGALPolyLineSetToPolygonSet::GetOutputPolygonSet()
 }
 
 // ----------------------------------------------------------------------------
-// Gets the input
-// Creates CGAL::Surface_mesh from vtkPolydata
-// Calls the CGAL::RunBooleanOperations
-// Fills the output vtkUnstructuredGrid from the result.
 int stkCGALPolyLineSetToPolygonSet::RequestData(
   vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {

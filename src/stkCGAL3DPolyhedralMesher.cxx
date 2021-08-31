@@ -1,15 +1,3 @@
-/**
- * \class stkCGAL3DPolyhedralMesher
- *
- * \brief Generates a polyhedral mesh of the bounding domain based on features related to the
- * interior surfaces. ODT and Lloyd optimization methods are supported. Exude and perturbe options
- * are also supported, but can have an impact on the refinement criteria. See the official CGAL
- * documentation for more information.
- *
- *        Inputs: Interior Surfaces (port 0, vtkPolyData), Bounding Domain (port 1, vtkPolyData)
- *        Output: Polyhedral Domain with features (port 0, vtkUnstructuredGrid)
- */
-
 #include "stkCGAL3DPolyhedralMesher.h"
 
 //---------VTK----------------------------------
@@ -152,7 +140,8 @@ int stkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
     {
       if (sizingFieldArray->GetTuple1(i) == 0.0)
       {
-        vtkErrorMacro("A sizing field value of 0 at point " << i << " will result in failure. Aborting.");
+        vtkErrorMacro(
+          "A sizing field value of 0 at point " << i << " will result in failure. Aborting.");
         return 0;
       }
     }

@@ -1,23 +1,6 @@
-/**
- * \class stkCGALBoolean3DMesher
- *
- * \brief This filter takes two inputs, inputMeshA and inputMeshB, of type vtkPolyData and applies
- *one of the four boolean operations (Union, Intersection, Difference1 (A - B) and Difference2 (B -
- *A)) to them. The user will have the option to select one of the four operations from a drop down
- *menu. The two inputs will be converted to CGAL Polygon Mesh class since vtkPolyData is not a valid
- *input. The converted inputs will then be fed into the appropriate function for execution. The
- *result of the function will be converted to a vtkUnstructuredGrid and be outputted as such.
- *
- *
- *
- * Inputs: inputMeshA (port == 0, vtkPolyData), inputMeshB (port == 1, vtkPolyData)
- * Output: output (port == 0, vtkUnstructuredGrid)
- *
- */
-
-//---------VTK----------------------------------
 #include "stkCGALBoolean3DMesher.h"
 
+//---------VTK----------------------------------
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkSmartPointer.h>
@@ -39,8 +22,8 @@ typedef CGAL::Surface_mesh<K::Point_3> Surface_Mesh;
 vtkStandardNewMacro(stkCGALBoolean3DMesher);
 
 // ----------------------------------------------------------------------------
-int stkCGALBoolean3DMesher::RequestData(
-  vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
+int stkCGALBoolean3DMesher::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
 {
   //  Get the input and output data objects.
   //  Get the info objects

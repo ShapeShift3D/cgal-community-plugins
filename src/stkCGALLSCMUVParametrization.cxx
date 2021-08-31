@@ -1,18 +1,6 @@
-/**
- * \class stkCGALLSCMUVParametrization
- *
- * \brief This filter evaluates self-intersections inside a PolyData. PolyData made of two
- * non-connected surfaces that intersect each other are counted as self-intersections.
- *
- *
- * Inputs: inputMesh (port == 0, vtkPolyData)
- * Output: output (port == 0, vtkPolyData)
- *
- */
-
-//---------VTK----------------------------------
 #include "stkCGALLSCMUVParametrization.h"
 
+//---------VTK----------------------------------
 #include <vtkCommand.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>

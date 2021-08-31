@@ -30,6 +30,10 @@
 #include <stkCGALIsotropicRemeshingFilterInterface.h>
 #include <stkCGALModule.h>
 
+/**
+ * @ingroup stkCGAL
+ *
+ */
 class STKCGAL_EXPORT stkCGALIsotropicRemeshingFilter
   : public stkCGALIsotropicRemeshingFilterInterface
 {

@@ -18,7 +18,6 @@
 
 #include <CGAL/Shape_detection/Efficient_RANSAC.h>
 
-//----------------------------------------------------------------------------
 vtkStandardNewMacro(stkCGALEfficientRANSAC);
 
 //----------------------------------------------------------------------------

@@ -19,7 +19,7 @@
  * @warning The input dataset must contain point notmals.
  *
  * @sa
- * stkCGALRegionGrowing
+ * stkCGALEfficientRANSAC
  */
 
 #pragma once
@@ -27,6 +27,10 @@
 #include <stkCGALEfficientRANSACInterface.h>
 #include <stkCGALModule.h>
 
+/**
+ * @ingroup stkCGAL
+ *
+ */
 class STKCGAL_EXPORT stkCGALEfficientRANSAC : public stkCGALEfficientRANSACInterface
 {
 public:

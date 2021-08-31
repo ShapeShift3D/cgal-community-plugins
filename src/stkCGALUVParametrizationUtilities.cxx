@@ -1,10 +1,3 @@
-/**
- * \class stkCGALUVParametrizationUtilities
- *
- * \brief Set of CGAL utility functions for UV parametrization methods.
- *
- */
-
 #include "stkCGALUVParametrizationUtilities.h"
 
 #include <vtkInformation.h>

@@ -1,13 +1,29 @@
+/**
+ * @class stkCGALBoolean3DMesher
+ * @brief Applies a boolean operation between two 3D surfaces.
+ *
+ * This filter takes two inputs, inputMeshA and inputMeshB, of type vtkPolyData and applies
+ * one of the four boolean operations (Union, Intersection, Difference1 (A - B) and Difference2 (B -
+ * A)) between them.
+ *
+ * Inputs: Surface Mesh A (port 0, vtkPolyData), Surface Mesh B (port 1, vtkPolyData)
+ * Output: Surface Mesh Result (port 0, vtkPolyData)
+ *
+ * @sa
+ * stkCGALBoolean3DMesher
+ */
 #pragma once
 
 #include <stkCGALBoolean3DMesherInterface.h>
 #include <stkCGALModule.h>
 
-// Inherit from the desired filter
+/**
+ * @ingroup stkCGAL
+ *
+ */
 class STKCGAL_EXPORT stkCGALBoolean3DMesher : public stkCGALBoolean3DMesherInterface
 {
 public:
-  // VTK requirements
   static stkCGALBoolean3DMesher* New();
   vtkTypeMacro(stkCGALBoolean3DMesher, stkCGALBoolean3DMesherInterface);
 

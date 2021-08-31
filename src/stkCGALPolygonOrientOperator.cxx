@@ -1,22 +1,6 @@
-/**
- * \class stkCGALPolygonOrientOperator
- *
- * \brief
- *
- *		 Conditions for valid polygons:
- *
- *		 Closed Boundary - the polygon's outer boundary must be a connected sequence of
- *curves, that start and end at the same vertex. Simplicity - the polygon must be simple.
- *		 Orientation - the polygon's outer boundary must be counter-clockwise oriented.
- *
- * Inputs: inputMeshA (port == 0, vtkPolyData), inputMeshB (port == 1, vtkPolyData)
- * Output: output (port == 0, vtkUnstructuredGrid)
- *
- */
-
-//---------VTK----------------------------------
 #include "stkCGALPolygonOrientOperator.h"
 
+//---------VTK----------------------------------
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 
@@ -32,8 +16,6 @@
 //---------Module--------------------------------------------------
 #include <stkCGALPolygonUtilities.h>
 
-vtkStandardNewMacro(stkCGALPolygonOrientOperator);
-
 typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 typedef K::Point_2 Point_2;
 typedef CGAL::Polygon_2<K> Polygon_2;
@@ -41,9 +23,11 @@ typedef CGAL::Polygon_with_holes_2<K> Polygon_with_holes_2;
 typedef std::list<Polygon_with_holes_2> Pwh_list_2;
 typedef CGAL::Polygon_set_2<K> Polygon_set_2;
 
+vtkStandardNewMacro(stkCGALPolygonOrientOperator);
+
 // ----------------------------------------------------------------------------
-int stkCGALPolygonOrientOperator::RequestData(
-  vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
+int stkCGALPolygonOrientOperator::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
 {
   //  Get the input and output data objects.
   //  Get the info objects
@@ -108,7 +92,9 @@ int stkCGALPolygonOrientOperator::RequestData(
     inputPolyLine, polygon, firstCoordinate, secondCoordinate);
 
   if (this->InvertPolyLineOrientation)
+  {
     polygon.reverse_orientation();
+  }
 
   if (this->ForcePolyLineOrientation)
   {

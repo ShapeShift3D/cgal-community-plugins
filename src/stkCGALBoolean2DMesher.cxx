@@ -1,22 +1,6 @@
-/**
- * \class stkCGALBoolean2DMesher
- *
- * \brief
- *
- *		 Conditions for valid polygons:
- *
- *		 Closed Boundary - the polygon's outer boundary must be a connected sequence of
- *curves, that start and end at the same vertex. Simplicity - the polygon must be simple.
- *		 Orientation - the polygon's outer boundary must be counter-clockwise oriented.
- *
- * Inputs: inputMeshA (port == 0, vtkPolyData), inputMeshB (port == 1, vtkPolyData)
- * Output: output (port == 0, vtkUnstructuredGrid)
- *
- */
-
-//---------VTK----------------------------------
 #include "stkCGALBoolean2DMesher.h"
 
+//---------VTK----------------------------------
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkSmartPointer.h>
@@ -35,10 +19,6 @@
 #include <stkCGALPolygonSetToPolyLineSet.h>
 #include <stkCGALPolygonUtilities.h>
 
-//----------
-// Declare the plugin
-vtkStandardNewMacro(stkCGALBoolean2DMesher);
-
 typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 typedef K::Point_2 Point_2;
 typedef CGAL::Polygon_2<K> Polygon_2;
@@ -46,9 +26,11 @@ typedef CGAL::Polygon_with_holes_2<K> Polygon_with_holes_2;
 typedef std::list<Polygon_with_holes_2> Pwh_list_2;
 typedef CGAL::Polygon_set_2<K> Polygon_set_2;
 
+vtkStandardNewMacro(stkCGALBoolean2DMesher);
+
 // ----------------------------------------------------------------------------
 int stkCGALBoolean2DMesher::RequestData(vtkInformation* vtkNotUsed(request),
-  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
+  vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
 {
   //  Get the input and output data objects.
   //  Get the info objects
@@ -199,7 +181,9 @@ int stkCGALBoolean2DMesher::RequestData(vtkInformation* vtkNotUsed(request),
   }
 
   if (this->DebugMode)
+  {
     stkCGALPolygonUtilities::PrintPolygonSet2Properties(polygonSetA, debugResultMessage, false);
+  }
 
   polygonSetToPolylineSetFilter->SetInputPolygonSet(result);
   polygonSetToPolylineSetFilter->Update();

@@ -1,22 +1,6 @@
-/**
- * \class stkCGALPolygonSetOrientedSideClassifier
- *
- * \brief
- *
- *		 Conditions for valid polygons:
- *
- *		 Closed Boundary - the polygon's outer boundary must be a connected sequence of
- *curves, that start and end at the same vertex. Simplicity - the polygon must be simple.
- *		 Orientation - the polygon's outer boundary must be counter-clockwise oriented.
- *
- * Inputs: inputMeshA (port == 0, vtkPolyData), inputMeshB (port == 1, vtkPolyData)
- * Output: output (port == 0, vtkUnstructuredGrid)
- *
- */
-
-//---------VTK----------------------------------
 #include "stkCGALPolygonSetOrientedSideClassifier.h"
 
+//---------VTK----------------------------------
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkSmartPointer.h>

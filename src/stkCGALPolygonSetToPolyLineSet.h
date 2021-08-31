@@ -1,6 +1,15 @@
+/**
+ * @class stkCGALPolygonSetToPolyLineSet
+ * @brief Converts a CGAL polygon set to a VTK polyline set
+ *
+ * Converter class used for other filters.
+ *
+ * @sa
+ * stkCGALPolygonSetToPolyLineSet
+ */
 #pragma once
 
-#include "vtkPolyDataAlgorithm.h"
+#include <vtkPolyDataAlgorithm.h>
 #include <stkCGALModule.h>
 
 #include <CGAL/Boolean_set_operations_2.h>
@@ -17,11 +26,13 @@ typedef CGAL::Polygon_with_holes_2<K> Polygon_with_holes_2;
 typedef std::list<Polygon_with_holes_2> Pwh_list_2;
 typedef CGAL::Polygon_set_2<K> Polygon_set_2;
 
-// Inherit from the desired filter
+/**
+ * @ingroup stkCGAL
+ *
+ */
 class STKCGAL_EXPORT stkCGALPolygonSetToPolyLineSet : public vtkPolyDataAlgorithm
 {
 public:
-  // VTK requirements
   static stkCGALPolygonSetToPolyLineSet* New();
   vtkTypeMacro(stkCGALPolygonSetToPolyLineSet, vtkPolyDataAlgorithm);
 
@@ -79,7 +90,7 @@ public:
 
 protected:
   stkCGALPolygonSetToPolyLineSet();
-  ~stkCGALPolygonSetToPolyLineSet() {}
+  ~stkCGALPolygonSetToPolyLineSet() = default;
 
   virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
@@ -90,7 +101,6 @@ protected:
   bool PrintPoints;
 
 private:
-  // needed but not implemented
   stkCGALPolygonSetToPolyLineSet(const stkCGALPolygonSetToPolyLineSet&) = delete;
   void operator=(const stkCGALPolygonSetToPolyLineSet&) = delete;
 

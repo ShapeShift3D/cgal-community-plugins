@@ -1,11 +1,3 @@
-/**
-* \class stkCGALPolygonUtilities
-*
-* \brief Set of CGAL utility functions usable by other classes in this module.
-*        
-*/
-
-
 #include "stkCGALPolygonUtilities.h"
 
 #include <vtkObjectFactory.h>
@@ -17,14 +9,6 @@
 #include <vtkAppendPolyData.h>
 
 vtkStandardNewMacro(stkCGALPolygonUtilities);
-
-// ----------------------------------------------------------------------------
-stkCGALPolygonUtilities::stkCGALPolygonUtilities()
-{}
-
-// ----------------------------------------------------------------------------
-stkCGALPolygonUtilities::~stkCGALPolygonUtilities()
-{}
 
 //----------------------------------------------------------------------------
 

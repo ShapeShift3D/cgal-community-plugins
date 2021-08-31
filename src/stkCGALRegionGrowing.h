@@ -10,14 +10,17 @@
  *      - Add extra kernels if applicable (Homogeneous and Simple_homogeneous)
  *
  * @sa
- * stkCGALEfficientRANSAC
+ * stkCGALRegionGrowing
  */
-
 #pragma once
 
 #include <stkCGALModule.h>
 #include <stkCGALRegionGrowingInterface.h>
 
+/**
+ * @ingroup stkCGAL
+ *
+ */
 class STKCGAL_EXPORT stkCGALRegionGrowing : public stkCGALRegionGrowingInterface
 {
 public:
@@ -30,13 +33,13 @@ protected:
 
   virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
+private:
+  stkCGALRegionGrowing(const stkCGALRegionGrowing&) = delete;
+  void operator=(const stkCGALRegionGrowing&) = delete;
+
   template<class CGalKernel>
   int Detection(vtkPolyData*, vtkPolyData*);
 
   template<typename MeshType>
   static bool vtkPolyDataToPolygonMesh(vtkPolyData*, MeshType&);
-
-private:
-  stkCGALRegionGrowing(const stkCGALRegionGrowing&) = delete;
-  void operator=(const stkCGALRegionGrowing&) = delete;
 };
