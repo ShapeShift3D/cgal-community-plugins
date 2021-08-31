@@ -54,7 +54,7 @@ template<typename CGalKernel>
 int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 {
   // Type declarations
-  typedef std::pair<CGalKernel::Point_3, CGalKernel::Vector_3> CGalOrientedPoint;
+  typedef std::pair<typename CGalKernel::Point_3, typename CGalKernel::Vector_3> CGalOrientedPoint;
   typedef std::vector<CGalOrientedPoint> CGalOrientedPointVector;
 
   typedef typename CGalKernel::FT FT;
@@ -86,10 +86,10 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   ransac.set_input(points);
 
   // Register planar shapes via template method
-  ransac.add_shape_factory<CGALPlane>();
+  ransac.template add_shape_factory<CGALPlane>();
 
   // Set parameters for shape detection.
-  Efficient_ransac::Parameters parameters;
+  typename Efficient_ransac::Parameters parameters;
   if (this->UserDefinedParameters)
   {
     // Set probability to miss the largest primitive at each iteration
@@ -118,7 +118,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   // Efficient_ransac::shapes() provides
   // an iterator range to the detected shapes.
-  Efficient_ransac::Shape_range shapes = ransac.shapes();
+  typename Efficient_ransac::Shape_range shapes = ransac.shapes();
 
   // Perform detection several times and choose result with the highest coverage
   FT best_coverage = 0;
@@ -172,7 +172,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   distancesArray->Fill(-1);
 
   int regionIndex = 0;
-  Efficient_ransac::Shape_range::iterator it = shapes.begin();
+  typename Efficient_ransac::Shape_range::iterator it = shapes.begin();
   while (it != shapes.end())
   {
     boost::shared_ptr<CGALShape> shape = *it;
@@ -206,6 +206,8 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   // This array is here to help testing
   output->GetPointData()->AddArray(distancesArray);
   distancesArray->Delete();
+
+  return 1;
 }
 
 //----------------------------------------------------------------------------
