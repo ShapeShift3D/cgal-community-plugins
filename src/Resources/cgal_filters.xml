@@ -20,6 +20,7 @@
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
+        <!-- For external users: Uncomment to expose the filter --> 
         <!-- <SourceProxy name="CGALARAPUVParametrization"
                      class="stkCGALARAPUVParametrization"
                      label="CGAL ARAP UV Parametrization"
@@ -34,6 +35,7 @@
             </Hints>
         </SourceProxy> -->
         <!-- ==================================================================== -->
+        <!-- For external users: Uncomment to expose the filter --> 
         <!-- <SourceProxy name="CGALLSCMUVParametrization"
                      class="stkCGALLSCMUVParametrization"
                      label="CGAL LSCM UV Parametrization"
@@ -48,6 +50,7 @@
             </Hints>
         </SourceProxy> -->
         <!-- ==================================================================== -->
+        <!-- For external users: Uncomment to expose the filter --> 
         <!-- <SourceProxy name="CGALBoolean3DMesher"
                      class="stkCGALBoolean3DMesher"
                      label="CGAL Boolean 3D"
@@ -323,7 +326,7 @@
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <!-- <SourceProxy name="CGALEfficientRANSAC"
+        <SourceProxy name="CGALEfficientRANSAC"
                class="stkCGALEfficientRANSAC"
                label="CGAL Shape Detection - Efficient RANSAC">
             <Documentation long_help="todo."
@@ -441,6 +444,6 @@
 		    <Hints> 
                 <ShowInMenu category="CGAL"/>
             </Hints>
-        </SourceProxy> -->
+        </SourceProxy>
     </ProxyGroup>
 </ServerManagerConfiguration>
