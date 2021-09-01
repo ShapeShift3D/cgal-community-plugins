@@ -6,9 +6,6 @@
  * It will append a cell data array "regions" filled with the detected
  * region indices or -1 if the cell is not assigned to a region.
  *
- * TODO:
- *      - Add extra kernels if applicable (Homogeneous and Simple_homogeneous)
- *
  * @sa
  * stkCGALRegionGrowing
  */

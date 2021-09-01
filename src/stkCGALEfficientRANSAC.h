@@ -9,13 +9,7 @@
  *
  * In addition, a point data array "distances" filled with the distances to the
  * corresponding plane will be added to the output point data.
- *
- * TODO:
- *      - Wrap detect() using callbacks so the user can see the progress
- *        (see
- * https://doc.cgal.org/latest/Shape_detection/index.html#Shape_detection_RANSACExample_with_callback)
- *      - Add the choice of the kernel as a parameter (see stkCGALRegionGrowing::KernelValue)
- *
+ * 
  * @warning The input dataset must contain point notmals.
  *
  * @sa
