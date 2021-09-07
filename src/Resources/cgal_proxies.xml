@@ -581,7 +581,7 @@
                                command="SetUseSafetyConstraints"
                                label="Use Safety Constraints"
                                number_of_elements="1"
-                               default_values="0">
+                               default_values="1">
                 <BooleanDomain name="bool" />
                 <Documentation>
                     If true, vertex moves that would worsen the mesh are ignored.
