@@ -1,0 +1,13 @@
+NAME
+  CGAL::stkCGAL
+LIBRARY_NAME
+  stkCGAL
+DEPENDS
+  VTK::FiltersCore
+  VTK::FiltersGeometry
+  VTK::FiltersExtraction
+  ParaView::stkCGALInterface
+PRIVATE_DEPENDS
+  VTK::CommonCore
+  VTK::CommonSystem
+  VTK::FiltersGeneral
