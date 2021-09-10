@@ -24,6 +24,7 @@ set(classes
   stkCGALRegionGrowing
   stkCGALSelfIntersectionMeasurer
   stkCGALUtilities
+  vtkCGALSurfaceMeshTopology
   stkCGALPolygonOffset
   stkCGAL3DConvexHull
 )
