@@ -5,7 +5,7 @@
 #include <CGAL/Mesh_3/io_signature.h>
 #include <CGAL/Surface_mesh.h>
 
-#include <vtkCGALUtilities.h>
+#include <stkCGALUtilities.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkCellArray.h>
@@ -76,7 +76,7 @@ int vtkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
     // -------------------------------
 
     Surface_Mesh cMesh;
-    bool ok = vtkCGALUtilities::vtkPolyDataToPolygonMesh(inMesh, cMesh);
+    bool ok = stkCGALUtilities::vtkPolyDataToPolygonMesh(inMesh, cMesh);
     if(!ok) {
         vtkErrorMacro("CGAL mesh conversion error.");
         return 0;

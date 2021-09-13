@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vtkCGALModule.h>
+#include <stkCGALModule.h>
 #include <vtkPolyDataAlgorithm.h>
 
-class VTKCGAL_EXPORT vtkCGALSurfaceMeshTopology : public vtkPolyDataAlgorithm
+class STKCGAL_EXPORT vtkCGALSurfaceMeshTopology : public vtkPolyDataAlgorithm
 {
 public:
   static vtkCGALSurfaceMeshTopology* New();
