@@ -12,9 +12,9 @@
 #include <vtkPolyData.h>
 #include <vtkPolyLine.h>
 
-#include "vtkCGALSurfaceMeshTopology.h"
+#include "stkCGALSurfaceMeshTopology.h"
 
-vtkStandardNewMacro(vtkCGALSurfaceMeshTopology);
+vtkStandardNewMacro(stkCGALSurfaceMeshTopology);
 
 typedef CGAL::Surface_mesh<CGAL::Simple_cartesian<double>::Point_3> Surface_Mesh;
 typedef Surface_Mesh::Vertex_index Vertex_Index;
@@ -23,7 +23,7 @@ typedef Surface_Mesh::Edge_index Edge_Index;
 typedef CGAL::Surface_mesh_topology::Path_on_surface<Surface_Mesh> Path;
 
 //----------------------------------------------------------------------------
-vtkCGALSurfaceMeshTopology::vtkCGALSurfaceMeshTopology()
+stkCGALSurfaceMeshTopology::stkCGALSurfaceMeshTopology()
 {
     this->SetNumberOfInputPorts(1);
     this->SetNumberOfOutputPorts(1);
@@ -58,7 +58,7 @@ static void remove_seen_vtx(const Path &path,
 
 
 //----------------------------------------------------------------------------
-int vtkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
+int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
                                             vtkInformationVector** inputVector,
                                             vtkInformationVector* outputVector)
 {

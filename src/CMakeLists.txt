@@ -23,6 +23,7 @@ set(classes
   stkCGALPolyLineSetToPolygonSet
   stkCGALRegionGrowing
   stkCGALSelfIntersectionMeasurer
+  stkCGALSurfaceMeshTopology
   stkCGALUtilities
   vtkCGALSurfaceMeshTopology
   stkCGALPolygonOffset
