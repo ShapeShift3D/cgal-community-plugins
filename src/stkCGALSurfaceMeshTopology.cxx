@@ -48,10 +48,8 @@ static vtkNew<vtkPolyLine> path_to_polyline(const Path &path, const Surface_Mesh
 static void remove_seen_vtx(const Path &path,
                               const Surface_Mesh &mesh,
                               std::unordered_set<Vertex_Index> &vertices) {
-    std::cerr << "path len:" << path.length() << std::endl;
     for(auto i=0; i < path.length(); i++) {
         Vertex_Index vtx = path.get_flip()[i] ? mesh.target(path[i]) : mesh.source(path[i]);
-        std::cerr << "vtx:" << vtx << std::endl;
         vertices.erase(vtx);
     }
 }
@@ -89,9 +87,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
 
     for(Vertex_Index vtx : cMesh.vertices()) { 
         vtx_to_check.insert(vtx);
-        //std::cerr << "edge:" << edge << std::endl;
     }
-    std::cerr << "vertices:" << vtx_to_check.size() << std::endl;
 
     vtkNew<vtkCellArray> cells;
     auto nbiters=0;

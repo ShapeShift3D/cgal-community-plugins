@@ -790,5 +790,26 @@
             </Hints>
         </SourceProxy>
 
+        <!-- ==================================================================== -->
+        <SourceProxy name="CGALSurfaceMeshTopology"
+                     class="stkCGALSurfaceMeshTopology"
+                     label="CGAL Surface Mesh Topology">
+            <InputProperty name="Input"
+                           port_index="0"
+                           command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources" />
+                    <Group name="filters" />
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData" />
+                </DataTypeDomain>
+            </InputProperty>
+
+            <Hints>
+                <ShowInMenu category="CGAL" />
+            </Hints>
+        </SourceProxy>
+
     </ProxyGroup>
 </ServerManagerConfiguration>
