@@ -24,6 +24,7 @@ set(classes
   stkCGALRegionGrowing
   stkCGALSelfIntersectionMeasurer
   stkCGALUtilities
+  stkCGALPolygonOffset
 )
 
 set(private_headers

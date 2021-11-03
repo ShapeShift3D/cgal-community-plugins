@@ -2,40 +2,12 @@
 
 #include <vtkObjectFactory.h>
 #include <vtkUnstructuredGrid.h>
-#include <vtkPolyData.h>
 #include <vtkCellData.h>
 #include <vtkIdTypeArray.h>
 
 #include <vtkAppendPolyData.h>
 
 vtkStandardNewMacro(stkCGALPolygonUtilities);
-
-//----------------------------------------------------------------------------
-
-/** @brief Converts a vtkPolyData (VTK) into Polygon 2 (CGAL).
-*          This method does not write into our PolyData structure.
-*		   Hence, we do not need to copy them before calling this function.
-*
-*  @param polyData The input PolyData
-*  @param tmesh The resulting Polygon 2 Mesh
-*  @return bool Success (true) or failure (false)
-*/
-bool stkCGALPolygonUtilities::vtkPolyDataToPolygon2(vtkPointSet* polyData, Polygon_2& tmesh, int& coordinate0, int& coordinate1)
-{
-	// get nb of points and cells
-	vtkIdType nb_points = polyData->GetNumberOfPoints();
-
-	// Extract points
-	for (vtkIdType i = 0; i < nb_points; ++i)
-	{
-		double coords[3];
-		polyData->GetPoint(i, coords);
-
-		tmesh.push_back(Point_2(coords[coordinate0], coords[coordinate1]));
-	}
-
-	return true;
-}
 
 //----------------------------------------------------------------------------
 
@@ -91,13 +63,13 @@ bool stkCGALPolygonUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_hol
 	pwhIdArray->SetNumberOfComponents(1);
 
 	vtkNew<vtkPolyData> boundary;
-	stkCGALPolygonUtilities::Polygon2ToPolyLine(pmesh.outer_boundary(), boundary, oneCell);
+	stkCGALPolygonUtilities::Polygon2ToVtkPolyLine<K>(pmesh.outer_boundary(), boundary, oneCell);
 	appendFilter->AddInputData(boundary);
 
 	for (hole_iterator = pmesh.holes_begin(); hole_iterator != pmesh.holes_end(); ++hole_iterator)
 	{
 		vtkNew<vtkPolyData> hole;
-		stkCGALPolygonUtilities::Polygon2ToPolyLine(*hole_iterator, hole, oneCell);
+		stkCGALPolygonUtilities::Polygon2ToVtkPolyLine<K>(*hole_iterator, hole, oneCell);
 		appendFilter->AddInputData(hole);
 	}
 
@@ -110,83 +82,6 @@ bool stkCGALPolygonUtilities::PolygonWithHoles2ToPolyData(const Polygon_with_hol
 		pwhIdArray->SetNumberOfTuples(polydata->GetNumberOfCells());
 		pwhIdArray->Fill(pwhId);
 		polydata->GetCellData()->AddArray(pwhIdArray);
-	}
-
-	return true;
-}
-
-//----------------------------------------------------------------------------
-
-/** @brief Converts a Polygon 2 (CGAL) into a PolyData (VTK).
-*
-*  @param pmesh The input Polygon 2
-*  @param usg The output PolyData
-*  @return bool Success (true) or failure (false)
-*/
-bool stkCGALPolygonUtilities::Polygon2ToPolyLine(const Polygon_2& pmesh, vtkPolyData* polyline, bool oneCell /* = false */)
-{
-	vtkNew<vtkPoints> vtk_points;
-
-	typename Polygon_2::Vertex_const_iterator vertex_iterator;
-
-	for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end(); ++vertex_iterator)
-	{
-
-		vtk_points->InsertNextPoint(
-            CGAL::to_double(vertex_iterator->x().exact()), CGAL::to_double(vertex_iterator->y().exact()), 0);
-	}
-
-	polyline->SetPoints(vtk_points);
-
-	if (polyline->GetLines() == nullptr || polyline->GetNumberOfLines() == 0)
-	{
-		// Not elegant but functional
-		vtkNew<vtkCellArray> vtk_cells;
-
-		if (oneCell)
-		{
-			if (pmesh.size() > 1)
-			{
-				if (pmesh.size() == 2)
-				{
-					vtk_cells->InsertNextCell(vtk_points->GetNumberOfPoints());
-					for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints(); ++i)
-					{
-						vtk_cells->InsertCellPoint(i);
-					}
-				}
-				else
-				{
-					vtk_cells->InsertNextCell(vtk_points->GetNumberOfPoints() + 1);
-					for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints(); ++i)
-					{
-						vtk_cells->InsertCellPoint(i);
-					}
-					vtk_cells->InsertCellPoint(0);
-				}
-			}
-		}
-		else
-		{
-			if (pmesh.size() > 1)
-			{
-				for (vtkIdType i = 0; i < vtk_points->GetNumberOfPoints() - 1; ++i)
-				{
-					vtk_cells->InsertNextCell(2);
-					vtk_cells->InsertCellPoint(i);
-					vtk_cells->InsertCellPoint(i + 1);
-				}
-
-				if (pmesh.size() > 2)
-				{
-					vtk_cells->InsertNextCell(2);
-					vtk_cells->InsertCellPoint(vtk_points->GetNumberOfPoints() - 1);
-					vtk_cells->InsertCellPoint(0);
-				}
-			}
-		}
-
-		polyline->SetLines(vtk_cells);
 	}
 
 	return true;
@@ -269,7 +164,6 @@ void stkCGALPolygonUtilities::PrintPolygonProperties(const Polygon_2& pmesh, std
             {
                 std::cout << "\t" << CGAL::to_double(vertex_iterator->x().exact()) << ", " << CGAL::to_double(vertex_iterator->y().exact()) << endl;
             }
-				
 		}
 	}
 	else
@@ -277,3 +171,22 @@ void stkCGALPolygonUtilities::PrintPolygonProperties(const Polygon_2& pmesh, std
 		cout << "The polygon is empty." << endl;
 	}
 }
+
+//----------------------------------------------------------------------------
+void stkCGALPolygonUtilities::GetPolygonPointCoordinates(
+  CGAL::Polygon_2<CGAL::Exact_predicates_inexact_constructions_kernel>::Vertex_const_iterator
+    vertex_iterator,
+  double& x, double& y)
+{
+  x = CGAL::to_double(vertex_iterator->x());
+  y = CGAL::to_double(vertex_iterator->y());
+};
+
+void stkCGALPolygonUtilities::GetPolygonPointCoordinates(
+  CGAL::Polygon_2<CGAL::Exact_predicates_exact_constructions_kernel>::Vertex_const_iterator
+    vertex_iterator,
+  double& x, double& y)
+{
+  x = CGAL::to_double(vertex_iterator->x().exact());
+  y = CGAL::to_double(vertex_iterator->y().exact());
+};

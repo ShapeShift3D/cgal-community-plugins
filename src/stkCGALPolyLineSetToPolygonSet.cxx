@@ -197,7 +197,7 @@ bool stkCGALPolyLineSetToPolygonSet::ProcessPwh(
     cleanFilter->Update();
 
     Polygon_2 polygon;
-    stkCGALPolygonUtilities::vtkPolyDataToPolygon2(
+    stkCGALPolygonUtilities::vtkPolyDataToPolygon2<K>(
       cleanFilter->GetOutput(), polygon, firstCoord, secondCoord);
 
     CGAL::Orientation orient = polygon.orientation();
