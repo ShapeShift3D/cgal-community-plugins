@@ -8,10 +8,7 @@
 #include <vtkPolyData.h>
 
 //---------CGAL---------------------------------
-#include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Polygon_set_2.h>
-#include <CGAL/Surface_mesh.h>
 
 //---------Module--------------------------------------------------
 #include <stkCGALPolygonUtilities.h>
@@ -19,9 +16,6 @@
 typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 typedef K::Point_2 Point_2;
 typedef CGAL::Polygon_2<K> Polygon_2;
-typedef CGAL::Polygon_with_holes_2<K> Polygon_with_holes_2;
-typedef std::list<Polygon_with_holes_2> Pwh_list_2;
-typedef CGAL::Polygon_set_2<K> Polygon_set_2;
 
 vtkStandardNewMacro(stkCGALPolygonOrientOperator);
 
@@ -88,8 +82,12 @@ int stkCGALPolygonOrientOperator::RequestData(vtkInformation* vtkNotUsed(request
   // their common vertex. Taken from https://doc.cgal.org/4.14.3/Polygon/index.html
   Polygon_2 polygon;
 
-  stkCGALPolygonUtilities::vtkPolyDataToPolygon2(
-    inputPolyLine, polygon, firstCoordinate, secondCoordinate);
+  if (!stkCGALPolygonUtilities::vtkPolyDataToPolygon2<K>(
+        inputPolyLine, polygon, firstCoordinate, secondCoordinate))
+  {
+    vtkErrorMacro("Failed to convert input into a polygon. Expected input to be a single Polygon");
+    return 0;
+  };
 
   if (this->InvertPolyLineOrientation)
   {
@@ -126,7 +124,6 @@ int stkCGALPolygonOrientOperator::RequestData(vtkInformation* vtkNotUsed(request
     }
   }
 
-  output0->DeepCopy(inputPolyLine);
-  stkCGALPolygonUtilities::Polygon2ToPolyLine(polygon, output0);
+  stkCGALPolygonUtilities::Polygon2ToVtkPolyLine<K>(polygon, output0);
   return 1;
 }
