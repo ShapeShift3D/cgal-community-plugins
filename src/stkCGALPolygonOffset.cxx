@@ -49,7 +49,7 @@ int stkCGALPolygonOffset::RequestData(vtkInformation* vtkNotUsed(request),
   Polygon_2Inexact outputPolygon;
   Polygon_2Inexact polygon;
 
-  if (!stkCGALPolygonUtilities::vtkPolyDataToPolygon2<KInexact>(input, polygon, 0, 1))
+  if (!stkCGALPolygonUtilities::vtkPolyDataToPolygon2<KInexact,Point_2Inexact>(input, polygon, 0, 1))
   {
     vtkErrorMacro("Failed to convert input into a polygon. Expected input to be a single Polygon");
     return 0;

@@ -82,7 +82,7 @@ int stkCGALPolygonOrientOperator::RequestData(vtkInformation* vtkNotUsed(request
   // their common vertex. Taken from https://doc.cgal.org/4.14.3/Polygon/index.html
   Polygon_2 polygon;
 
-  if (!stkCGALPolygonUtilities::vtkPolyDataToPolygon2<K>(
+  if (!stkCGALPolygonUtilities::vtkPolyDataToPolygon2<K,Point_2>(
         inputPolyLine, polygon, firstCoordinate, secondCoordinate))
   {
     vtkErrorMacro("Failed to convert input into a polygon. Expected input to be a single Polygon");

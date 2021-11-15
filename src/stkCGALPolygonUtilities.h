@@ -43,13 +43,13 @@ public:
   typedef std::list<Polygon_with_holes_2> Pwh_list_2;
   typedef CGAL::Polygon_set_2<K> Polygon_set_2;
 
-  template<typename T>
+  template<typename Kernal,typename Point>
   static bool vtkPolyDataToPolygon2(
-    vtkPointSet* polydata, CGAL::Polygon_2<T>& tmesh, int coordinate0, int coordinate1);
+    vtkPointSet* polydata, CGAL::Polygon_2<Kernal>& tmesh, int coordinate0, int coordinate1);
 
-  template<typename T>
+  template<typename Kernal>
   static bool Polygon2ToVtkPolyLine(
-    const CGAL::Polygon_2<T>& pmesh, vtkPolyData* polyline, bool oneCell = false);
+    const CGAL::Polygon_2<Kernal>& pmesh, vtkPolyData* polyline, bool oneCell = false);
 
   static bool PwhList2ToPolyData(const Pwh_list_2& pmesh, vtkPolyData* polydata,
     std::string pwhIdArrayName = "PolygonWithHolesId", bool oneCell = false);
@@ -100,9 +100,9 @@ private:
  *  @param T Contruction Kernal for the CGAL Polygon
  *  @return bool Success (true) or failure (false)
  */
-template<typename T>
+template<typename Kernal,typename Point>
 bool stkCGALPolygonUtilities::vtkPolyDataToPolygon2(
-  vtkPointSet* polyData, CGAL::Polygon_2<T>& tmesh, int coordinate0, int coordinate1)
+  vtkPointSet* polyData, CGAL::Polygon_2<Kernal>& tmesh, int coordinate0, int coordinate1)
 {
   vtkNew<vtkContourLoopExtraction> loopExtractionFilter;
   loopExtractionFilter->SetInputData(polyData);
@@ -134,7 +134,7 @@ bool stkCGALPolygonUtilities::vtkPolyDataToPolygon2(
   {
     double coords[3];
     orderedVtkData->GetPoint(i, coords);
-    tmesh.push_back(T::Point_2(coords[coordinate0], coords[coordinate1]));
+    tmesh.push_back(Point(coords[coordinate0], coords[coordinate1]));
   }
 
   return true;
@@ -150,13 +150,13 @@ bool stkCGALPolygonUtilities::vtkPolyDataToPolygon2(
  *  @return bool Success (true) or failure (false)
  *
  */
-template<typename T>
+template<typename Kernal>
 bool stkCGALPolygonUtilities::Polygon2ToVtkPolyLine(
-  const CGAL::Polygon_2<T>& pmesh, vtkPolyData* polyline, bool oneCell)
+  const CGAL::Polygon_2<Kernal>& pmesh, vtkPolyData* polyline, bool oneCell)
 {
   vtkNew<vtkPoints> vtk_points;
 
-  typename CGAL::Polygon_2<T>::Vertex_const_iterator vertex_iterator;
+  typename CGAL::Polygon_2<Kernal>::Vertex_const_iterator vertex_iterator;
 
   for (vertex_iterator = pmesh.vertices_begin(); vertex_iterator != pmesh.vertices_end();
        ++vertex_iterator)
