@@ -97,7 +97,8 @@ private:
  *
  *  @param polyData The input PolyData
  *  @param tmesh The resulting Polygon 2 Mesh
- *  @param T Contruction Kernal for the CGAL Polygon
+ *  @param Kernal Contruction Kernal for the CGAL Polygon
+ *  @param Point CGAL Point
  *  @return bool Success (true) or failure (false)
  */
 template<typename Kernal,typename Point>
@@ -146,7 +147,7 @@ bool stkCGALPolygonUtilities::vtkPolyDataToPolygon2(
  *
  *  @param pmesh The input Polygon 2
  *  @param polyline The output PolyData
- *  @param T Contruction Kernal for the CGAL Polygon
+ *  @param Kernal Contruction Kernal for the CGAL Polygon
  *  @return bool Success (true) or failure (false)
  *
  */
