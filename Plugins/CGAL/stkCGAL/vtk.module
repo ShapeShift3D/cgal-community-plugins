@@ -7,6 +7,7 @@ DEPENDS
   VTK::FiltersGeometry
   VTK::FiltersExtraction
   ParaView::stkCGALInterface
+  VTK::FiltersModeling
 PRIVATE_DEPENDS
   VTK::CommonCore
   VTK::CommonSystem
