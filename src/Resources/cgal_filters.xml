@@ -117,6 +117,72 @@
                 </Documentation>
             </IntVectorProperty>
 
+            <IntVectorProperty
+                name="RepairSelfIntersections"
+                command="SetRepairSelfIntersections"
+                number_of_elements="1"
+                default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation />
+            </IntVectorProperty>
+            UseExperimentalMethod
+
+            <IntVectorProperty
+                name="MaxStep"
+                command="SetMaxStep"
+                number_of_elements="1"
+                default_values="2"
+                panel_visibility="advanced">
+                <Documentation />
+            </IntVectorProperty>
+
+            <IntVectorProperty
+                name="PreserveGenus"
+                command="SetPreserveGenus"
+                number_of_elements="1"
+                default_values="0"
+                panel_visibility="advanced">
+                <BooleanDomain name="bool" />
+                <Documentation />
+            </IntVectorProperty>
+
+            <IntVectorProperty
+                name="OnlyTreatSelfIntersectionsLocally"
+                command="SetOnlyTreatSelfIntersectionsLocally"
+                number_of_elements="1"
+                default_values="0"
+                panel_visibility="advanced">
+                <BooleanDomain name="bool" />
+                <Documentation />
+            </IntVectorProperty>
+
+            <DoubleVectorProperty
+                name="StrongDihedralAngle"
+                command="SetStrongDihedralAngle"
+                number_of_elements="1"
+                default_values="60.0"
+                panel_visibility="advanced">
+                <Documentation />
+            </DoubleVectorProperty>
+
+            <DoubleVectorProperty
+                name="WeakDihedralAngle"
+                command="SetWeakDihedralAngle"
+                number_of_elements="1"
+                default_values="0.0"
+                panel_visibility="advanced">
+                <Documentation />
+            </DoubleVectorProperty>
+
+            <IntVectorProperty
+            name="UseExperimentalRepairMethod"
+            command="SetUseExperimentalRepairMethod"
+            number_of_elements="1"
+            default_values="0">
+            <BooleanDomain name="bool" />
+            <Documentation />
+            </IntVectorProperty>
+
             <Hints> 
                 <ShowInMenu category="CGAL"/>
             </Hints>

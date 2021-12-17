@@ -12,12 +12,17 @@
 #include <vtkAppendPolyData.h>
 #include <vtkCleanPolyData.h>
 #include <vtkPolyDataConnectivityFilter.h>
+#include <vtkStaticPointLocator.h>
+#include <vtkMath.h>
 
 //---------CGAL---------------------------------
 #include <CGAL/Polygon_mesh_processing/self_intersections.h>
+#include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
 
 //---------Module-------------------------------
 #include <stkCGALUtilities.h>
+
+#include <vector>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Surface_mesh<K::Point_3> Surface_Mesh;
@@ -71,7 +76,20 @@ int stkCGALSelfIntersectionMeasurer::RequestData(vtkInformation* vtkNotUsed(requ
       std::cout << "====== Region " << i << " ======" << std::endl;
 
       vtkNew<vtkPolyData> singlePoly;
-      this->ExecuteSelfIntersect(polyData, singlePoly);
+      vtkNew<vtkPolyData> tempPoly;
+
+      if (this->RepairSelfIntersections)
+      {
+        this->ExecuteRepairSelfIntersect(polyData, singlePoly);
+        tempPoly->ShallowCopy(singlePoly);
+      }
+      else
+      {
+        tempPoly->ShallowCopy(polyData);
+      }
+
+      this->ExecuteSelfIntersect(tempPoly, singlePoly);
+
       appendFinal->AddInputData(singlePoly);
     }
 
@@ -83,7 +101,21 @@ int stkCGALSelfIntersectionMeasurer::RequestData(vtkInformation* vtkNotUsed(requ
   else
   {
     vtkNew<vtkPolyData> outPoly;
-    this->ExecuteSelfIntersect(inputMesh, outPoly);
+
+    vtkNew<vtkPolyData> tempPoly;
+
+    // TODO : Remove this. Find a way convey the message if self intersetions exists or not
+    if (this->RepairSelfIntersections)
+    {
+      this->ExecuteRepairSelfIntersect(inputMesh, outPoly);
+      tempPoly->ShallowCopy(outPoly);
+    }
+    else
+    {
+      tempPoly->ShallowCopy(inputMesh);
+    }
+
+    this->ExecuteSelfIntersect(tempPoly, outPoly);
 
     // Copy to output
     output->ShallowCopy(outPoly);
@@ -144,6 +176,123 @@ int stkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(
 
   polyDataOut->DeepCopy(polyDataIn);
   polyDataOut->GetCellData()->AddArray(intersectingTrisArray);
+
+  return 1;
+}
+
+//---------------------------------------------------
+int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
+  vtkPolyData* polyDataIn, vtkPolyData* polyDataOut)
+{
+  namespace PMP = CGAL::Polygon_mesh_processing;
+
+  Surface_Mesh surfaceMesh;
+  stkCGALUtilities::vtkPolyDataToPolygonMesh(polyDataIn, surfaceMesh);
+
+  if (!CGAL::is_triangle_mesh(surfaceMesh))
+  {
+    vtkErrorMacro("Mesh is not triangular.");
+    return 0;
+  }
+
+  bool intersecting = PMP::does_self_intersect(
+    surfaceMesh, PMP::parameters::vertex_point_map(get(CGAL::vertex_point, surfaceMesh)));
+
+  if (intersecting)
+  {
+    vtkWarningMacro(
+      "Self-Intersections were found in the mesh. Trying to Repair Self-Intersections");
+    // TODO : Drop Use Experiment Repair Method After testing
+    if (this->UseExperimentalRepairMethod)
+    {
+
+      // TODO : Recheck all the parameters in this experimental method
+      PMP::experimental::remove_self_intersections(surfaceMesh);
+    }
+    else
+    {
+      auto face_range = CGAL::faces(surfaceMesh);
+      std::set<face_descriptor> working_face_range(face_range.begin(), face_range.end());
+
+      std::pair<bool, bool> result_pair;
+
+      // Look for self-intersections in the mesh and remove them
+      bool all_fixed = true; // indicates if the filling of all created holes went fine
+      bool topology_issue =
+        false; // indicates if some boundary cycles of edges are blocking the fixing
+      std::set<face_descriptor> faces_to_remove;
+
+      int maxStep = this->MaxStep;
+      int step = -1;
+      bool preserve_genus = this->PreserveGenus;
+      bool only_treat_self_intersections_locally = this->OnlyTreatSelfIntersectionsLocally;
+      const double strong_dihedral_angle = this->StrongDihedralAngle;
+      const double weak_dihedral_angle = this->WeakDihedralAngle;
+
+      typedef CGAL::Named_function_parameters<bool, CGAL::internal_np::all_default_t,
+        CGAL::internal_np::No_property>
+        NamedParameters;
+
+      NamedParameters np;
+
+      typedef typename CGAL::GetVertexPointMap<Surface_Mesh, NamedParameters>::type VertexPointMap;
+
+      VertexPointMap vpm = CGAL::parameters::choose_parameter(
+        CGAL::parameters::get_parameter(np, CGAL::internal_np::vertex_point),
+        CGAL::get_property_map(CGAL::vertex_point, surfaceMesh));
+
+      typedef typename CGAL::GetGeomTraits<Surface_Mesh, NamedParameters>::type GeomTraits;
+
+      GeomTraits gt = CGAL::parameters::choose_parameter<GeomTraits>(
+        CGAL::parameters::get_parameter(np, CGAL::internal_np::geom_traits));
+
+      while (++step < maxStep)
+      {
+        if (faces_to_remove
+              .empty()) // the previous round might have been blocked due to topological constraints
+        {
+
+          std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
+          PMP::self_intersections(surfaceMesh, std::back_inserter(intersected_tris));
+
+          typedef std::pair<face_descriptor, face_descriptor> Face_pair;
+          for (const Face_pair& fp : intersected_tris)
+          {
+            faces_to_remove.insert(fp.first);
+            faces_to_remove.insert(fp.second);
+          }
+        }
+
+        if (faces_to_remove.empty() && all_fixed)
+        {
+          break;
+        }
+
+        result_pair = CGAL::Polygon_mesh_processing::internal::remove_self_intersections_one_step(
+          faces_to_remove, working_face_range, surfaceMesh, step, preserve_genus,
+          only_treat_self_intersections_locally, strong_dihedral_angle, weak_dihedral_angle, vpm,
+          gt);
+
+        all_fixed = result_pair.first;
+        topology_issue = result_pair.second;
+      }
+
+      vtkWarningMacro(<< "All fixed : " << all_fixed);
+      vtkWarningMacro(<< "Topology issue  : " << topology_issue);
+    }
+
+    stkCGALUtilities::SurfaceMeshToPolyData(surfaceMesh, polyDataOut);
+
+    // TODO : Preserve old ID in array using StaticPointLocater and Distance2BetweenPoints =0
+    // bool Generate OLD Id array 
+    // Locate Points with static point locater 
+    // Check Distance 
+    // Add to a new point array 
+  }
+  else
+  {
+    polyDataOut->ShallowCopy(polyDataIn);
+  }
 
   return 1;
 }
