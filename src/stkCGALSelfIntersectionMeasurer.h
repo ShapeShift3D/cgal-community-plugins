@@ -36,4 +36,5 @@ private:
   void operator=(const stkCGALSelfIntersectionMeasurer&) = delete;
 
   int ExecuteSelfIntersect(vtkPolyData* polyDataIn, vtkPolyData* polyDataOut);
+  int ExecuteRepairSelfIntersect(vtkPolyData* polyDataIn, vtkPolyData* polyDataOut);
 };
