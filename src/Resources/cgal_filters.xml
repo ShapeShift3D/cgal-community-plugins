@@ -125,25 +125,36 @@
                 <BooleanDomain name="bool" />
                 <Documentation />
             </IntVectorProperty>
-            UseExperimentalMethod
 
             <IntVectorProperty
                 name="MaxStep"
                 command="SetMaxStep"
                 number_of_elements="1"
-                default_values="2"
+                default_values="7"
                 panel_visibility="advanced">
                 <Documentation />
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="RepairSelfIntersections"
+                                             value="1" />
+                </Hints>
             </IntVectorProperty>
 
             <IntVectorProperty
                 name="PreserveGenus"
                 command="SetPreserveGenus"
                 number_of_elements="1"
-                default_values="0"
+                default_values="1"
                 panel_visibility="advanced">
                 <BooleanDomain name="bool" />
                 <Documentation />
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="RepairSelfIntersections"
+                                             value="1" />
+                </Hints>
             </IntVectorProperty>
 
             <IntVectorProperty
@@ -154,6 +165,12 @@
                 panel_visibility="advanced">
                 <BooleanDomain name="bool" />
                 <Documentation />
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="RepairSelfIntersections"
+                                             value="1" />
+                </Hints>
             </IntVectorProperty>
 
             <DoubleVectorProperty
@@ -163,6 +180,12 @@
                 default_values="60.0"
                 panel_visibility="advanced">
                 <Documentation />
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="RepairSelfIntersections"
+                                             value="1" />
+                </Hints>
             </DoubleVectorProperty>
 
             <DoubleVectorProperty
@@ -172,16 +195,61 @@
                 default_values="0.0"
                 panel_visibility="advanced">
                 <Documentation />
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="RepairSelfIntersections"
+                                             value="1" />
+                </Hints>
             </DoubleVectorProperty>
 
             <IntVectorProperty
-            name="UseExperimentalRepairMethod"
-            command="SetUseExperimentalRepairMethod"
-            number_of_elements="1"
-            default_values="0">
-            <BooleanDomain name="bool" />
-            <Documentation />
+                name="GenerateOldIDArray"
+                command="SetGenerateOldIDArray"
+                number_of_elements="1"
+                default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation />
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="RepairSelfIntersections"
+                                             value="1" />
+                </Hints>
             </IntVectorProperty>
+
+            <StringVectorProperty
+                name="OldIDArrayName"
+                command="SetOldIDArrayName"
+                number_of_elements="1"
+                animateable="0"
+                default_values="OldIDs"
+                panel_visibility="advanced">
+                <Documentation></Documentation>
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="RepairSelfIntersections"
+                                             value="1" />
+                </Hints>
+            </StringVectorProperty>
+
+            <PropertyGroup label="Measure Self-Intersections">
+				<Property name="SelfIntersectionsArrayName" />
+				<Property name="IterateByConnectivity" />
+				<Property name="PrintSelfIntersectingPairs" />
+			</PropertyGroup>
+
+            <PropertyGroup label="Repair Self-Intersections">
+				<Property name="RepairSelfIntersections" />
+				<Property name="MaxStep" />
+				<Property name="PreserveGenus" />
+				<Property name="OnlyTreatSelfIntersectionsLocally" />
+				<Property name="StrongDihedralAngle" />
+				<Property name="WeakDihedralAngle" />
+				<Property name="GenerateOldIDArray" />
+				<Property name="OldIDArrayName" />
+			</PropertyGroup>
 
             <Hints> 
                 <ShowInMenu category="CGAL"/>

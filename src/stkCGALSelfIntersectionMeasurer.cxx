@@ -7,17 +7,19 @@
 #include <vtkPolyData.h>
 
 #include <vtkCellData.h>
+#include <vtkIdTypeArray.h>
 #include <vtkIntArray.h>
+#include <vtkPointData.h>
 
 #include <vtkAppendPolyData.h>
 #include <vtkCleanPolyData.h>
+#include <vtkMath.h>
 #include <vtkPolyDataConnectivityFilter.h>
 #include <vtkStaticPointLocator.h>
-#include <vtkMath.h>
 
 //---------CGAL---------------------------------
-#include <CGAL/Polygon_mesh_processing/self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
+#include <CGAL/Polygon_mesh_processing/self_intersections.h>
 
 //---------Module-------------------------------
 #include <stkCGALUtilities.h>
@@ -104,7 +106,6 @@ int stkCGALSelfIntersectionMeasurer::RequestData(vtkInformation* vtkNotUsed(requ
 
     vtkNew<vtkPolyData> tempPoly;
 
-    // TODO : Remove this. Find a way convey the message if self intersetions exists or not
     if (this->RepairSelfIntersections)
     {
       this->ExecuteRepairSelfIntersect(inputMesh, outPoly);
@@ -200,94 +201,115 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
 
   if (intersecting)
   {
-    vtkWarningMacro(
-      "Self-Intersections were found in the mesh. Trying to Repair Self-Intersections");
-    // TODO : Drop Use Experiment Repair Method After testing
-    if (this->UseExperimentalRepairMethod)
+    vtkWarningMacro("Trying to Repair Self-Intersections");
+
+    vtkNew<vtkIdTypeArray> OrginalIDArray;
+
+    // PMP::experimental::remove_self_intersections(surfaceMesh);
+
+    auto face_range = CGAL::faces(surfaceMesh);
+    std::set<face_descriptor> working_face_range(face_range.begin(), face_range.end());
+
+    std::pair<bool, bool> result_pair;
+
+    // Look for self-intersections in the mesh and remove them
+    bool all_fixed = true; // indicates if the filling of all created holes went fine
+    bool topology_issue =
+      false; // indicates if some boundary cycles of edges are blocking the fixing
+    std::set<face_descriptor> faces_to_remove;
+
+    int maxStep = this->MaxStep;
+    int step = -1;
+    bool preserve_genus = this->PreserveGenus;
+    bool only_treat_self_intersections_locally = this->OnlyTreatSelfIntersectionsLocally;
+    const double strong_dihedral_angle = this->StrongDihedralAngle;
+    const double weak_dihedral_angle = this->WeakDihedralAngle;
+
+    typedef CGAL::Named_function_parameters<bool, CGAL::internal_np::all_default_t,
+      CGAL::internal_np::No_property>
+      NamedParameters;
+
+    NamedParameters np;
+
+    typedef typename CGAL::GetVertexPointMap<Surface_Mesh, NamedParameters>::type VertexPointMap;
+
+    VertexPointMap vpm = CGAL::parameters::choose_parameter(
+      CGAL::parameters::get_parameter(np, CGAL::internal_np::vertex_point),
+      CGAL::get_property_map(CGAL::vertex_point, surfaceMesh));
+
+    typedef typename CGAL::GetGeomTraits<Surface_Mesh, NamedParameters>::type GeomTraits;
+
+    GeomTraits gt = CGAL::parameters::choose_parameter<GeomTraits>(
+      CGAL::parameters::get_parameter(np, CGAL::internal_np::geom_traits));
+
+    while (++step < maxStep)
     {
-
-      // TODO : Recheck all the parameters in this experimental method
-      PMP::experimental::remove_self_intersections(surfaceMesh);
-    }
-    else
-    {
-      auto face_range = CGAL::faces(surfaceMesh);
-      std::set<face_descriptor> working_face_range(face_range.begin(), face_range.end());
-
-      std::pair<bool, bool> result_pair;
-
-      // Look for self-intersections in the mesh and remove them
-      bool all_fixed = true; // indicates if the filling of all created holes went fine
-      bool topology_issue =
-        false; // indicates if some boundary cycles of edges are blocking the fixing
-      std::set<face_descriptor> faces_to_remove;
-
-      int maxStep = this->MaxStep;
-      int step = -1;
-      bool preserve_genus = this->PreserveGenus;
-      bool only_treat_self_intersections_locally = this->OnlyTreatSelfIntersectionsLocally;
-      const double strong_dihedral_angle = this->StrongDihedralAngle;
-      const double weak_dihedral_angle = this->WeakDihedralAngle;
-
-      typedef CGAL::Named_function_parameters<bool, CGAL::internal_np::all_default_t,
-        CGAL::internal_np::No_property>
-        NamedParameters;
-
-      NamedParameters np;
-
-      typedef typename CGAL::GetVertexPointMap<Surface_Mesh, NamedParameters>::type VertexPointMap;
-
-      VertexPointMap vpm = CGAL::parameters::choose_parameter(
-        CGAL::parameters::get_parameter(np, CGAL::internal_np::vertex_point),
-        CGAL::get_property_map(CGAL::vertex_point, surfaceMesh));
-
-      typedef typename CGAL::GetGeomTraits<Surface_Mesh, NamedParameters>::type GeomTraits;
-
-      GeomTraits gt = CGAL::parameters::choose_parameter<GeomTraits>(
-        CGAL::parameters::get_parameter(np, CGAL::internal_np::geom_traits));
-
-      while (++step < maxStep)
+      if (faces_to_remove
+            .empty()) // the previous round might have been blocked due to topological constraints
       {
-        if (faces_to_remove
-              .empty()) // the previous round might have been blocked due to topological constraints
+
+        std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
+        PMP::self_intersections(surfaceMesh, std::back_inserter(intersected_tris));
+
+        typedef std::pair<face_descriptor, face_descriptor> Face_pair;
+        for (const Face_pair& fp : intersected_tris)
         {
-
-          std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
-          PMP::self_intersections(surfaceMesh, std::back_inserter(intersected_tris));
-
-          typedef std::pair<face_descriptor, face_descriptor> Face_pair;
-          for (const Face_pair& fp : intersected_tris)
-          {
-            faces_to_remove.insert(fp.first);
-            faces_to_remove.insert(fp.second);
-          }
+          faces_to_remove.insert(fp.first);
+          faces_to_remove.insert(fp.second);
         }
-
-        if (faces_to_remove.empty() && all_fixed)
-        {
-          break;
-        }
-
-        result_pair = CGAL::Polygon_mesh_processing::internal::remove_self_intersections_one_step(
-          faces_to_remove, working_face_range, surfaceMesh, step, preserve_genus,
-          only_treat_self_intersections_locally, strong_dihedral_angle, weak_dihedral_angle, vpm,
-          gt);
-
-        all_fixed = result_pair.first;
-        topology_issue = result_pair.second;
       }
 
-      vtkWarningMacro(<< "All fixed : " << all_fixed);
-      vtkWarningMacro(<< "Topology issue  : " << topology_issue);
+      if (faces_to_remove.empty() && all_fixed)
+      {
+        break;
+      }
+
+      result_pair = CGAL::Polygon_mesh_processing::internal::remove_self_intersections_one_step(
+        faces_to_remove, working_face_range, surfaceMesh, step, preserve_genus,
+        only_treat_self_intersections_locally, strong_dihedral_angle, weak_dihedral_angle, vpm, gt);
+
+      all_fixed = result_pair.first;
+      topology_issue = result_pair.second;
     }
+
+    vtkWarningMacro(<< "Done Repairing. Measuring Self-intersection in the repaired mesh");
 
     stkCGALUtilities::SurfaceMeshToPolyData(surfaceMesh, polyDataOut);
 
-    // TODO : Preserve old ID in array using StaticPointLocater and Distance2BetweenPoints =0
-    // bool Generate OLD Id array 
-    // Locate Points with static point locater 
-    // Check Distance 
-    // Add to a new point array 
+    if (this->GenerateOldIDArray)
+    {
+      auto pointLocator = vtkSmartPointer<vtkStaticPointLocator>::New();
+      pointLocator->SetDataSet(polyDataIn);
+      pointLocator->BuildLocator();
+
+      OrginalIDArray->SetName((this->OldIDArrayName).c_str());
+      OrginalIDArray->SetNumberOfComponents(1);
+      OrginalIDArray->SetNumberOfTuples(polyDataOut->GetNumberOfPoints());
+      OrginalIDArray->Fill(-1);
+
+      // map point from irepaired mesh to input mesh and store points Ids in a pair
+      for (int pointID_repaired_mesh = 0; pointID_repaired_mesh < polyDataOut->GetNumberOfPoints();
+           pointID_repaired_mesh++)
+      {
+        double pointID_repaired_coords[3] = { 0.0 };
+        double locatedID_coords[3] = { 0.0 };
+
+        polyDataOut->GetPoint(pointID_repaired_mesh, pointID_repaired_coords);
+        auto locatedID_input_mesh = pointLocator->FindClosestPoint(pointID_repaired_coords);
+
+        polyDataIn->GetPoint(locatedID_input_mesh, locatedID_coords);
+
+        if (vtkMath::Distance2BetweenPoints(pointID_repaired_coords, locatedID_coords) == 0.0)
+        {
+          OrginalIDArray->SetTuple1(pointID_repaired_mesh, locatedID_input_mesh);
+        }
+        else
+        {
+          OrginalIDArray->SetTuple1(pointID_repaired_mesh, -1);
+        }
+      }
+      polyDataOut->GetPointData()->AddArray(OrginalIDArray);
+    }
   }
   else
   {
