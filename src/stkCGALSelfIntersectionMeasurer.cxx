@@ -163,8 +163,16 @@ int stkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(
     intersectingTrisArray->SetTuple1(intersected_tris[i].second.idx(), currentTuple + 1);
   }
 
-  vtkWarningMacro("Self-Intersections were found in the mesh. "
-    << intersected_tris.size() << " pairs of triangles intersect.");
+  if (intersected_tris.size() == 0)
+  {
+    vtkWarningMacro("No Self-Intersections were found in the mesh. "
+      << intersected_tris.size() << " pairs of triangles intersect.");
+  }
+  else
+  {
+    vtkWarningMacro("Self-Intersections were found in the mesh. "
+      << intersected_tris.size() << " pairs of triangles intersect.");
+  }
 
   if (this->PrintSelfIntersectingPairs)
   {
@@ -201,10 +209,11 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
 
   if (intersecting)
   {
-    vtkWarningMacro("Trying to Repair Self-Intersections");
+    vtkWarningMacro("Found some Self-Intersections.Trying to Repair Self-Intersections");
 
     vtkNew<vtkIdTypeArray> OrginalIDArray;
 
+    // Most of the code below is replicated from the experimental remove_self_intersections method
     // PMP::experimental::remove_self_intersections(surfaceMesh);
 
     auto face_range = CGAL::faces(surfaceMesh);
@@ -218,8 +227,8 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
       false; // indicates if some boundary cycles of edges are blocking the fixing
     std::set<face_descriptor> faces_to_remove;
 
-    int maxStep = this->MaxStep;
     int step = -1;
+    int maxStep = this->MaxStep;
     bool preserve_genus = this->PreserveGenus;
     bool only_treat_self_intersections_locally = this->OnlyTreatSelfIntersectionsLocally;
     const double strong_dihedral_angle = this->StrongDihedralAngle;
@@ -242,16 +251,19 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
     GeomTraits gt = CGAL::parameters::choose_parameter<GeomTraits>(
       CGAL::parameters::get_parameter(np, CGAL::internal_np::geom_traits));
 
+    if (!this->PreserveGenus)
+      PMP::duplicate_non_manifold_vertices(surfaceMesh, np);
+
     while (++step < maxStep)
     {
       if (faces_to_remove
             .empty()) // the previous round might have been blocked due to topological constraints
       {
+        typedef std::pair<face_descriptor, face_descriptor> Face_pair;
 
-        std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
+        std::vector<Face_pair> intersected_tris;
         PMP::self_intersections(surfaceMesh, std::back_inserter(intersected_tris));
 
-        typedef std::pair<face_descriptor, face_descriptor> Face_pair;
         for (const Face_pair& fp : intersected_tris)
         {
           faces_to_remove.insert(fp.first);
@@ -264,8 +276,8 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
         break;
       }
 
-      result_pair = CGAL::Polygon_mesh_processing::internal::remove_self_intersections_one_step(
-        faces_to_remove, working_face_range, surfaceMesh, step, preserve_genus,
+      result_pair = PMP::internal::remove_self_intersections_one_step(faces_to_remove,
+        working_face_range, surfaceMesh, step, preserve_genus,
         only_treat_self_intersections_locally, strong_dihedral_angle, weak_dihedral_angle, vpm, gt);
 
       all_fixed = result_pair.first;
