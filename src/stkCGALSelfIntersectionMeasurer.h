@@ -3,6 +3,10 @@
  * @brief This filter evaluates self-intersections inside a PolyData. PolyData made of two
  * non-connected surfaces that intersect each other are counted as self-intersections.
  *
+ * Self-Intersections repair is done by making a big-enough hole and filling it.
+ * Local self-intersection removal is more subtle and only considers self-intersections
+ * within a connected component and then tries to fix those.
+ *
  * Inputs: inputMesh (port 0, vtkPolyData)
  * Output: output (port 0, vtkPolyData)
  *

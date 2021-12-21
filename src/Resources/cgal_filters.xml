@@ -123,7 +123,9 @@
                 number_of_elements="1"
                 default_values="0">
                 <BooleanDomain name="bool" />
-                <Documentation />
+                <Documentation >
+                    Turn On/Off Repair Self-Intersections feature 
+                </Documentation>
             </IntVectorProperty>
 
             <IntVectorProperty
@@ -132,7 +134,9 @@
                 number_of_elements="1"
                 default_values="7"
                 panel_visibility="advanced">
-                <Documentation />
+                <Documentation >
+                    Maximum number of extra layers of faces considered around self-intersecting faces for repair process
+                </Documentation>
                 <Hints>
                     <PropertyWidgetDecorator type="GenericDecorator"
                                              mode="visibility"
@@ -148,7 +152,9 @@
                 default_values="1"
                 panel_visibility="advanced">
                 <BooleanDomain name="bool" />
-                <Documentation />
+                <Documentation >
+                    If false, non-manifold vertices of the input mesh won't be duplicated
+                </Documentation>
                 <Hints>
                     <PropertyWidgetDecorator type="GenericDecorator"
                                              mode="visibility"
@@ -164,7 +170,9 @@
                 default_values="0"
                 panel_visibility="advanced">
                 <BooleanDomain name="bool" />
-                <Documentation />
+                <Documentation >
+                    If true, repair process will constrain sharp edges in the hole defined by the diheral angles parameters
+                </Documentation>
                 <Hints>
                     <PropertyWidgetDecorator type="GenericDecorator"
                                              mode="visibility"
@@ -179,7 +187,9 @@
                 number_of_elements="1"
                 default_values="60.0"
                 panel_visibility="advanced">
-                <Documentation />
+                <Documentation >
+                    Parameter to constrain edges
+                </Documentation>
                 <Hints>
                     <PropertyWidgetDecorator type="GenericDecorator"
                                              mode="visibility"
@@ -188,28 +198,32 @@
                 </Hints>
             </DoubleVectorProperty>
 
-            <DoubleVectorProperty
+            <!-- <DoubleVectorProperty
                 name="WeakDihedralAngle"
                 command="SetWeakDihedralAngle"
                 number_of_elements="1"
                 default_values="0.0"
                 panel_visibility="advanced">
-                <Documentation />
+                <Documentation >
+                    Currenly not used (Uintil detect_features++ is integrated)
+                </Documentation> 
                 <Hints>
                     <PropertyWidgetDecorator type="GenericDecorator"
                                              mode="visibility"
                                              property="RepairSelfIntersections"
                                              value="1" />
                 </Hints>
-            </DoubleVectorProperty>
+            </DoubleVectorProperty> -->
 
             <IntVectorProperty
-                name="GenerateOldIDArray"
+                name="GenerateOldIDsArray"
                 command="SetGenerateOldIDArray"
                 number_of_elements="1"
                 default_values="0">
                 <BooleanDomain name="bool" />
-                <Documentation />
+                <Documentation >
+                    Turn On/Off feature to generate array containing original point IDs
+                </Documentation>    
                 <Hints>
                     <PropertyWidgetDecorator type="GenericDecorator"
                                              mode="visibility"
@@ -225,7 +239,9 @@
                 animateable="0"
                 default_values="OldIDs"
                 panel_visibility="advanced">
-                <Documentation></Documentation>
+                <Documentation >
+                    Name of the array that contains the original point IDs of the mesh
+                </Documentation>
                 <Hints>
                     <PropertyWidgetDecorator type="GenericDecorator"
                                              mode="visibility"
@@ -246,8 +262,8 @@
 				<Property name="PreserveGenus" />
 				<Property name="OnlyTreatSelfIntersectionsLocally" />
 				<Property name="StrongDihedralAngle" />
-				<Property name="WeakDihedralAngle" />
-				<Property name="GenerateOldIDArray" />
+				<!-- <Property name="WeakDihedralAngle" /> -->
+				<Property name="GenerateOldIDsArray" />
 				<Property name="OldIDArrayName" />
 			</PropertyGroup>
 
