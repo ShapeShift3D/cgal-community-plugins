@@ -10,8 +10,6 @@
 #include <vtkStaticPointLocator.h>
 #include <vtkUnstructuredGrid.h>
 
-#include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
-
 #include <vtkTimerLog.h>
 
 //---------CGAL---------------------------------
