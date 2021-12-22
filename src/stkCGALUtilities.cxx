@@ -13,8 +13,6 @@
 
 #include <vtkAppendPolyData.h>
 
-#include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
-
 vtkStandardNewMacro(stkCGALUtilities);
 
 // ----------------------------------------------------------------------------
