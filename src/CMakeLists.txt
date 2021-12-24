@@ -25,6 +25,7 @@ set(classes
   stkCGALSelfIntersectionMeasurer
   stkCGALUtilities
   stkCGALPolygonOffset
+  stkCGAL3DConvexHull
 )
 
 set(private_headers

@@ -657,5 +657,59 @@
                 <ShowInMenu category="CGAL" />
             </Hints>
         </SourceProxy>
+
+        <!-- ==================================================================== -->
+        <SourceProxy
+            name="CGAL3DConvexHull"
+            class="stkCGAL3DConvexHull"
+            label="CGAL 3D Convex Hull">
+            <Documentation
+                long_help="Create a 3D Convex Hull of the polygonal mesh."
+                short_help="Create a 3D Convex Hull of the polygonal mesh.">
+                Generate 3D Convex Hull from a Point Set Data.
+ 
+                A subset S⊆R3 is convex if for any two points p and q in the set the line segment with endpoints p and q is contained in S.
+                The convex hull of a set S is the smallest convex set containing S.
+            </Documentation>
+
+            <InputProperty
+                name="InputPointSet"
+                port_index="0"
+                command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources" />
+                    <Group name="filters" />
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPointSet" />
+                </DataTypeDomain>
+                <Documentation>
+                        Set the source point set.
+                </Documentation>
+            </InputProperty>
+
+            <IntVectorProperty
+                name="ConvexHullMethod"
+                command="SetConvexHullMethod"
+                number_of_elements="1"
+                default_values="0">
+                <EnumerationDomain name="enum">
+                    <Entry
+                        text="QuickHull"
+                        value="0" />
+                    <Entry
+                        text="Delaunay3D"
+                        value="1" />
+                </EnumerationDomain>
+                <Documentation >
+                    Method used to generate Convex Hull 
+                </Documentation>
+            </IntVectorProperty>
+
+            <Hints>
+                <ShowInMenu category="CGAL" />
+            </Hints>
+        </SourceProxy>
+
     </ProxyGroup>
 </ServerManagerConfiguration>
