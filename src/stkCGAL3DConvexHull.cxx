@@ -57,7 +57,7 @@ int stkCGAL3DConvexHull::RequestData(vtkInformation* vtkNotUsed(request),
   {
     CGAL::convex_hull_3(points.begin(), points.end(), convexHull);
   }
-  else if (ConvexHullMethods::DELAUNAY3D)
+  else if (this->ConvexHullMethod == ConvexHullMethods::DELAUNAY3D)
   {
     Delaunay T;
     T.insert(points.begin(), points.end());
