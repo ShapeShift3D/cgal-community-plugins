@@ -24,6 +24,8 @@
 //---------Module-------------------------------
 #include <stkCGALUtilities.h>
 
+#include <set>
+#include <utility>
 #include <vector>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
@@ -252,7 +254,9 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
       CGAL::parameters::get_parameter(np, CGAL::internal_np::geom_traits));
 
     if (!this->PreserveGenus)
+    {
       PMP::duplicate_non_manifold_vertices(surfaceMesh, np);
+    }
 
     while (++step < maxStep)
     {
@@ -314,10 +318,6 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
         if (vtkMath::Distance2BetweenPoints(pointID_repaired_coords, locatedID_coords) == 0.0)
         {
           OrginalIDArray->SetTuple1(pointID_repaired_mesh, locatedID_input_mesh);
-        }
-        else
-        {
-          OrginalIDArray->SetTuple1(pointID_repaired_mesh, -1);
         }
       }
       polyDataOut->GetPointData()->AddArray(OrginalIDArray);
