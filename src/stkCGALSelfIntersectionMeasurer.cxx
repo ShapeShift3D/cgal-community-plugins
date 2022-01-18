@@ -140,36 +140,14 @@ int stkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(
   nullFaceMaskArray->SetName(this->NullFaceMaskArrayName.c_str());
 
   Surface_Mesh surfaceMesh;
-  stkCGALUtilities::vtkPolyDataToPolygonMesh(polyDataIn, surfaceMesh, cellOriginalIdsArray, nullFaceMaskArray);
+  stkCGALUtilities::vtkPolyDataToPolygonMesh(
+    polyDataIn, surfaceMesh, cellOriginalIdsArray, nullFaceMaskArray);
 
   if (!CGAL::is_triangle_mesh(surfaceMesh))
   {
     vtkErrorMacro("Mesh is not triangular.");
     return 0;
   }
-
-  typedef typename boost::graph_traits<Surface_Mesh>::vertex_descriptor vertex_descriptor;
-  typedef typename boost::graph_traits<Surface_Mesh>::face_iterator face_iterator;
-
-  typedef typename boost::property_map<Surface_Mesh, CGAL::vertex_point_t>::const_type VPMap;
-  typedef typename boost::property_map_value<Surface_Mesh, CGAL::vertex_point_t>::type Point_3;
-
-  VPMap vpmap = get(CGAL::vertex_point, surfaceMesh);
-
-  // for(face_iterator fit = faces(surfaceMesh).begin() ;
-  //      fit != faces(surfaceMesh).end() ;
-  //      ++fit )
-  // {
-  //   if (fit->idx() == 148305 - 2)
-  //   {
-  //     for (vertex_descriptor v :vertices_around_face(halfedge(*fit, surfaceMesh), surfaceMesh))
-  //     {
-  //       std::cout << "Vertex Id: " << v.idx() << std::endl;
-  //       const Point_3& p = get(vpmap, v);
-  //       std::cout << "Cell Points: " << CGAL::to_double(p.x()) << ", " << CGAL::to_double(p.y()) << ", " << CGAL::to_double(p.z()) << std::endl;
-  //     }
-  //   }
-  // }
 
   bool intersecting = PMP::does_self_intersect(
     surfaceMesh, PMP::parameters::vertex_point_map(get(CGAL::vertex_point, surfaceMesh)));

@@ -33,7 +33,8 @@ stkCGALUtilities::~stkCGALUtilities() {}
  *  @param tmesh The resulting Surface Mesh
  *  @return bool Success (true) or failure (false)
  */
-bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh0& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh0& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   typedef typename boost::property_map<SurfaceMesh0, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<SurfaceMesh0, CGAL::vertex_point_t>::type Point_3;
@@ -55,7 +56,8 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
  *  @param tmesh The resulting Polygon Mesh
  *  @return bool Success (true) or failure (false)
  */
-bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron0& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron0& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   typedef typename boost::property_map<Polyhedron0, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<Polyhedron0, CGAL::vertex_point_t>::type Point_3;
@@ -77,7 +79,8 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
  *  @param tmesh The resulting Surface Mesh
  *  @return bool Success (true) or failure (false)
  */
-bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh1& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh1& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   typedef typename boost::property_map<SurfaceMesh1, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<SurfaceMesh1, CGAL::vertex_point_t>::type Point_3;
@@ -99,7 +102,8 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
  *  @param tmesh The resulting Polygon Mesh
  *  @return bool Success (true) or failure (false)
  */
-bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron1& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron1& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   typedef typename boost::property_map<Polyhedron1, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<Polyhedron1, CGAL::vertex_point_t>::type Point_3;
@@ -121,7 +125,8 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
  *  @param tmesh The resulting Surface Mesh
  *  @return bool Success (true) or failure (false)
  */
-bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh2& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh2& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   typedef typename boost::property_map<SurfaceMesh2, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<SurfaceMesh2, CGAL::vertex_point_t>::type Point_3;
@@ -143,7 +148,8 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
  *  @param tmesh The resulting Polygon Mesh
  *  @return bool Success (true) or failure (false)
  */
-bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron2& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron2& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   typedef typename boost::property_map<Polyhedron2, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<Polyhedron2, CGAL::vertex_point_t>::type Point_3;
@@ -165,7 +171,8 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
  *  @param tmesh The resulting Polygon Mesh
  *  @return bool Success (true) or failure (false)
  */
-bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron3& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedron3& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   typedef typename boost::property_map<Polyhedron3, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<Polyhedron3, CGAL::vertex_point_t>::type Point_3;
@@ -187,7 +194,8 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, Polyhedro
  *  @param tmesh The resulting Surface Mesh
  *  @return bool Success (true) or failure (false)
  */
-bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh3& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMesh3& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   typedef typename boost::property_map<SurfaceMesh3, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<SurfaceMesh3, CGAL::vertex_point_t>::type Point_3;
@@ -210,7 +218,8 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, SurfaceMe
  *  @return bool Success (true) or failure (false)
  */
 template<typename KernelType, typename MeshType>
-bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   typedef typename boost::property_map<MeshType, CGAL::vertex_point_t>::type VPMap;
   typedef typename boost::property_map_value<MeshType, CGAL::vertex_point_t>::type Point_3;
@@ -233,7 +242,8 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMesh(vtkPointSet* polyData, MeshType&
  *  @return bool Success (true) or failure (false)
  */
 template<typename VPMapType, typename PointType, typename VertexDescriptor, typename MeshType>
-bool stkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh, vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
+bool stkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh,
+  vtkIdTypeArray* cellOriginalIdsArray /*= nullptr*/, vtkIntArray* nullFaceMaskArray /*= nullptr*/)
 {
   VPMapType vpmap = get(CGAL::vertex_point, tmesh);
 
@@ -247,7 +257,7 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
     {
       cellOriginalIdsArray->SetName("OriginalIds");
     }
-    
+
     cellOriginalIdsArray->SetNumberOfComponents(1);
   }
 
@@ -297,7 +307,7 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
       return false;
     }
 
-    // Store cell's point ids in vr 
+    // Store cell's point ids in vr
     std::vector<VertexDescriptor> vr(nb_vertices);
     for (vtkIdType k = 0; k < nb_vertices; ++k)
     {

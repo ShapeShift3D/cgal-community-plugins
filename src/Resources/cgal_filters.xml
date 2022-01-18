@@ -1,105 +1,78 @@
 <ServerManagerConfiguration>
     <!-- ==================================================================== -->
     <ProxyGroup name="filters">
-        <SourceProxy name="CGAL3DPolyhedralMesher"
-                     class="stkCGAL3DPolyhedralMesher"
-                     label="CGAL 3D Polyhedral Mesher"
-                     base_proxygroup="polyhedral_meshers"
-                     base_proxyname="CGAL3DPolyhedralMesher">
+        <SourceProxy
+            name="CGAL3DPolyhedralMesher"
+            class="stkCGAL3DPolyhedralMesher"
+            label="CGAL 3D Polyhedral Mesher"
+            base_proxygroup="polyhedral_meshers"
+            base_proxyname="CGAL3DPolyhedralMesher">
             <Documentation>
                 Applies an ARAP UV Parametrization on a polygonal mesh.
             </Documentation>
 
-            <Property name="Update"
-                      command="Modified"
-                      label="Update"
-                      panel_widget="command_button"/>
-            
-            <Hints> 
-                <ShowInMenu category="CGAL"/>
+            <Property
+                name="Update"
+                command="Modified"
+                label="Update"
+                panel_widget="command_button" />
+
+            <Hints>
+                <ShowInMenu category="CGAL" />
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <!-- For external users: Uncomment to expose the filter --> 
-        <!-- <SourceProxy name="CGALARAPUVParametrization"
-                     class="stkCGALARAPUVParametrization"
-                     label="CGAL ARAP UV Parametrization"
-                     base_proxygroup="uv_parametrizations"
-                     base_proxyname="CGALARAPUVParametrization">
-            <Documentation>
-                Applies an ARAP UV Parametrization on a polygonal mesh.
-            </Documentation>
-            
-            <Hints> 
-                <ShowInMenu category="CGAL"/>
-            </Hints>
-        </SourceProxy> -->
+        <!-- For external users: Uncomment to expose the filter -->
+        <!-- <SourceProxy name="CGALARAPUVParametrization" class="stkCGALARAPUVParametrization" label="CGAL ARAP UV Parametrization" base_proxygroup="uv_parametrizations" base_proxyname="CGALARAPUVParametrization"> <Documentation> Applies an ARAP UV Parametrization on a polygonal mesh. </Documentation> <Hints> <ShowInMenu category="CGAL"/> </Hints> </SourceProxy> -->
         <!-- ==================================================================== -->
-        <!-- For external users: Uncomment to expose the filter --> 
-        <!-- <SourceProxy name="CGALLSCMUVParametrization"
-                     class="stkCGALLSCMUVParametrization"
-                     label="CGAL LSCM UV Parametrization"
-                     base_proxygroup="uv_parametrizations"
-                     base_proxyname="CGALLSCMUVParametrization">
-            <Documentation>
-                Applies a LSCM UV Parametrization on a polygonal mesh.
-            </Documentation>
+        <!-- For external users: Uncomment to expose the filter -->
+        <!-- <SourceProxy name="CGALLSCMUVParametrization" class="stkCGALLSCMUVParametrization" label="CGAL LSCM UV Parametrization" base_proxygroup="uv_parametrizations" base_proxyname="CGALLSCMUVParametrization"> <Documentation> Applies a LSCM UV Parametrization on a polygonal mesh. </Documentation> <Hints> <ShowInMenu category="CGAL"/> </Hints> </SourceProxy> -->
+        <!-- ==================================================================== -->
+        <!-- For external users: Uncomment to expose the filter -->
+        <!-- <SourceProxy name="CGALBoolean3DMesher" class="stkCGALBoolean3DMesher" label="CGAL Boolean 3D" base_proxygroup="boolean_meshers" base_proxyname="CGALBoolean3DMesher"> <Documentation long_help="Applies a boolean operation on two PolyData inputs." short_help="Applies a boolean operation on two PolyData inputs."> </Documentation> <Hints> <ShowInMenu category="CGAL"/> </Hints> </SourceProxy> -->
+        <!-- ==================================================================== -->
+        <SourceProxy
+            name="CGALSelfIntersectionMeasurer"
+            class="stkCGALSelfIntersectionMeasurer"
+            label="CGAL Self Intersection Measurer">
+            <Documentation
+                long_help="Finds self intersections inside a polygonal mesh and stores the information in an array."
+                short_help="Finds self intersections inside a polygonal mesh." />
 
-            <Hints> 
-                <ShowInMenu category="CGAL"/>
-            </Hints>
-        </SourceProxy> -->
-        <!-- ==================================================================== -->
-        <!-- For external users: Uncomment to expose the filter --> 
-        <!-- <SourceProxy name="CGALBoolean3DMesher"
-                     class="stkCGALBoolean3DMesher"
-                     label="CGAL Boolean 3D"
-                     base_proxygroup="boolean_meshers"
-                     base_proxyname="CGALBoolean3DMesher">
-            <Documentation long_help="Applies a boolean operation on two PolyData inputs."
-                           short_help="Applies a boolean operation on two PolyData inputs."> </Documentation>
-            <Hints> 
-                <ShowInMenu category="CGAL"/>
-            </Hints>
-        </SourceProxy> -->
-        <!-- ==================================================================== -->
-        <SourceProxy name="CGALSelfIntersectionMeasurer"
-                     class="stkCGALSelfIntersectionMeasurer"
-                     label="CGAL Self Intersection Measurer">
-            <Documentation long_help="Finds self intersections inside a polygonal mesh and stores the information in an array."
-                           short_help="Finds self intersections inside a polygonal mesh."> </Documentation>
-
-            <InputProperty name="InputMesh"
-                           port_index="0"
-                           command="SetInputConnection">
+            <InputProperty
+                name="InputMesh"
+                port_index="0"
+                command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
-                    <Group name="sources"/>
-                    <Group name="filters"/>
+                    <Group name="sources" />
+                    <Group name="filters" />
                 </ProxyGroupDomain>
                 <DataTypeDomain name="input_type">
-                    <DataType value="vtkDataSet"/>
+                    <DataType value="vtkDataSet" />
                 </DataTypeDomain>
                 <Documentation>
                     Set the source data set.
                 </Documentation>
             </InputProperty>
 
-            <StringVectorProperty name="SelfIntersectionsArrayName"
-                                  command="SetSelfIntersectionsArrayName"
-                                  number_of_elements="1"
-                                  animateable="0"
-                                  default_values="Self-Intersections"
-                                  panel_visibility="advanced">
+            <StringVectorProperty
+                name="SelfIntersectionsArrayName"
+                command="SetSelfIntersectionsArrayName"
+                number_of_elements="1"
+                animateable="0"
+                default_values="Self-Intersections"
+                panel_visibility="advanced">
                 <Documentation>
                     Name of the Self-Intersections array.
                 </Documentation>
             </StringVectorProperty>
 
-            <IntVectorProperty name="IterateByConnectivity"
-                               command="SetIterateByConnectivity"
-                               label="Iterate By Connectivity"
-                               number_of_elements="1"
-                               default_values="1">
+            <IntVectorProperty
+                name="IterateByConnectivity"
+                command="SetIterateByConnectivity"
+                label="Iterate By Connectivity"
+                number_of_elements="1"
+                default_values="1">
                 <BooleanDomain name="bool" />
                 <Documentation>
                     Checks self-intersections independently for every geometrically non-connected mesh of the polydata.
@@ -107,11 +80,12 @@
                 </Documentation>
             </IntVectorProperty>
 
-            <IntVectorProperty name="PrintSelfIntersectingPairs"
-                               command="SetPrintSelfIntersectingPairs"
-                               number_of_elements="1"
-                               default_values="0">
-                <BooleanDomain name="bool"/>
+            <IntVectorProperty
+                name="PrintSelfIntersectingPairs"
+                command="SetPrintSelfIntersectingPairs"
+                number_of_elements="1"
+                default_values="0">
+                <BooleanDomain name="bool" />
                 <Documentation>
                     Print pairs of triangles self-intersecting themselves to the console output.
                 </Documentation>
@@ -123,7 +97,7 @@
                 number_of_elements="1"
                 default_values="0">
                 <BooleanDomain name="bool" />
-                <Documentation >
+                <Documentation>
                     Turn On/Off Repair Self-Intersections feature 
                 </Documentation>
             </IntVectorProperty>
@@ -134,14 +108,15 @@
                 number_of_elements="1"
                 default_values="7"
                 panel_visibility="advanced">
-                <Documentation >
+                <Documentation>
                     Maximum number of extra layers of faces considered around self-intersecting faces for repair process
                 </Documentation>
                 <Hints>
-                    <PropertyWidgetDecorator type="GenericDecorator"
-                                             mode="visibility"
-                                             property="RepairSelfIntersections"
-                                             value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="RepairSelfIntersections"
+                        value="1" />
                 </Hints>
             </IntVectorProperty>
 
@@ -152,14 +127,15 @@
                 default_values="1"
                 panel_visibility="advanced">
                 <BooleanDomain name="bool" />
-                <Documentation >
+                <Documentation>
                     If false, non-manifold vertices of the input mesh won't be duplicated
                 </Documentation>
                 <Hints>
-                    <PropertyWidgetDecorator type="GenericDecorator"
-                                             mode="visibility"
-                                             property="RepairSelfIntersections"
-                                             value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="RepairSelfIntersections"
+                        value="1" />
                 </Hints>
             </IntVectorProperty>
 
@@ -170,14 +146,15 @@
                 default_values="0"
                 panel_visibility="advanced">
                 <BooleanDomain name="bool" />
-                <Documentation >
+                <Documentation>
                     If true, repair process will constrain sharp edges in the hole defined by the diheral angles parameters
                 </Documentation>
                 <Hints>
-                    <PropertyWidgetDecorator type="GenericDecorator"
-                                             mode="visibility"
-                                             property="RepairSelfIntersections"
-                                             value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="RepairSelfIntersections"
+                        value="1" />
                 </Hints>
             </IntVectorProperty>
 
@@ -187,33 +164,19 @@
                 number_of_elements="1"
                 default_values="60.0"
                 panel_visibility="advanced">
-                <Documentation >
+                <Documentation>
                     Parameter to constrain edges
                 </Documentation>
                 <Hints>
-                    <PropertyWidgetDecorator type="GenericDecorator"
-                                             mode="visibility"
-                                             property="RepairSelfIntersections"
-                                             value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="RepairSelfIntersections"
+                        value="1" />
                 </Hints>
             </DoubleVectorProperty>
 
-            <!-- <DoubleVectorProperty
-                name="WeakDihedralAngle"
-                command="SetWeakDihedralAngle"
-                number_of_elements="1"
-                default_values="0.0"
-                panel_visibility="advanced">
-                <Documentation >
-                    Currenly not used (Uintil detect_features++ is integrated)
-                </Documentation> 
-                <Hints>
-                    <PropertyWidgetDecorator type="GenericDecorator"
-                                             mode="visibility"
-                                             property="RepairSelfIntersections"
-                                             value="1" />
-                </Hints>
-            </DoubleVectorProperty> -->
+            <!-- <DoubleVectorProperty name="WeakDihedralAngle" command="SetWeakDihedralAngle" number_of_elements="1" default_values="0.0" panel_visibility="advanced"> <Documentation > Currenly not used (Uintil detect_features++ is integrated) </Documentation> <Hints> <PropertyWidgetDecorator type="GenericDecorator" mode="visibility" property="RepairSelfIntersections" value="1" /> </Hints> </DoubleVectorProperty> -->
 
             <IntVectorProperty
                 name="GenerateOldIDsArray"
@@ -221,14 +184,15 @@
                 number_of_elements="1"
                 default_values="0">
                 <BooleanDomain name="bool" />
-                <Documentation >
+                <Documentation>
                     Turn On/Off feature to generate array containing original point IDs
-                </Documentation>    
+                </Documentation>
                 <Hints>
-                    <PropertyWidgetDecorator type="GenericDecorator"
-                                             mode="visibility"
-                                             property="RepairSelfIntersections"
-                                             value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="RepairSelfIntersections"
+                        value="1" />
                 </Hints>
             </IntVectorProperty>
 
@@ -239,23 +203,25 @@
                 animateable="0"
                 default_values="OldIDs"
                 panel_visibility="advanced">
-                <Documentation >
+                <Documentation>
                     Name of the array that contains the original point IDs of the mesh
                 </Documentation>
                 <Hints>
-                    <PropertyWidgetDecorator type="GenericDecorator"
-                                             mode="visibility"
-                                             property="RepairSelfIntersections"
-                                             value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="RepairSelfIntersections"
+                        value="1" />
                 </Hints>
             </StringVectorProperty>
 
-            <IntVectorProperty name="OutputNullFaceMaskArray"
-                               command="SetOutputNullFaceMaskArray"
-                               number_of_elements="1"
-                               default_values="1"
-                               panel_visibility="advanced">
-                <BooleanDomain name="bool"/>
+            <IntVectorProperty
+                name="OutputNullFaceMaskArray"
+                command="SetOutputNullFaceMaskArray"
+                number_of_elements="1"
+                default_values="1"
+                panel_visibility="advanced">
+                <BooleanDomain name="bool" />
                 <Documentation>
                     Outputs a mask array of faces which couldn't be understood by CGAL.
                 </Documentation>
@@ -268,101 +234,112 @@
                 animateable="0"
                 default_values="NullFaceMask"
                 panel_visibility="advanced">
-                <Documentation >
+                <Documentation>
                     Name of the mask array indicating which faces are null from CGAL's interpretation.
                 </Documentation>
                 <Hints>
-                    <PropertyWidgetDecorator type="GenericDecorator"
-                                             mode="visibility"
-                                             property="OutputNullFaceMaskArray"
-                                             value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="OutputNullFaceMaskArray"
+                        value="1" />
                 </Hints>
             </StringVectorProperty>
 
             <PropertyGroup label="Measure Self-Intersections">
-				<Property name="SelfIntersectionsArrayName" />
-				<Property name="IterateByConnectivity" />
-				<Property name="PrintSelfIntersectingPairs" />
-			</PropertyGroup>
+                <Property name="SelfIntersectionsArrayName" />
+                <Property name="IterateByConnectivity" />
+                <Property name="PrintSelfIntersectingPairs" />
+            </PropertyGroup>
 
             <PropertyGroup label="Repair Self-Intersections">
-				<Property name="RepairSelfIntersections" />
-				<Property name="MaxStep" />
-				<Property name="PreserveGenus" />
-				<Property name="OnlyTreatSelfIntersectionsLocally" />
-				<Property name="StrongDihedralAngle" />
-				<!-- <Property name="WeakDihedralAngle" /> -->
-				<Property name="GenerateOldIDsArray" />
-				<Property name="OldIDArrayName" />
-			</PropertyGroup>
+                <Property name="RepairSelfIntersections" />
+                <Property name="MaxStep" />
+                <Property name="PreserveGenus" />
+                <Property name="OnlyTreatSelfIntersectionsLocally" />
+                <Property name="StrongDihedralAngle" />
+                <!-- <Property name="WeakDihedralAngle" /> -->
+                <Property name="GenerateOldIDsArray" />
+                <Property name="OldIDArrayName" />
+            </PropertyGroup>
 
             <PropertyGroup label="Debugging">
-				<Property name="OutputNullFaceMaskArray" />
+                <Property name="OutputNullFaceMaskArray" />
                 <Property name="NullFaceMaskArrayName" />
-			</PropertyGroup>
+            </PropertyGroup>
 
-            <Hints> 
-                <ShowInMenu category="CGAL"/>
+            <Hints>
+                <ShowInMenu category="CGAL" />
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <SourceProxy name="CGALPolygonOrientOperator"
-                     class="stkCGALPolygonOrientOperator"
-                     label="CGAL Polygon Orient Operator"
-                     base_proxygroup="loop_operators"
-                     base_proxyname="CGALPolygonOrientOperator">
-            <Documentation long_help="Orders a polygon clockwise or counterclockwise."
-                           short_help="Orders a polygon clockwise or counterclockwise."> </Documentation>
+        <SourceProxy
+            name="CGALPolygonOrientOperator"
+            class="stkCGALPolygonOrientOperator"
+            label="CGAL Polygon Orient Operator"
+            base_proxygroup="loop_operators"
+            base_proxyname="CGALPolygonOrientOperator">
+            <Documentation
+                long_help="Orders a polygon clockwise or counterclockwise."
+                short_help="Orders a polygon clockwise or counterclockwise." />
 
-            <Property name="Update"
-                      command="Modified"
-                      label="Update"
-                      panel_widget="command_button"/>
+            <Property
+                name="Update"
+                command="Modified"
+                label="Update"
+                panel_widget="command_button" />
 
-            <Hints> 
-                <ShowInMenu category="CGAL"/>
+            <Hints>
+                <ShowInMenu category="CGAL" />
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <SourceProxy name="CGALBoolean2DMesher"
-                     class="stkCGALBoolean2DMesher"
-                     label="CGAL Boolean 2D Mesher"
-                     base_proxygroup="boolean_meshers"
-                     base_proxyname="CGALBoolean2DMesher">
-            <Documentation long_help="Applies a 2d boolean operation on sets of PolyLine inputs."
-                           short_help="Applies a 2d boolean operation on sets of PolyLine inputs."> </Documentation>
+        <SourceProxy
+            name="CGALBoolean2DMesher"
+            class="stkCGALBoolean2DMesher"
+            label="CGAL Boolean 2D Mesher"
+            base_proxygroup="boolean_meshers"
+            base_proxyname="CGALBoolean2DMesher">
+            <Documentation
+                long_help="Applies a 2d boolean operation on sets of PolyLine inputs."
+                short_help="Applies a 2d boolean operation on sets of PolyLine inputs." />
 
-            <Property name="Update"
-                      command="Modified"
-                      label="Update"
-                      panel_widget="command_button"/>
+            <Property
+                name="Update"
+                command="Modified"
+                label="Update"
+                panel_widget="command_button" />
 
-            <Hints> 
-                <ShowInMenu category="CGAL"/>
+            <Hints>
+                <ShowInMenu category="CGAL" />
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <SourceProxy name="CGALPolygonSetOrientedSideClassifier"
-                     class="stkCGALPolygonSetOrientedSideClassifier"
-                     label="CGAL Polygon Set Oriented Side Classifier"
-                     base_proxygroup="point_classifiers"
-                     base_proxyname="CGALPolygonSetOrientedSideClassifier">
-            <Documentation long_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set."
-                           short_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set."> </Documentation>
+        <SourceProxy
+            name="CGALPolygonSetOrientedSideClassifier"
+            class="stkCGALPolygonSetOrientedSideClassifier"
+            label="CGAL Polygon Set Oriented Side Classifier"
+            base_proxygroup="point_classifiers"
+            base_proxyname="CGALPolygonSetOrientedSideClassifier">
+            <Documentation
+                long_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set."
+                short_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set." />
 
-            <Property name="Update"
-                      command="Modified"
-                      label="Update"
-                      panel_widget="command_button"/>
+            <Property
+                name="Update"
+                command="Modified"
+                label="Update"
+                panel_widget="command_button" />
 
-            <Hints> 
-                <ShowInMenu category="CGAL"/>
+            <Hints>
+                <ShowInMenu category="CGAL" />
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <SourceProxy name="IsotropicRemeshingFilter"
-                     class="stkCGALIsotropicRemeshingFilter"
-                     label="CGAL Isotropic Remeshing">
+        <SourceProxy
+            name="IsotropicRemeshingFilter"
+            class="stkCGALIsotropicRemeshingFilter"
+            label="CGAL Isotropic Remeshing">
             <Documentation
                 short_help="Remeshes datasets."
                 long_help="Remeshes a dataset.">
@@ -370,9 +347,10 @@
                 as input, and returns a PolyData containing the remeshed input.
                 An optional input array can be supplied to mask the remeshing zone.
             </Documentation>
-            <InputProperty name="Input"
-                           port_index="0"
-                           command="SetInputConnection">
+            <InputProperty
+                name="Input"
+                port_index="0"
+                command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
                     <Group name="sources" />
                     <Group name="filters" />
@@ -380,60 +358,73 @@
                 <DataTypeDomain name="input_type">
                     <DataType value="vtkPolyData" />
                 </DataTypeDomain>
-                <InputArrayDomain name="MeshingMaskArray"
-                                  attribute_type="cell"
-                                  number_of_components="1"
-                                  optional="1" />
+                <InputArrayDomain
+                    name="MeshingMaskArray"
+                    attribute_type="cell"
+                    number_of_components="1"
+                    optional="1" />
                 <Documentation>
                     The input Mesh.
                 </Documentation>
             </InputProperty>
-            <StringVectorProperty name="MeshingMaskArrayName"
-                                  command="SetMeshingMaskArrayName"
-                                  label="Meshing Mask"
-                                  default_values="None"
-                                  number_of_elements="1">
-                <ArrayListDomain name="array_list"
-                                 none_string="None"
-                                 input_domain_name="MeshingMaskArray">
+            <StringVectorProperty
+                name="MeshingMaskArrayName"
+                command="SetMeshingMaskArrayName"
+                label="Meshing Mask"
+                default_values="None"
+                number_of_elements="1">
+                <ArrayListDomain
+                    name="array_list"
+                    none_string="None"
+                    input_domain_name="MeshingMaskArray">
                     <RequiredProperties>
-                        <Property name="Input" function="Input" />
+                        <Property
+                            name="Input"
+                            function="Input" />
                     </RequiredProperties>
                 </ArrayListDomain>
                 <Documentation>
                     Specifies the meshing mask array name.
                 </Documentation>
             </StringVectorProperty>
-            <IntVectorProperty name="ProtectConstraints"
-                               command="SetProtectConstraints"
-                               default_values="1"
-                               number_of_elements="1">
+            <IntVectorProperty
+                name="ProtectConstraints"
+                command="SetProtectConstraints"
+                default_values="1"
+                number_of_elements="1">
                 <Documentation>
                     Toggles border constraints protection.
                     The boundary edges will be considered as constrained and protected.
                 </Documentation>
                 <BooleanDomain name="bool" />
             </IntVectorProperty>
-            <DoubleVectorProperty name="TargetEdgeLength"
-                                  command="SetTargetEdgeLength"
-                                  number_of_elements="1"
-                                  default_values="0.0"
-                                  information_property="TargetEdgeLengthInfo">
-                <DoubleRangeDomain name="range" min="0.0" />
+            <DoubleVectorProperty
+                name="TargetEdgeLength"
+                command="SetTargetEdgeLength"
+                number_of_elements="1"
+                default_values="0.0"
+                information_property="TargetEdgeLengthInfo">
+                <DoubleRangeDomain
+                    name="range"
+                    min="0.0" />
                 <Documentation>
                     The target length for the new edges of the mesh (default is 1% of the bounding box diagonal).
                 </Documentation>
             </DoubleVectorProperty>
-            <DoubleVectorProperty name="TargetEdgeLengthInfo"
-                                  command="GetTargetEdgeLengthInfo"
-                                  information_only="1">
+            <DoubleVectorProperty
+                name="TargetEdgeLengthInfo"
+                command="GetTargetEdgeLengthInfo"
+                information_only="1">
                 <SimpleDoubleInformationHelper />
             </DoubleVectorProperty>
-            <IntVectorProperty name="NumberOfIterations"
-                               command="SetNumberOfIterations"
-                               number_of_elements="1"
-                               default_values="1">
-                <IntRangeDomain name="range" min="1" />
+            <IntVectorProperty
+                name="NumberOfIterations"
+                command="SetNumberOfIterations"
+                number_of_elements="1"
+                default_values="1">
+                <IntRangeDomain
+                    name="range"
+                    min="1" />
                 <Documentation>
                     The number of iterations for the sequence of atomic operations performed (edge splits,
                     edge collapses, edge flips, tangential relaxation and projection to the initial surface
@@ -445,102 +436,134 @@
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <SourceProxy name="CGALRegionGrowing"
-               class="stkCGALRegionGrowing"
-               label="CGAL Shape Detection - Region Growing">
-            <Documentation long_help="todo."
-                       short_help="todo."> </Documentation>
-            <InputProperty name="Input"
-                           port_index="0"
-                           command="SetInputConnection">
+        <SourceProxy
+            name="CGALRegionGrowing"
+            class="stkCGALRegionGrowing"
+            label="CGAL Shape Detection - Region Growing">
+            <Documentation
+                long_help="todo."
+                short_help="todo." />
+            <InputProperty
+                name="Input"
+                port_index="0"
+                command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
-                    <Group name="sources"/>
-                    <Group name="filters"/>
+                    <Group name="sources" />
+                    <Group name="filters" />
                 </ProxyGroupDomain>
                 <DataTypeDomain name="input_type">
-                    <DataType value="vtkDataSet"/>
+                    <DataType value="vtkDataSet" />
                 </DataTypeDomain>
             </InputProperty>
-            <IntVectorProperty name="Kernel"
-                               command="SetKernelValue"
-                               number_of_elements="1"
-                               default_values="1">
+            <IntVectorProperty
+                name="Kernel"
+                command="SetKernelValue"
+                number_of_elements="1"
+                default_values="1">
                 <EnumerationDomain name="enum">
-                    <Entry text="EPEC"              value="1" />
-                    <Entry text="EPEC_SQRT"         value="2" />
-                    <Entry text="EPEC_KTH_ROOT"     value="3" />
-                    <Entry text="EPEC_ROOT_OF"      value="4" />
-                    <Entry text="EPIC"              value="5" />
-                    <Entry text="Cartesian"         value="6" />
-                    <Entry text="Simple_cartesian"  value="7" />
+                    <Entry
+                        text="EPEC"
+                        value="1" />
+                    <Entry
+                        text="EPEC_SQRT"
+                        value="2" />
+                    <Entry
+                        text="EPEC_KTH_ROOT"
+                        value="3" />
+                    <Entry
+                        text="EPEC_ROOT_OF"
+                        value="4" />
+                    <Entry
+                        text="EPIC"
+                        value="5" />
+                    <Entry
+                        text="Cartesian"
+                        value="6" />
+                    <Entry
+                        text="Simple_cartesian"
+                        value="7" />
                 </EnumerationDomain>
                 <Documentation>
 					Set the kernel. Depending on the CGAL kernel used,
                     the compute time may very a lot and so the output regions.
                 </Documentation>
             </IntVectorProperty>
-            <DoubleVectorProperty name="MaxDistanceToPlane"
-                               command="SetMaxDistanceToPlane"
-                               number_of_elements="1"
-                               default_values="1.0">
-                <DoubleRangeDomain min="0.0" name="range" />
+            <DoubleVectorProperty
+                name="MaxDistanceToPlane"
+                command="SetMaxDistanceToPlane"
+                number_of_elements="1"
+                default_values="1.0">
+                <DoubleRangeDomain
+                    min="0.0"
+                    name="range" />
                 <Documentation>
                     The maximum distance from the furthest face vertex to a plane.
                 </Documentation>
             </DoubleVectorProperty>
-            <DoubleVectorProperty name="MaxAcceptedAngle"
-                               command="SetMaxAcceptedAngle"
-                               number_of_elements="1"
-                               default_values="45.0">
+            <DoubleVectorProperty
+                name="MaxAcceptedAngle"
+                command="SetMaxAcceptedAngle"
+                number_of_elements="1"
+                default_values="45.0">
                 <Documentation>
                     The maximum accepted angle between the face normal and the normal of a plane.
                 </Documentation>
             </DoubleVectorProperty>
-            <IntVectorProperty name="MinRegionSize"
-                               command="SetMinRegionSize"
-                               number_of_elements="1"
-                               default_values="5">
-                <IntRangeDomain min="0" name="range" />
+            <IntVectorProperty
+                name="MinRegionSize"
+                command="SetMinRegionSize"
+                number_of_elements="1"
+                default_values="5">
+                <IntRangeDomain
+                    min="0"
+                    name="range" />
                 <Documentation>
                     The minimum number of mesh faces a region must have.
                 </Documentation>
             </IntVectorProperty>
-		    <Hints> 
-                <ShowInMenu category="CGAL"/>
+            <Hints>
+                <ShowInMenu category="CGAL" />
             </Hints>
         </SourceProxy>
         <!-- ==================================================================== -->
-        <SourceProxy name="CGALEfficientRANSAC"
-               class="stkCGALEfficientRANSAC"
-               label="CGAL Shape Detection - Efficient RANSAC">
-            <Documentation long_help="todo."
-                       short_help="todo."> </Documentation>
-            <InputProperty name="Input"
-                           port_index="0"
-                           command="SetInputConnection">
+        <SourceProxy
+            name="CGALEfficientRANSAC"
+            class="stkCGALEfficientRANSAC"
+            label="CGAL Shape Detection - Efficient RANSAC">
+            <Documentation
+                long_help="todo."
+                short_help="todo." />
+            <InputProperty
+                name="Input"
+                port_index="0"
+                command="SetInputConnection">
                 <ProxyGroupDomain name="groups">
-                    <Group name="sources"/>
-                    <Group name="filters"/>
+                    <Group name="sources" />
+                    <Group name="filters" />
                 </ProxyGroupDomain>
                 <DataTypeDomain name="input_type">
-                    <DataType value="vtkDataSet"/>
+                    <DataType value="vtkDataSet" />
                 </DataTypeDomain>
             </InputProperty>
-            <IntVectorProperty name="NumberOfIterations"
-                               command="SetNumberOfIterations"
-                               number_of_elements="1"
-                               default_values="1">
-                <IntRangeDomain min="1" name="range" />
+            <IntVectorProperty
+                name="NumberOfIterations"
+                command="SetNumberOfIterations"
+                number_of_elements="1"
+                default_values="1">
+                <IntRangeDomain
+                    min="1"
+                    name="range" />
                 <Documentation>
                     The algorithm will perform detection several times
                     and choose resultwith the highest coverage
                     (i.e. ratio of the points assigned to a shape).
                 </Documentation>
             </IntVectorProperty>
-            <IntVectorProperty name="UserDefinedParameters"
-                             command="SetUserDefinedParameters"
-                             number_of_elements="1"
-                             default_values="0">
+            <IntVectorProperty
+                name="UserDefinedParameters"
+                command="SetUserDefinedParameters"
+                number_of_elements="1"
+                default_values="0">
                 <BooleanDomain name="bool" />
                 <Documentation>
                     If not checked, the algorithm will evaluate default
@@ -548,89 +571,111 @@
                     Otherwise the user has the ability define detection parameters.
                 </Documentation>
             </IntVectorProperty>
-            <IntVectorProperty name="MinPoints"
-                               command="SetMinPoints"
-                               number_of_elements="1"
-                               default_values="200">
-                <IntRangeDomain min="0" name="range" />
+            <IntVectorProperty
+                name="MinPoints"
+                command="SetMinPoints"
+                number_of_elements="1"
+                default_values="200">
+                <IntRangeDomain
+                    min="0"
+                    name="range" />
                 <Hints>
-                  <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="visibility"
-                                           property="UserDefinedParameters"
-                                           value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="UserDefinedParameters"
+                        value="1" />
                 </Hints>
                 <Documentation>
                     Set the minimum number of points in a shape.
                 </Documentation>
             </IntVectorProperty>
-            <DoubleVectorProperty name="Probability"
-                                  command="SetProbability"
-                                  number_of_elements="1"
-                                  default_values="0.05">
-                <DoubleRangeDomain min="0.0" max="1.0" name="range" />
+            <DoubleVectorProperty
+                name="Probability"
+                command="SetProbability"
+                number_of_elements="1"
+                default_values="0.05">
+                <DoubleRangeDomain
+                    min="0.0"
+                    max="1.0"
+                    name="range" />
                 <Hints>
-                  <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="visibility"
-                                           property="UserDefinedParameters"
-                                           value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="UserDefinedParameters"
+                        value="1" />
                 </Hints>
                 <Documentation>
                     Set the probability to miss the largest primitive at each iteration. Probability to control search endurance.
                     A lower probability provides a higher reliability and determinism at the cost of longer running time due to a higher search endurance.
                 </Documentation>
             </DoubleVectorProperty>
-            <DoubleVectorProperty name="Epsilon"
-                                  command="SetEpsilon"
-                                  number_of_elements="1"
-                                  default_values="0.002">
-                <DoubleRangeDomain min="0.0" name="range" />
+            <DoubleVectorProperty
+                name="Epsilon"
+                command="SetEpsilon"
+                number_of_elements="1"
+                default_values="0.002">
+                <DoubleRangeDomain
+                    min="0.0"
+                    name="range" />
                 <Hints>
-                  <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="visibility"
-                                           property="UserDefinedParameters"
-                                           value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="UserDefinedParameters"
+                        value="1" />
                 </Hints>
                 <Documentation>
                     Set the maximum acceptable Euclidean distance between a point and a shape.
                 </Documentation>
             </DoubleVectorProperty>
-            <DoubleVectorProperty name="ClusterEpsilon"
-                                  command="SetClusterEpsilon"
-                                  number_of_elements="1"
-                                  default_values="0.01">
-                <DoubleRangeDomain min="0.0" name="range" />
+            <DoubleVectorProperty
+                name="ClusterEpsilon"
+                command="SetClusterEpsilon"
+                number_of_elements="1"
+                default_values="0.01">
+                <DoubleRangeDomain
+                    min="0.0"
+                    name="range" />
                 <Hints>
-                  <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="visibility"
-                                           property="UserDefinedParameters"
-                                           value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="UserDefinedParameters"
+                        value="1" />
                 </Hints>
                 <Documentation>
                     Set the maximum acceptable Euclidean distance between points, which are assumed to be neighbors.
                 </Documentation>
             </DoubleVectorProperty>
-            <DoubleVectorProperty name="MaxNormalDeviation"
-                                  command="SetMaxNormalDeviation"
-                                  number_of_elements="1"
-                                  default_values="0.9">
-                <DoubleRangeDomain min="0.0" max="1.0" name="range" />
+            <DoubleVectorProperty
+                name="MaxNormalDeviation"
+                command="SetMaxNormalDeviation"
+                number_of_elements="1"
+                default_values="0.9">
+                <DoubleRangeDomain
+                    min="0.0"
+                    max="1.0"
+                    name="range" />
                 <Hints>
-                  <PropertyWidgetDecorator type="GenericDecorator"
-                                           mode="visibility"
-                                           property="UserDefinedParameters"
-                                           value="1" />
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="UserDefinedParameters"
+                        value="1" />
                 </Hints>
                 <Documentation>
                     Set the maximum threshold on the dot product between the estimated shape's normal and
                     the point's normal, that is the cosine of the angle (cos(25°) = 0.9).
                 </Documentation>
             </DoubleVectorProperty>
-		    <Hints> 
-                <ShowInMenu category="CGAL"/>
+            <Hints>
+                <ShowInMenu category="CGAL" />
             </Hints>
         </SourceProxy>
 
-         <!-- ==================================================================== -->
+        <!-- ==================================================================== -->
         <SourceProxy
             name="CGALPolygonOffset"
             class="stkCGALPolygonOffset"
@@ -735,7 +780,7 @@
                         text="Delaunay3D"
                         value="1" />
                 </EnumerationDomain>
-                <Documentation >
+                <Documentation>
                     Method used to generate Convex Hull 
                 </Documentation>
             </IntVectorProperty>
