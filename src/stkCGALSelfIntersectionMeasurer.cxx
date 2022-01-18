@@ -133,14 +133,43 @@ int stkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(
 {
   namespace PMP = CGAL::Polygon_mesh_processing;
 
+  vtkNew<vtkIdTypeArray> cellOriginalIdsArray;
+  cellOriginalIdsArray->SetName("OriginalIds");
+
+  vtkNew<vtkIntArray> nullFaceMaskArray;
+  nullFaceMaskArray->SetName(this->NullFaceMaskArrayName.c_str());
+
   Surface_Mesh surfaceMesh;
-  stkCGALUtilities::vtkPolyDataToPolygonMesh(polyDataIn, surfaceMesh);
+  stkCGALUtilities::vtkPolyDataToPolygonMesh(polyDataIn, surfaceMesh, cellOriginalIdsArray, nullFaceMaskArray);
 
   if (!CGAL::is_triangle_mesh(surfaceMesh))
   {
     vtkErrorMacro("Mesh is not triangular.");
     return 0;
   }
+
+  typedef typename boost::graph_traits<Surface_Mesh>::vertex_descriptor vertex_descriptor;
+  typedef typename boost::graph_traits<Surface_Mesh>::face_iterator face_iterator;
+
+  typedef typename boost::property_map<Surface_Mesh, CGAL::vertex_point_t>::const_type VPMap;
+  typedef typename boost::property_map_value<Surface_Mesh, CGAL::vertex_point_t>::type Point_3;
+
+  VPMap vpmap = get(CGAL::vertex_point, surfaceMesh);
+
+  // for(face_iterator fit = faces(surfaceMesh).begin() ;
+  //      fit != faces(surfaceMesh).end() ;
+  //      ++fit )
+  // {
+  //   if (fit->idx() == 148305 - 2)
+  //   {
+  //     for (vertex_descriptor v :vertices_around_face(halfedge(*fit, surfaceMesh), surfaceMesh))
+  //     {
+  //       std::cout << "Vertex Id: " << v.idx() << std::endl;
+  //       const Point_3& p = get(vpmap, v);
+  //       std::cout << "Cell Points: " << CGAL::to_double(p.x()) << ", " << CGAL::to_double(p.y()) << ", " << CGAL::to_double(p.z()) << std::endl;
+  //     }
+  //   }
+  // }
 
   bool intersecting = PMP::does_self_intersect(
     surfaceMesh, PMP::parameters::vertex_point_map(get(CGAL::vertex_point, surfaceMesh)));
@@ -155,14 +184,17 @@ int stkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(
   intersectingTrisArray->Fill(0);
 
   int currentTuple = 0;
+  int originalId = 0;
 
-  for (vtkIdType i = 0; i < intersected_tris.size(); ++i)
+  for (auto i = 0; i < intersected_tris.size(); ++i)
   {
-    currentTuple = intersectingTrisArray->GetTuple1(intersected_tris[i].first.idx());
-    intersectingTrisArray->SetTuple1(intersected_tris[i].first.idx(), currentTuple + 1);
+    originalId = cellOriginalIdsArray->GetTuple1(intersected_tris[i].first.idx());
+    currentTuple = intersectingTrisArray->GetTuple1(originalId);
+    intersectingTrisArray->SetTuple1(originalId, currentTuple + 1);
 
-    currentTuple = intersectingTrisArray->GetTuple1(intersected_tris[i].second.idx());
-    intersectingTrisArray->SetTuple1(intersected_tris[i].second.idx(), currentTuple + 1);
+    originalId = cellOriginalIdsArray->GetTuple1(intersected_tris[i].second.idx());
+    currentTuple = intersectingTrisArray->GetTuple1(originalId);
+    intersectingTrisArray->SetTuple1(originalId, currentTuple + 1);
   }
 
   if (intersected_tris.size() == 0)
@@ -178,7 +210,7 @@ int stkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(
 
   if (this->PrintSelfIntersectingPairs)
   {
-    for (vtkIdType i = 0; i < intersected_tris.size(); ++i)
+    for (auto i = 0; i < intersected_tris.size(); ++i)
     {
       vtkWarningMacro("Triangle " << intersected_tris[i].first.idx() << " is intersecting with "
                                   << intersected_tris[i].second.idx() << ".");
@@ -187,6 +219,11 @@ int stkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(
 
   polyDataOut->DeepCopy(polyDataIn);
   polyDataOut->GetCellData()->AddArray(intersectingTrisArray);
+
+  if (this->OutputNullFaceMaskArray)
+  {
+    polyDataOut->GetCellData()->AddArray(nullFaceMaskArray);
+  }
 
   return 1;
 }

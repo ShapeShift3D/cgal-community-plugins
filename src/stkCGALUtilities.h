@@ -25,6 +25,8 @@
 class vtkPointSet;
 class vtkUnstructuredGrid;
 class vtkPolyData;
+class vtkIdTypeArray;
+class vtkIntArray;
 
 /**
  * @ingroup stkCGAL
@@ -58,21 +60,21 @@ public:
   typedef CGAL::Surface_mesh<K3::Point_3> SurfaceMesh3;
 
   // Converters from VTK to CGAL
-  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh0& tmesh);
+  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh0& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 
-  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron0& tmesh);
+  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron0& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 
-  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh1& tmesh);
+  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh1& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 
-  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron1& tmesh);
+  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron1& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 
-  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh2& tmesh);
+  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh2& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 
-  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron2& tmesh);
+  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron2& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 
-  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron3& tmesh);
+  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron3& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 
-  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh3& tmesh);
+  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh3& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 
   // Converters from CGAL to VTK
   static bool PolygonMeshToVtkUnstructuredGrid(const SurfaceMesh0& pmesh, vtkUnstructuredGrid* usg);
@@ -95,8 +97,8 @@ private:
   void operator=(const stkCGALUtilities&) = delete;
 
   template<typename KernelType, typename MeshType>
-  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, MeshType& tmesh);
+  static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, MeshType& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 
   template<typename VPMapType, typename PointType, typename VertexDescriptor, typename MeshType>
-  static bool vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh);
+  static bool vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh, vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 };

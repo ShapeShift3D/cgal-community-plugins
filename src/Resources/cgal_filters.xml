@@ -250,6 +250,35 @@
                 </Hints>
             </StringVectorProperty>
 
+            <IntVectorProperty name="OutputNullFaceMaskArray"
+                               command="SetOutputNullFaceMaskArray"
+                               number_of_elements="1"
+                               default_values="1"
+                               panel_visibility="advanced">
+                <BooleanDomain name="bool"/>
+                <Documentation>
+                    Outputs a mask array of faces which couldn't be understood by CGAL.
+                </Documentation>
+            </IntVectorProperty>
+
+            <StringVectorProperty
+                name="NullFaceMaskArrayName"
+                command="SetNullFaceMaskArrayName"
+                number_of_elements="1"
+                animateable="0"
+                default_values="NullFaceMask"
+                panel_visibility="advanced">
+                <Documentation >
+                    Name of the mask array indicating which faces are null from CGAL's interpretation.
+                </Documentation>
+                <Hints>
+                    <PropertyWidgetDecorator type="GenericDecorator"
+                                             mode="visibility"
+                                             property="OutputNullFaceMaskArray"
+                                             value="1" />
+                </Hints>
+            </StringVectorProperty>
+
             <PropertyGroup label="Measure Self-Intersections">
 				<Property name="SelfIntersectionsArrayName" />
 				<Property name="IterateByConnectivity" />
@@ -265,6 +294,11 @@
 				<!-- <Property name="WeakDihedralAngle" /> -->
 				<Property name="GenerateOldIDsArray" />
 				<Property name="OldIDArrayName" />
+			</PropertyGroup>
+
+            <PropertyGroup label="Debugging">
+				<Property name="OutputNullFaceMaskArray" />
+                <Property name="NullFaceMaskArrayName" />
 			</PropertyGroup>
 
             <Hints> 
