@@ -383,19 +383,6 @@ bool stkCGALUtilities::SurfaceMeshToPolyData(const SurfaceMesh3& pmesh, vtkPolyD
  *  @param usg The output Unstructured Grid
  *  @return bool Success (true) or failure (false)
  */
-bool stkCGALUtilities::PolyhedronToPolyData(const Polyhedron3& pmesh, vtkPolyData* poly)
-{
-  return stkCGALUtilities::SurfaceMeshToPolyDataImpl<Polyhedron3>(pmesh, poly);
-}
-
-//----------------------------------------------------------------------------
-
-/** @brief Converts a Surface Mesh (CGAL) into a PolyData (VTK).
- *
- *  @param pmesh The input Surface Mesh
- *  @param usg The output Unstructured Grid
- *  @return bool Success (true) or failure (false)
- */
 template<typename MeshType>
 bool stkCGALUtilities::SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyData* poly)
 {
