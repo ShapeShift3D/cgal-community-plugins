@@ -322,7 +322,10 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
     }
     else
     {
-      cellOriginalIdsArray->InsertNextTuple1(i);
+      if (cellOriginalIdsArray)
+      {
+        cellOriginalIdsArray->InsertNextTuple1(i);
+      }
     }
   }
 
