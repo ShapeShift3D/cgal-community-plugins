@@ -96,10 +96,8 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         nbiters++;
         Vertex_Index vtx = *(vtx_to_check.begin());
         vtx_to_check.erase(vtx_to_check.begin());
-        std::cerr << "\nsource vertex: " << vtx << std::endl;
 
         Halfedge_Index he = cMesh.halfedge(vtx);
-        std::cerr << "source he: " << he << std::endl;
         Path path = curves.compute_shortest_non_contractible_cycle_with_base_point(he, wf);
         if(path.is_empty()) {
             continue;
@@ -109,7 +107,6 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         auto pline = path_to_polyline(path, cMesh);
         cells->InsertNextCell(pline);
     }
-    std::cerr << "nbiters:" << nbiters << std::endl;
 
     outMesh->SetPoints(inMesh->GetPoints());
     outMesh->SetLines(cells);
