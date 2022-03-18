@@ -316,7 +316,7 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
 
     // Add face if possible
     typename boost::graph_traits<MeshType>::face_descriptor fd = CGAL::Euler::add_face(vr, tmesh);
-    if (fd == boost::graph_traits<MeshType>::null_face())
+    if (nullFaceMaskArray && fd == boost::graph_traits<MeshType>::null_face())
     {
       nullFaceMaskArray->SetTuple1(i, 1);
     }
