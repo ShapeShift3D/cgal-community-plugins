@@ -253,7 +253,7 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
 
   if (cellOriginalIdsArray)
   {
-    if (!cellOriginalIdsArray->GetName() || cellOriginalIdsArray->GetName() == '\0')
+    if (!cellOriginalIdsArray->GetName() || cellOriginalIdsArray->GetName()[0] == '\0')
     {
       cellOriginalIdsArray->SetName("OriginalIds");
     }
@@ -263,7 +263,7 @@ bool stkCGALUtilities::vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshT
 
   if (nullFaceMaskArray)
   {
-    if (!nullFaceMaskArray->GetName() || nullFaceMaskArray->GetName() == '\0')
+    if (!nullFaceMaskArray->GetName() || nullFaceMaskArray->GetName()[0] == '\0')
     {
       nullFaceMaskArray->SetName("NullFaceMask");
     }
