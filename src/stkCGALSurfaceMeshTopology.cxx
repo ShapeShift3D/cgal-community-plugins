@@ -90,10 +90,8 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
     }
 
     vtkNew<vtkCellArray> cells;
-    auto nbiters=0;
     
     while(!vtx_to_check.empty()) {
-        nbiters++;
         Vertex_Index vtx = *(vtx_to_check.begin());
         vtx_to_check.erase(vtx_to_check.begin());
 
