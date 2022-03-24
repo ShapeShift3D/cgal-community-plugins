@@ -651,6 +651,10 @@
                     port_index="2"
                     command="SetInputConnection"
                     optional="1">
+                    <Hints>
+                        <Optional />
+                        <!-- No input selection dialog at instantiation -->
+                    </Hints>
                 <Documentation>
                     Point cloud with scalar values
                 </Documentation>
@@ -661,9 +665,6 @@
                 <DataTypeDomain name="input_type">
                     <DataType value="vtkPointSet"/>
                 </DataTypeDomain>
-                <InputArrayDomain name="SizingFieldArray"
-                                  attribute_type="point"
-                                  number_of_components="1"/>
             </InputProperty>
 
             <DoubleVectorProperty name="EdgeSize"
@@ -790,18 +791,10 @@
             
             <StringVectorProperty name="CustomSizingFieldArrayName"
                                   command="SetCustomSizingFieldArrayName"
-                                  label="Custom Sizing Field Array"
+                                  label="Custom Sizing Field Array Name"
                                   number_of_elements="1"
                                   animateable="0"
                                   default_values="">
-                <ArrayListDomain name="array_list"
-                                 none_string="None"
-                                 input_domain_name="SizingFieldArray">
-                    <RequiredProperties>
-                        <Property name="Sizing Field (Optional)"
-                                  function="Input" />
-                    </RequiredProperties>
-                </ArrayListDomain>
                 <Documentation>
                     Specifies the custom sizing field
                 </Documentation>
