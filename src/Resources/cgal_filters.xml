@@ -8,7 +8,7 @@
             base_proxygroup="polyhedral_meshers"
             base_proxyname="CGAL3DPolyhedralMesher">
             <Documentation>
-                Applies an ARAP UV Parametrization on a polygonal mesh.
+                Generates a polyhedral mesh inside a bounding polyhedron domain under a set of features given by a polyhedral surface
             </Documentation>
 
             <Property

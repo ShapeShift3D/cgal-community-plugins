@@ -795,7 +795,6 @@
                                   animateable="0"
                                   default_values="">
                 <ArrayListDomain name="array_list"
-                                 none_string="None"
                                  input_domain_name="SizingFieldArray">
                     <RequiredProperties>
                         <Property name="Sizing Field (Optional)"
