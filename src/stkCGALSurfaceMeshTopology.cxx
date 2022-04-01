@@ -11,6 +11,10 @@
 #include <vtkCellArray.h>
 #include <vtkPolyData.h>
 #include <vtkPolyLine.h>
+#include <vtkStaticPointLocator.h>
+#include <vtkSmartPointer.h>
+#include <vtkPointData.h>
+#include <vtkThresholdPoints.h>
 
 #include "stkCGALSurfaceMeshTopology.h"
 
@@ -27,6 +31,7 @@ stkCGALSurfaceMeshTopology::stkCGALSurfaceMeshTopology()
 {
     this->SetNumberOfInputPorts(1);
     this->SetNumberOfOutputPorts(1);
+    this->VertexToCheckPointMaskName="VertexToCheckMask";
 }
 
 static vtkNew<vtkPolyLine> path_to_polyline(const Path &path, const Surface_Mesh &mesh) {
@@ -67,6 +72,14 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         vtkErrorMacro("Mesh is empty.");
         return 0;
     }
+
+    auto maskedVertexArray = inMesh->GetPointData()->GetArray(this->VertexToCheckPointMaskName.c_str());
+
+    if (maskedVertexArray == nullptr)
+    {
+    // TODO : Vertex to Check point Array mask Null Check
+    }
+
     if (outMesh == nullptr) {
         vtkErrorMacro("Out mesh is empty.");
         return 0;
@@ -85,8 +98,36 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
 
     std::unordered_set<Vertex_Index> vtx_to_check;
 
+    auto thresholdVertexToCheck = vtkSmartPointer<vtkThresholdPoints>::New();
+    thresholdVertexToCheck->SetInputData(inMesh);
+    thresholdVertexToCheck->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, this->VertexToCheckPointMaskName.c_str());
+    thresholdVertexToCheck->Update();
+
+    auto pointLocator = vtkSmartPointer<vtkStaticPointLocator>::New();
+    pointLocator->SetDataSet(thresholdVertexToCheck->GetOutput()); 
+    pointLocator->BuildLocator();
+
     for(Vertex_Index vtx : cMesh.vertices()) { 
+        // TODO : Only User Defined vertices must be inserted over here
+        
+        // Point to check 
+        double meshPoint[3] = {0.0};
+        meshPoint[0] = CGAL::to_double(cMesh.point(vtx).x());
+        meshPoint[1] = CGAL::to_double(cMesh.point(vtx).y());
+        meshPoint[2] = CGAL::to_double(cMesh.point(vtx).z());
+
+        // Closet Point Locater to VTK Point Set with Mask with Dist2==0 
+        // Make Constrait search tolerance as advanced property 
+
+        double minDist = 9999.0;
+        // TODO : Expose Tol as a advanced property 
+        pointLocator->FindClosestPointWithinRadius(0.0001,meshPoint,minDist);
+
+        // inMesh->GetPoint(pointLocator->FindClosestPoint(meshPoint));
+        if (minDist < 0.0001)
+        {
         vtx_to_check.insert(vtx);
+        }
     }
 
     vtkNew<vtkCellArray> cells;

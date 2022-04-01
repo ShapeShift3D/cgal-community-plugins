@@ -804,11 +804,37 @@
                 <DataTypeDomain name="input_type">
                     <DataType value="vtkPolyData" />
                 </DataTypeDomain>
-            </InputProperty>
+                <InputArrayDomain
+                name="VertexToCheckPointMaskArray"
+                attribute_type="point"
+                number_of_components="1" />
+                </InputProperty>
+
+                <StringVectorProperty
+                name="VertexToCheckPointMaskName"
+                command="SetVertexToCheckPointMaskName"
+                label="Vertex To Check Point Mask"
+                default_values="None"
+                number_of_elements="1">
+                <ArrayListDomain
+                    name="array_list"
+                    none_string="None"
+                    input_domain_name="VertexToCheckPointMaskArray">
+                    <RequiredProperties>
+                        <Property
+                            name="Input"
+                            function="Input" />
+                    </RequiredProperties>
+                </ArrayListDomain>
+                <Documentation>
+                    Specifies the meshing mask array name.
+                </Documentation>
+            </StringVectorProperty>
 
             <Hints>
                 <ShowInMenu category="CGAL" />
             </Hints>
+
         </SourceProxy>
 
     </ProxyGroup>
