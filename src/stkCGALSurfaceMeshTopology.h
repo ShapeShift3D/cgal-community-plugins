@@ -19,6 +19,14 @@ public:
   vtkSetMacro(VertexToCheckPointMaskName, std::string);
   //@}
 
+  //@{
+  /**
+   * 
+   */
+  vtkGetMacro(SquaredContraintSearchTolerance, double);
+  vtkSetMacro(SquaredContraintSearchTolerance, double);
+  //@}
+
 protected:
   stkCGALSurfaceMeshTopology();
   ~stkCGALSurfaceMeshTopology() {}
@@ -33,4 +41,6 @@ private:
   void operator=(const stkCGALSurfaceMeshTopology&) = delete;
 
   std::string VertexToCheckPointMaskName;
+
+  double SquaredContraintSearchTolerance;
 };

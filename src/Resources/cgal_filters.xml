@@ -831,6 +831,21 @@
                 </Documentation>
             </StringVectorProperty>
 
+            <DoubleVectorProperty
+                name="SquaredContraintSearchTolerance"
+                command="SetSquaredContraintSearchTolerance"
+                number_of_elements="1"
+                default_values=".000001"
+                panel_visibility="advanced">
+                <Documentation>
+                    The value used to offset the polygon.
+                </Documentation>
+            </DoubleVectorProperty>
+
+            <PropertyGroup label="Measure Self-Intersections">
+                <Property name="SquaredContraintSearchTolerance" />
+            </PropertyGroup>
+
             <Hints>
                 <ShowInMenu category="CGAL" />
             </Hints>
