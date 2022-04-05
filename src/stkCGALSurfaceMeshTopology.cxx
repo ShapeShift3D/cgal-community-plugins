@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "stkCGALSurfaceMeshTopology.h"
 
 #include <CGAL/Curves_on_surface_topology.h>
 #include <CGAL/Simple_cartesian.h>
@@ -14,11 +14,14 @@
 #include <vtkSmartPointer.h>
 #include <vtkPointData.h>
 #include <vtkThresholdPoints.h>
-
+#include <vtkAppendPolyData.h>
 #include <vtkStaticPointLocator.h>
 #include <vtkMath.h>
-
-#include "stkCGALSurfaceMeshTopology.h"
+#include <vtkContourLoopExtraction.h>
+#include <vtkCleanPolyData.h>
+#include <vtkCellData.h>
+#include <vtkIdTypeArray.h>
+#include <vtkDoubleArray.h>
 
 vtkStandardNewMacro(stkCGALSurfaceMeshTopology);
 
@@ -35,22 +38,38 @@ stkCGALSurfaceMeshTopology::stkCGALSurfaceMeshTopology()
     this->SetNumberOfOutputPorts(1);
     this->VertexToCheckPointMaskName="VertexToCheckMask";
     this->SquaredContraintSearchTolerance= 1e-6;
+    this->ExtractSimpleCycles = true;
+    this->GenerateCycleIDs = true;
+    this->CycleIDArrayName = "Cycle ID";
+    this->CalculateCycleLength = true;
+    this->CycleLengthArrayName = "Cycle Length";
 }
 
-static vtkNew<vtkPolyLine> path_to_polyline(const Path &path, const Surface_Mesh &mesh) {
-    vtkNew<vtkPolyLine> pline;
-    auto pids = pline->GetPointIds();
-    pids->SetNumberOfIds(path.length() + 1);
+static vtkNew<vtkPolyData> path_to_polydata(const Path &path, const Surface_Mesh &mesh) 
+{
+    vtkNew<vtkPolyData> cycle;
+    vtkNew<vtkPoints> cyclePoints;
+    vtkNew<vtkIdList> pointIds;
+    pointIds->SetNumberOfIds(path.length() + 1);
 
     for(auto i=0; i < path.length(); i++) {
         Vertex_Index vtx = path.get_flip()[i] ? mesh.target(path[i]) : mesh.source(path[i]);
-        pids->SetId(i, vtx);
+        double cyclePoint[3] = {0.0};
+        cyclePoint[0] = CGAL::to_double(mesh.point(vtx).x());
+        cyclePoint[1] = CGAL::to_double(mesh.point(vtx).y());
+        cyclePoint[2] = CGAL::to_double(mesh.point(vtx).z());
+        cyclePoints->InsertNextPoint(cyclePoint);
+        pointIds->SetId(i, i);
     }
 
     // close loop
-    pids->SetId(path.length(), pids->GetId(0));
+    pointIds->SetId(path.length(), 0);
 
-    return pline;
+    cycle->SetPoints(cyclePoints);
+    cycle->Allocate();
+    cycle->InsertNextCell(VTK_POLY_LINE,pointIds);
+
+    return cycle;
 }
 
 static void remove_seen_vtx(const Path &path,
@@ -108,12 +127,12 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
     thresholdVertexToCheck->ThresholdByUpper(0.00001);
     thresholdVertexToCheck->Update();
 
-    // TODO : Add a Debug MultiBlock
     if (thresholdVertexToCheck->GetOutput()->GetNumberOfPoints() <= 0)
     {
         vtkErrorMacro("There is no vertex to check in select Point mask");
         return 0;
     }
+
     auto pointLocator = vtkSmartPointer<vtkStaticPointLocator>::New();
     pointLocator->SetDataSet(thresholdVertexToCheck->GetOutput()); 
     pointLocator->BuildLocator();
@@ -125,8 +144,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         meshPoint[0] = CGAL::to_double(cMesh.point(vtx).x());
         meshPoint[1] = CGAL::to_double(cMesh.point(vtx).y());
         meshPoint[2] = CGAL::to_double(cMesh.point(vtx).z());
-
-        // TODO : Expose Tol as a advanced property 
+ 
         auto locatedID_T = pointLocator->FindClosestPoint(meshPoint);
         thresholdVertexToCheck->GetOutput()->GetPoint(locatedID_T, locatedID_Coords);
 
@@ -136,7 +154,29 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         }
     }
 
-    vtkNew<vtkCellArray> cells;
+    vtkNew<vtkAppendPolyData> outputCycles;
+
+    vtkNew<vtkCleanPolyData> cleanCycle;
+    cleanCycle->ConvertPolysToLinesOff();
+    cleanCycle->ConvertStripsToPolysOff();
+    cleanCycle->ConvertLinesToPointsOff();
+    cleanCycle->PointMergingOn();
+
+    vtkNew<vtkContourLoopExtraction> loopExtract;
+    loopExtract->SetOutputModeToPolylines();
+
+    vtkIdType cycleID = 0 ;
+
+    vtkNew<vtkIdTypeArray> cycleIDArray;
+    cycleIDArray->SetNumberOfComponents(1);
+    cycleIDArray->SetNumberOfValues(1);
+    cycleIDArray->SetName(this->CycleIDArrayName.c_str());
+
+    vtkNew<vtkDoubleArray> cycleLengthArray;
+    cycleLengthArray->SetNumberOfComponents(1);
+    cycleLengthArray->SetNumberOfValues(1);
+    cycleLengthArray->SetName(this->CycleLengthArrayName.c_str());
+
     while(!vtx_to_check.empty()) {
         Vertex_Index vtx = *(vtx_to_check.begin());
         vtx_to_check.erase(vtx_to_check.begin());
@@ -150,7 +190,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         }
 
         // TODO : Perform this under Advanced Boolean Property 
-        // Check that path passes the vtx_to_check
+        // Check that path passes through the vtx_to_check
         bool vertex_in_path = false;
         for(auto i=0; i < path.length(); i++) 
         {
@@ -170,23 +210,64 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         if (path.is_closed())
         {
         remove_seen_vtx(path, cMesh, vtx_to_check); // TODO : This could be made optional under advanced property, increase coverage and execution counts
-        auto pline = path_to_polyline(path, cMesh);
 
-        // TODO : Put this in Debug 
-        cells->InsertNextCell(pline);
+        auto cycle = path_to_polydata(path,cMesh);
 
-        // TODO : We have polyline at this point
-        // TODO : Apply Contour Loop Extract on the Polyline
-        // TODO : Calculate Distance of a polyline 
-        // TODO : Keep Original Point IDs on the Polyline in an Array
-        // TODO : Sort Polyling based on their length. Can possibilty use Length Criteria in PolyDataCellGroupClassfier? 
-        // TODO : Append Polyline in the Output 
+        vtkNew<vtkPolyData> nthCycle;
+
+        if(this->ExtractSimpleCycles)
+        {
+        cleanCycle->SetInputData(cycle);
+        cleanCycle->Update();
+
+        loopExtract->SetInputData(cleanCycle->GetOutput());
+        loopExtract->Update();
+
+        if(loopExtract->GetOutput()->GetNumberOfPoints() <= 0)
+        {
+         continue;
+        }
+        else{
+        nthCycle->ShallowCopy(loopExtract->GetOutput());
+        }
+        }
+        else
+        {
+            nthCycle->ShallowCopy(cycle);
+        }
+
+        if(this->GenerateCycleIDs)
+        {
+        cycleIDArray->SetTuple1(0,cycleID);
+        nthCycle->GetCellData()->AddArray(cycleIDArray);
+        cycleID++;
+        }
+
+        if(this->CalculateCycleLength)
+        {
+        double cycleLength = 0.0;
+        double tmpPt0[3] = { 0.0 }, tmpPt1[3] = { 0.0 };
+
+        vtkSmartPointer<vtkIdList> ptIdsList = vtkSmartPointer<vtkIdList>::New();
+        nthCycle->GetLines()->GetCell(0,ptIdsList);
+        nthCycle->GetPoint(ptIdsList->GetId(0), tmpPt0);
+        for (vtkIdType pointId = 1; pointId < ptIdsList->GetNumberOfIds(); ++pointId)
+        {
+          nthCycle->GetPoint(ptIdsList->GetId(pointId), tmpPt1);
+          cycleLength += std::sqrt(vtkMath::Distance2BetweenPoints(tmpPt0, tmpPt1));
+          std::copy(tmpPt1, tmpPt1 + 3, tmpPt0);
+        }
+
+        cycleLengthArray->SetTuple1(0,cycleLength);
+        nthCycle->GetCellData()->AddArray(cycleLengthArray);
+        }
+
+        outputCycles->AddInputData(nthCycle);
         }
     }
 
-    // TODO : This can go in Debug MutliBlock
-    outMesh->SetPoints(inMesh->GetPoints());
-    outMesh->SetLines(cells);
+    outputCycles->Update();
+    outMesh->ShallowCopy(outputCycles->GetOutput());
 
     return 1;
 }

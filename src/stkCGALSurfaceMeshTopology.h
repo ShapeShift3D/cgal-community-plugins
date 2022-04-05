@@ -27,6 +27,49 @@ public:
   vtkSetMacro(SquaredContraintSearchTolerance, double);
   //@}
 
+  //@{
+  /**
+   * 
+   */
+  vtkSetMacro(ExtractSimpleCycles, bool);
+  vtkGetMacro(ExtractSimpleCycles, bool);
+  vtkBooleanMacro(ExtractSimpleCycles, bool);
+  //@}
+
+  //@{
+  /**
+   * 
+   */
+  vtkSetMacro(GenerateCycleIDs, bool);
+  vtkGetMacro(GenerateCycleIDs, bool);
+  vtkBooleanMacro(GenerateCycleIDs, bool);
+  //@}
+
+  //@{
+  /**
+   * 
+   */
+  vtkGetMacro(CycleIDArrayName, std::string);
+  vtkSetMacro(CycleIDArrayName, std::string);
+  //@}
+
+  //@{
+  /**
+   * 
+   */
+  vtkSetMacro(CalculateCycleLength, bool);
+  vtkGetMacro(CalculateCycleLength, bool);
+  vtkBooleanMacro(CalculateCycleLength, bool);
+  //@}
+
+  //@{
+  /**
+   * 
+   */
+  vtkGetMacro(CycleLengthArrayName, std::string);
+  vtkSetMacro(CycleLengthArrayName, std::string);
+  //@}
+
 protected:
   stkCGALSurfaceMeshTopology();
   ~stkCGALSurfaceMeshTopology() {}
@@ -43,4 +86,12 @@ private:
   std::string VertexToCheckPointMaskName;
 
   double SquaredContraintSearchTolerance;
+
+  bool ExtractSimpleCycles;
+
+  bool GenerateCycleIDs;
+  std::string CycleIDArrayName;
+
+  bool CalculateCycleLength;
+  std::string CycleLengthArrayName;
 };

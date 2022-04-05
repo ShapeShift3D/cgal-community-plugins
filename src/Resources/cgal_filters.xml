@@ -827,9 +827,31 @@
                     </RequiredProperties>
                 </ArrayListDomain>
                 <Documentation>
-                    Specifies the meshing mask array name.
+                    
                 </Documentation>
             </StringVectorProperty>
+
+            <IntVectorProperty
+            name="GenerateCycleIDs"
+            command="SetGenerateCycleIDs"
+            number_of_elements="1"
+            default_values="1">
+            <BooleanDomain name="bool" />
+            <Documentation>
+               
+            </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty
+            name="CalculateCycleLength"
+            command="SetCalculateCycleLength"
+            number_of_elements="1"
+            default_values="1">
+            <BooleanDomain name="bool" />
+            <Documentation>
+               
+            </Documentation>
+            </IntVectorProperty>
 
             <DoubleVectorProperty
                 name="SquaredContraintSearchTolerance"
@@ -842,8 +864,61 @@
                 </Documentation>
             </DoubleVectorProperty>
 
-            <PropertyGroup label="Measure Self-Intersections">
+            <IntVectorProperty
+            name="ExtractSimpleCycles"
+            command="SetExtractSimpleCycles"
+            number_of_elements="1"
+            default_values="1"
+            panel_visibility="advanced">
+            <BooleanDomain name="bool" />
+            <Documentation>
+               
+            </Documentation>
+            </IntVectorProperty>
+
+            <StringVectorProperty
+            name="CycleIDArrayName"
+            command="SetCycleIDArrayName"
+            label="Cycle ID Array Name"
+            default_values="Cycle ID"
+            number_of_elements="1"
+            panel_visibility="advanced">
+            <Documentation>
+                
+            </Documentation>
+            <Hints>
+                <PropertyWidgetDecorator
+                    type="GenericDecorator"
+                    mode="visibility"
+                    property="GenerateCycleIDs"
+                    value="1" />
+            </Hints>
+            </StringVectorProperty>
+
+            <StringVectorProperty
+            name="CycleLengthArrayName"
+            command="SetCycleLengthArrayName"
+            label="Cycle Length Array Name"
+            default_values="Cycle Length"
+            number_of_elements="1"
+            panel_visibility="advanced">
+            <Documentation>
+                
+            </Documentation>
+            <Hints>
+                <PropertyWidgetDecorator
+                    type="GenericDecorator"
+                    mode="visibility"
+                    property="CalculateCycleLength"
+                    value="1" />
+            </Hints>
+            </StringVectorProperty>
+
+            <PropertyGroup label="Advanced">
                 <Property name="SquaredContraintSearchTolerance" />
+                <Property name="ExtractSimpleCycles" />
+                <Property name="CycleIDArrayName" />
+                <Property name="CycleLengthArrayName" />
             </PropertyGroup>
 
             <Hints>
