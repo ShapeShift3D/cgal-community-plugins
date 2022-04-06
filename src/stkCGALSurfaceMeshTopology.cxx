@@ -2,10 +2,8 @@
 
 #include <CGAL/Curves_on_surface_topology.h>
 #include <CGAL/Simple_cartesian.h>
-#include <CGAL/Mesh_3/io_signature.h>
 #include <CGAL/Surface_mesh.h>
 
-#include <stkCGALUtilities.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkCellArray.h>
@@ -23,12 +21,13 @@
 #include <vtkIdTypeArray.h>
 #include <vtkDoubleArray.h>
 
+#include "stkCGALUtilities.h"
+
 vtkStandardNewMacro(stkCGALSurfaceMeshTopology);
 
 typedef CGAL::Surface_mesh<CGAL::Simple_cartesian<double>::Point_3> Surface_Mesh;
 typedef Surface_Mesh::Vertex_index Vertex_Index;
 typedef Surface_Mesh::Halfedge_index Halfedge_Index;
-typedef Surface_Mesh::Edge_index Edge_Index;
 typedef CGAL::Surface_mesh_topology::Path_on_surface<Surface_Mesh> Path;
 
 //----------------------------------------------------------------------------
@@ -38,6 +37,7 @@ stkCGALSurfaceMeshTopology::stkCGALSurfaceMeshTopology()
     this->SetNumberOfOutputPorts(1);
     this->VertexToCheckPointMaskName="VertexToCheckMask";
     this->SquaredContraintSearchTolerance= 1e-6;
+    this->OptimizeForExecutionTime = true;
     this->ExtractSimpleCycles = true;
     this->GenerateCycleIDs = true;
     this->CycleIDArrayName = "Cycle ID";
@@ -103,24 +103,6 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         return 0;
     }
 
-    if (outMesh == nullptr) {
-        vtkErrorMacro("Out mesh is empty.");
-        return 0;
-    }
-    // -------------------------------
-
-    Surface_Mesh cMesh;
-    bool ok = stkCGALUtilities::vtkPolyDataToPolygonMesh(inMesh, cMesh);
-    if(!ok) {
-        vtkErrorMacro("CGAL mesh conversion error.");
-        return 0;
-    }
-
-    CGAL::Surface_mesh_topology::Curves_on_surface_topology<Surface_Mesh> curves(cMesh);
-    CGAL::Surface_mesh_topology::Euclidean_length_weight_functor<Surface_Mesh> wf(cMesh);
-
-    std::unordered_set<Vertex_Index> vtx_to_check;
-
     auto thresholdVertexToCheck = vtkSmartPointer<vtkThresholdPoints>::New();
     thresholdVertexToCheck->SetInputData(inMesh);
     thresholdVertexToCheck->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, this->VertexToCheckPointMaskName.c_str());
@@ -132,6 +114,23 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         vtkErrorMacro("There is no vertex to check in select Point mask");
         return 0;
     }
+
+    if (outMesh == nullptr) {
+        vtkErrorMacro("Out mesh is empty.");
+        return 0;
+    }
+    // -------------------------------
+    Surface_Mesh cMesh;
+    bool ok = stkCGALUtilities::vtkPolyDataToPolygonMesh(inMesh, cMesh);
+    if(!ok) {
+        vtkErrorMacro("CGAL mesh conversion error.");
+        return 0;
+    }
+
+    CGAL::Surface_mesh_topology::Curves_on_surface_topology<Surface_Mesh> curves(cMesh);
+    CGAL::Surface_mesh_topology::Euclidean_length_weight_functor<Surface_Mesh> wf(cMesh);
+
+    std::unordered_set<Vertex_Index> vtx_to_check;
 
     auto pointLocator = vtkSmartPointer<vtkStaticPointLocator>::New();
     pointLocator->SetDataSet(thresholdVertexToCheck->GetOutput()); 
@@ -167,50 +166,37 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
 
     vtkIdType cycleID = 0 ;
 
-    vtkNew<vtkIdTypeArray> cycleIDArray;
-    cycleIDArray->SetNumberOfComponents(1);
-    cycleIDArray->SetNumberOfValues(1);
-    cycleIDArray->SetName(this->CycleIDArrayName.c_str());
-
-    vtkNew<vtkDoubleArray> cycleLengthArray;
-    cycleLengthArray->SetNumberOfComponents(1);
-    cycleLengthArray->SetNumberOfValues(1);
-    cycleLengthArray->SetName(this->CycleLengthArrayName.c_str());
-
+    auto loopSize = vtx_to_check.size() ; 
+    int process_percentage = 1;
+    this->SetProgressText("Progress");
     while(!vtx_to_check.empty()) {
+        
+        double progress = (double)(loopSize - vtx_to_check.size())/loopSize;
+
+        if (progress > process_percentage*.1)
+        {
+            process_percentage++;
+            this->UpdateProgress(progress);
+        }
+
         Vertex_Index vtx = *(vtx_to_check.begin());
         vtx_to_check.erase(vtx_to_check.begin());
 
         Halfedge_Index he = cMesh.halfedge(vtx);
-        // TODO : Check if its valid to use the overload of the function
+ 
         Path path = curves.compute_shortest_non_contractible_cycle_with_base_point(he, wf);
 
         if(path.is_empty()) {
             continue;
         }
 
-        // TODO : Perform this under Advanced Boolean Property 
-        // Check that path passes through the vtx_to_check
-        bool vertex_in_path = false;
-        for(auto i=0; i < path.length(); i++) 
-        {
-          Vertex_Index vtx_cycle= path.get_flip()[i] ? cMesh.target(path[i]) : cMesh.source(path[i]);
-          vertex_in_path = (vtx_cycle == vtx) ?  true : false;
-          if (vertex_in_path == true)
-          {
-              break;
-          }
-        }
-
-        if (vertex_in_path == false)
-        {
-            continue;
-        }
-
         if (path.is_closed())
         {
-        remove_seen_vtx(path, cMesh, vtx_to_check); // TODO : This could be made optional under advanced property, increase coverage and execution counts
 
+        if(this->OptimizeForExecutionTime)
+        {
+        remove_seen_vtx(path, cMesh, vtx_to_check); 
+        }
         auto cycle = path_to_polydata(path,cMesh);
 
         vtkNew<vtkPolyData> nthCycle;
@@ -238,13 +224,23 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
 
         if(this->GenerateCycleIDs)
         {
+         vtkNew<vtkIdTypeArray> cycleIDArray;
+         cycleIDArray->SetNumberOfComponents(1);
+         cycleIDArray->SetNumberOfValues(1);
+         cycleIDArray->SetName(this->CycleIDArrayName.c_str());
+
         cycleIDArray->SetTuple1(0,cycleID);
         nthCycle->GetCellData()->AddArray(cycleIDArray);
         cycleID++;
         }
 
         if(this->CalculateCycleLength)
-        {
+        {       
+         vtkNew<vtkDoubleArray> cycleLengthArray;
+         cycleLengthArray->SetNumberOfComponents(1);
+         cycleLengthArray->SetNumberOfValues(1);
+         cycleLengthArray->SetName(this->CycleLengthArrayName.c_str());
+          
         double cycleLength = 0.0;
         double tmpPt0[3] = { 0.0 }, tmpPt1[3] = { 0.0 };
 

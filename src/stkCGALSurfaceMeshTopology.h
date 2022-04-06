@@ -31,6 +31,15 @@ public:
   /**
    * 
    */
+  vtkSetMacro(OptimizeForExecutionTime, bool);
+  vtkGetMacro(OptimizeForExecutionTime, bool);
+  vtkBooleanMacro(OptimizeForExecutionTime, bool);
+  //@}
+
+  //@{
+  /**
+   * 
+   */
   vtkSetMacro(ExtractSimpleCycles, bool);
   vtkGetMacro(ExtractSimpleCycles, bool);
   vtkBooleanMacro(ExtractSimpleCycles, bool);
@@ -86,6 +95,8 @@ private:
   std::string VertexToCheckPointMaskName;
 
   double SquaredContraintSearchTolerance;
+
+  bool OptimizeForExecutionTime;
 
   bool ExtractSimpleCycles;
 

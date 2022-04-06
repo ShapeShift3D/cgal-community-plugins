@@ -876,6 +876,18 @@
             </Documentation>
             </IntVectorProperty>
 
+            <IntVectorProperty
+            name="OptimizeForExecutionTime"
+            command="SetOptimizeForExecutionTime"
+            number_of_elements="1"
+            default_values="1"
+            panel_visibility="advanced">
+            <BooleanDomain name="bool" />
+            <Documentation>
+               
+            </Documentation>
+            </IntVectorProperty>
+
             <StringVectorProperty
             name="CycleIDArrayName"
             command="SetCycleIDArrayName"
@@ -916,6 +928,7 @@
 
             <PropertyGroup label="Advanced">
                 <Property name="SquaredContraintSearchTolerance" />
+                <Property name="OptimizeForExecutionTime" />
                 <Property name="ExtractSimpleCycles" />
                 <Property name="CycleIDArrayName" />
                 <Property name="CycleLengthArrayName" />
