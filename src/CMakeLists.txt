@@ -53,6 +53,7 @@ vtk_module_add_module(${NAMESPACE}::stkCGAL
 set(xml_files
   Resources/cgal_proxies.xml
   Resources/cgal_filters.xml
+  Resources/stkCGALSurfaceMeshTopology.xml
 )
 
 paraview_add_server_manager_xmls(
