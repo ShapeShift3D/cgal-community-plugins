@@ -6,12 +6,10 @@
 
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
-#include <vtkCellArray.h>
 #include <vtkPolyData.h>
 #include <vtkPolyLine.h>
-#include <vtkSmartPointer.h>
+#include <vtkNew.h>
 #include <vtkPointData.h>
-#include <vtkThresholdPoints.h>
 #include <vtkAppendPolyData.h>
 #include <vtkStaticPointLocator.h>
 #include <vtkMath.h>
@@ -20,6 +18,7 @@
 #include <vtkCellData.h>
 #include <vtkIdTypeArray.h>
 #include <vtkDoubleArray.h>
+#include <vtkPointSet.h>
 
 #include "stkCGALUtilities.h"
 
@@ -95,6 +94,12 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         return 0;
     }
 
+    if (inMesh->GetNumberOfCells() == 0 )
+    {
+         vtkErrorMacro("Mesh is does not contain any Cell.");
+        return 0;
+    }
+
     auto maskedVertexArray = inMesh->GetPointData()->GetArray(this->VertexToCheckPointMaskName.c_str());
 
     if (maskedVertexArray == nullptr)
@@ -103,13 +108,21 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         return 0;
     }
 
-    auto thresholdVertexToCheck = vtkSmartPointer<vtkThresholdPoints>::New();
-    thresholdVertexToCheck->SetInputData(inMesh);
-    thresholdVertexToCheck->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, this->VertexToCheckPointMaskName.c_str());
-    thresholdVertexToCheck->ThresholdByUpper(0.00001);
-    thresholdVertexToCheck->Update();
+    vtkNew <vtkPoints> maskedPoints;
+    vtkNew <vtkPointSet> vertexToCheck;
+    for (vtkIdType pointID = 0; pointID < maskedVertexArray->GetNumberOfTuples(); pointID++)
+    {
+      if (maskedVertexArray->GetTuple1(pointID) > 0)
+      {
+        maskedPoints->InsertNextPoint(inMesh->GetPoint(pointID));
+      }
+    }
+    vertexToCheck->SetPoints(maskedPoints);
+    vtkNew<vtkStaticPointLocator> pointLocator;
+    pointLocator->SetDataSet(vertexToCheck); 
+    pointLocator->BuildLocator();
 
-    if (thresholdVertexToCheck->GetOutput()->GetNumberOfPoints() <= 0)
+    if (vertexToCheck->GetNumberOfPoints() <= 0)
     {
         vtkErrorMacro("There is no vertex to check in select Point mask");
         return 0;
@@ -119,6 +132,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         vtkErrorMacro("Out mesh is empty.");
         return 0;
     }
+
     // -------------------------------
     Surface_Mesh cMesh;
     bool ok = stkCGALUtilities::vtkPolyDataToPolygonMesh(inMesh, cMesh);
@@ -132,22 +146,18 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
 
     std::unordered_set<Vertex_Index> vtx_to_check;
 
-    auto pointLocator = vtkSmartPointer<vtkStaticPointLocator>::New();
-    pointLocator->SetDataSet(thresholdVertexToCheck->GetOutput()); 
-    pointLocator->BuildLocator();
-
     for(Vertex_Index vtx : cMesh.vertices()) { 
         // Point to check 
         double meshPoint[3] = {0.0};
-        double locatedID_Coords[3] = {0.0};
+        double locatedIDCoords[3] = {0.0};
         meshPoint[0] = CGAL::to_double(cMesh.point(vtx).x());
         meshPoint[1] = CGAL::to_double(cMesh.point(vtx).y());
         meshPoint[2] = CGAL::to_double(cMesh.point(vtx).z());
  
-        auto locatedID_T = pointLocator->FindClosestPoint(meshPoint);
-        thresholdVertexToCheck->GetOutput()->GetPoint(locatedID_T, locatedID_Coords);
+        auto locatedID = pointLocator->FindClosestPoint(meshPoint);
+        vertexToCheck->GetPoint(locatedID, locatedIDCoords);
 
-        if (vtkMath::Distance2BetweenPoints(meshPoint, locatedID_Coords) < this->SquaredContraintSearchTolerance)
+        if (vtkMath::Distance2BetweenPoints(meshPoint, locatedIDCoords) < this->SquaredContraintSearchTolerance)
         {
         vtx_to_check.insert(vtx);
         }
@@ -244,7 +254,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
         double cycleLength = 0.0;
         double tmpPt0[3] = { 0.0 }, tmpPt1[3] = { 0.0 };
 
-        vtkSmartPointer<vtkIdList> ptIdsList = vtkSmartPointer<vtkIdList>::New();
+        vtkNew<vtkIdList> ptIdsList;
         nthCycle->GetLines()->GetCell(0,ptIdsList);
         nthCycle->GetPoint(ptIdsList->GetId(0), tmpPt0);
         for (vtkIdType pointId = 1; pointId < ptIdsList->GetNumberOfIds(); ++pointId)
