@@ -1,3 +1,16 @@
+/**
+ * @class stkCGALSurfaceMeshTopology
+ * @brief Generates Non-Contractible cycles on a Surface Mesh from Base Point Mask Array
+ *
+ *  Inputs: Surface Mesh (port 0, vtkPolyData)
+ *  Output: PolyLines (port 0, vtkPolyData)
+ * 
+ * @ingroup stkCGAL
+ *
+ * @sa
+ * stkCGALSurfaceMeshTopologyInterface
+ */
+
 #pragma once
 
 #include <stkCGALModule.h>

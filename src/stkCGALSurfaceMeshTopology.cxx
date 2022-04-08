@@ -70,7 +70,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
 {
   vtkPolyData* inMesh = this->GetInputMesh();
-  ;
+  
   vtkPolyData* outMesh = vtkPolyData::GetData(outputVector, 0);
 
   if (inMesh == nullptr || inMesh->GetNumberOfPoints() == 0)
@@ -86,7 +86,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
   }
 
   auto maskedVertexArray =
-    inMesh->GetPointData()->GetArray(this->VertexToCheckPointMaskName.c_str());
+    inMesh->GetPointData()->GetArray(this->BasePointMaskArrayName.c_str());
 
   if (maskedVertexArray == nullptr)
   {
@@ -95,7 +95,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
   }
 
   vtkNew<vtkPoints> maskedPoints;
-  vtkNew<vtkPointSet> vertexToCheck;
+  vtkNew<vtkPointSet> basePoints;
   for (vtkIdType pointID = 0; pointID < maskedVertexArray->GetNumberOfTuples(); pointID++)
   {
     if (maskedVertexArray->GetTuple1(pointID) > 0)
@@ -103,12 +103,12 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
       maskedPoints->InsertNextPoint(inMesh->GetPoint(pointID));
     }
   }
-  vertexToCheck->SetPoints(maskedPoints);
+  basePoints->SetPoints(maskedPoints);
   vtkNew<vtkStaticPointLocator> pointLocator;
-  pointLocator->SetDataSet(vertexToCheck);
+  pointLocator->SetDataSet(basePoints);
   pointLocator->BuildLocator();
 
-  if (vertexToCheck->GetNumberOfPoints() <= 0)
+  if (basePoints->GetNumberOfPoints() <= 0)
   {
     vtkErrorMacro("There is no vertex to check in select Point mask");
     return 0;
@@ -144,7 +144,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
     meshPoint[2] = CGAL::to_double(cMesh.point(vtx).z());
 
     auto locatedID = pointLocator->FindClosestPoint(meshPoint);
-    vertexToCheck->GetPoint(locatedID, locatedIDCoords);
+    basePoints->GetPoint(locatedID, locatedIDCoords);
 
     if (vtkMath::Distance2BetweenPoints(meshPoint, locatedIDCoords) <
       this->SquaredContraintSearchTolerance)
@@ -169,6 +169,8 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
   auto loopSize = vtx_to_check.size();
   int process_percentage = 1;
   this->SetProgressText("Progress");
+  this->UpdateProgress(0.0);
+  
   while (!vtx_to_check.empty())
   {
 

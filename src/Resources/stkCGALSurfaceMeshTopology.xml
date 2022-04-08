@@ -8,7 +8,7 @@
             <Documentation
                 long_help="CGAL Surface Mesh Topology"
                 short_help="CGAL Surface Mesh Topology">
-               
+                Generates Non-Contractible cycles on a Surface Mesh from Base Point Mask Array
             </Documentation>
 
             <InputProperty
@@ -29,9 +29,9 @@
             </InputProperty>
 
             <StringVectorProperty
-                name="VertexToCheckPointMaskName"
-                command="SetVertexToCheckPointMaskName"
-                label="Vertex To Check Point Mask"
+                name="BasePointMaskArrayName"
+                command="SetBasePointMaskArrayName"
+                label="Base Point Array Mask"
                 default_values="None"
                 number_of_elements="1">
                 <ArrayListDomain
@@ -44,7 +44,10 @@
                             function="Input" />
                     </RequiredProperties>
                 </ArrayListDomain>
-                <Documentation />
+                <Documentation>
+                    Set the Point Mask Array for defining the Base Points for generation of Non-contractible 
+                    cycles. All Points with a postive value in mask array are defined as base points.
+                </Documentation>
             </StringVectorProperty>
 
             <IntVectorProperty
@@ -53,7 +56,9 @@
                 number_of_elements="1"
                 default_values="1">
                 <BooleanDomain name="bool" />
-                <Documentation />
+                <Documentation >
+                    Generate ID for each cycle
+                </Documentation>
             </IntVectorProperty>
 
             <IntVectorProperty
@@ -62,7 +67,9 @@
                 number_of_elements="1"
                 default_values="1">
                 <BooleanDomain name="bool" />
-                <Documentation />
+                <Documentation >
+                    Calculate Length of each cycle
+                </Documentation>
             </IntVectorProperty>
 
             <DoubleVectorProperty
@@ -71,9 +78,9 @@
                 number_of_elements="1"
                 default_values=".000001"
                 panel_visibility="advanced">
-                <Documentation>
-     The value used to offset the polygon.
- </Documentation>
+                <Documentation >
+                    Set Square of Tolerance used for locating points
+                </Documentation>
             </DoubleVectorProperty>
 
             <IntVectorProperty
@@ -83,7 +90,9 @@
                 default_values="1"
                 panel_visibility="advanced">
                 <BooleanDomain name="bool" />
-                <Documentation />
+                <Documentation >
+                    If ON, collapsed cycles edges will be discarded form the generated cycles
+                </Documentation>
             </IntVectorProperty>
 
             <IntVectorProperty
@@ -93,7 +102,10 @@
                 default_values="1"
                 panel_visibility="advanced">
                 <BooleanDomain name="bool" />
-                <Documentation />
+                <Documentation >
+                    If ON, there will be significant reduction in execution time and duplicate cycles.
+                    If OFF, if all cycles generated from Base Points will be generated.
+                </Documentation>
             </IntVectorProperty>
 
             <StringVectorProperty
@@ -103,7 +115,9 @@
                 default_values="Cycle ID"
                 number_of_elements="1"
                 panel_visibility="advanced">
-                <Documentation />
+                <Documentation >
+                    Set Cycle ID Array Name
+                </Documentation>
                 <Hints>
                     <PropertyWidgetDecorator
                         type="GenericDecorator"
@@ -120,7 +134,9 @@
                 default_values="Cycle Length"
                 number_of_elements="1"
                 panel_visibility="advanced">
-                <Documentation />
+                <Documentation >
+                    Set Cycle Length Array Name
+                </Documentation>
                 <Hints>
                     <PropertyWidgetDecorator
                         type="GenericDecorator"
@@ -129,6 +145,12 @@
                         value="1" />
                 </Hints>
             </StringVectorProperty>
+
+            <PropertyGroup label="Non Contractible Cycles Generation ">
+                <Property name="BasePointMaskArrayName" />
+                <Property name="GenerateCycleIDs" />
+                <Property name="CalculateCycleLength" />
+            </PropertyGroup>
 
             <PropertyGroup label="Advanced">
                 <Property name="SquaredContraintSearchTolerance" />
