@@ -1,5 +1,5 @@
 #[==[
-"stkCGALSurfaceMeshTopologyTest" is the name of the executable.
+"stkCGALModuleTests" is the name of the executable.
 "tests" is the name of the variable used to store the list of tests.
 "TestUtils.css" is the name of one of the cpp files containing tests
 Options:
@@ -22,7 +22,7 @@ vtk_add_test_cxx(stkCGALModuleTests tests
   NO_VALID # For all test files
   NO_OUTPUT # For all test files
 
-  stkTestCGALSurfaceMeshTopology.cxx
+  TestCGALSurfaceMeshTopology.cxx
   # Alternative syntax to specify the options per-file:
   # TestUtils.cxx,NO_DATA,NO_VALID,NO_OUTPUT
 
