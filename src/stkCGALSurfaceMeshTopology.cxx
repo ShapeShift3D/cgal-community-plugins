@@ -70,7 +70,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
 {
   vtkPolyData* inMesh = this->GetInputMesh();
-  
+
   vtkPolyData* outMesh = vtkPolyData::GetData(outputVector, 0);
 
   if (inMesh == nullptr || inMesh->GetNumberOfPoints() == 0)
@@ -85,8 +85,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
     return 0;
   }
 
-  auto maskedVertexArray =
-    inMesh->GetPointData()->GetArray(this->BasePointMaskArrayName.c_str());
+  auto maskedVertexArray = inMesh->GetPointData()->GetArray(this->BasePointMaskArrayName.c_str());
 
   if (maskedVertexArray == nullptr)
   {
@@ -146,8 +145,9 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
     auto locatedID = pointLocator->FindClosestPoint(meshPoint);
     basePoints->GetPoint(locatedID, locatedIDCoords);
 
-    if (vtkMath::Distance2BetweenPoints(meshPoint, locatedIDCoords) <
-      this->SquaredContraintSearchTolerance)
+    double squaredTolerance = std::pow(this->ContraintSearchTolerance, 2);
+
+    if (vtkMath::Distance2BetweenPoints(meshPoint, locatedIDCoords) < squaredTolerance)
     {
       vtx_to_check.insert(vtx);
     }
@@ -170,11 +170,12 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
   int process_percentage = 1;
   this->SetProgressText("Progress");
   this->UpdateProgress(0.0);
-  
+
+  double progress = 0.0;
+
   while (!vtx_to_check.empty())
   {
-
-    double progress = (double)(loopSize - vtx_to_check.size()) / loopSize;
+    progress = (double)(loopSize - vtx_to_check.size()) / loopSize;
 
     if (progress > process_percentage * .1)
     {
@@ -231,7 +232,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
       {
         vtkNew<vtkIdTypeArray> cycleIDArray;
         cycleIDArray->SetNumberOfComponents(1);
-        cycleIDArray->SetNumberOfValues(1);
+        cycleIDArray->SetNumberOfTuples(1);
         cycleIDArray->SetName(this->CycleIDArrayName.c_str());
 
         cycleIDArray->SetTuple1(0, cycleID);
@@ -243,7 +244,7 @@ int stkCGALSurfaceMeshTopology::RequestData(vtkInformation* vtkNotUsed(request),
       {
         vtkNew<vtkDoubleArray> cycleLengthArray;
         cycleLengthArray->SetNumberOfComponents(1);
-        cycleLengthArray->SetNumberOfValues(1);
+        cycleLengthArray->SetNumberOfTuples(1);
         cycleLengthArray->SetName(this->CycleLengthArrayName.c_str());
 
         double cycleLength = 0.0;

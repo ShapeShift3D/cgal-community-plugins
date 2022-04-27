@@ -73,13 +73,13 @@
             </IntVectorProperty>
 
             <DoubleVectorProperty
-                name="SquaredContraintSearchTolerance"
-                command="SetSquaredContraintSearchTolerance"
+                name="ContraintSearchTolerance"
+                command="SetContraintSearchTolerance"
                 number_of_elements="1"
-                default_values=".000001"
+                default_values=".001"
                 panel_visibility="advanced">
                 <Documentation >
-                    Set Square of Tolerance used for locating points
+                    Set search tolerance used for locating points
                 </Documentation>
             </DoubleVectorProperty>
 
@@ -153,7 +153,7 @@
             </PropertyGroup>
 
             <PropertyGroup label="Advanced">
-                <Property name="SquaredContraintSearchTolerance" />
+                <Property name="ContraintSearchTolerance" />
                 <Property name="OptimizeForExecutionTime" />
                 <Property name="ExtractSimpleCycles" />
                 <Property name="CycleIDArrayName" />
