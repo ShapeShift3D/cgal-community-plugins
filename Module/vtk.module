@@ -5,14 +5,16 @@ LIBRARY_NAME
 DESCRIPTION
   CGAL sources and filters
 DEPENDS
-  VTK::FiltersCore
-  VTK::FiltersGeometry
-  VTK::FiltersExtraction
   ParaView::stkCGALInterface
+  VTK::FiltersCore
   VTK::FiltersModeling
 PRIVATE_DEPENDS
   VTK::CommonCore
   VTK::CommonSystem
+  VTK::FiltersExtraction
+  VTK::FiltersGeometry
   VTK::FiltersGeneral
+  VTK::FiltersSources
 TEST_DEPENDS
+  VTK::FiltersSources
   VTK::TestingCore
