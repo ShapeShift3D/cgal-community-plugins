@@ -10,6 +10,8 @@
 #include <vtkPointData.h>
 #include <vtkSmartPointer.h>
 #include <vtkTimerLog.h>
+#include <vtkMath.h>
+#include <vtkStaticPointLocator.h>
 
 // -- CGAL
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -33,10 +35,10 @@ int stkCGALEfficientRANSAC::RequestData(vtkInformation* vtkNotUsed(request),
   vtkPolyData* output = vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   // Copy input data to the output
-  output->CopyStructure(input);
-  output->GetCellData()->PassData(input->GetCellData());
-  output->GetFieldData()->PassData(input->GetFieldData());
-  output->GetPointData()->PassData(input->GetPointData());
+  output->DeepCopy(input);
+
+  // TODO : Explicitly ask for Normals array as an Input 
+  // Set Array to process 
 
   return this->Detection<CGAL::Exact_predicates_inexact_constructions_kernel>(input, output);
 }
@@ -90,7 +92,10 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   // Set parameters for shape detection.
   typename Efficient_ransac::Parameters parameters;
-  if (this->UserDefinedParameters)
+  // TODO : Add default paramters values to the documentation
+  // TODO : Make dropsown for Default/Custom in the UI
+  // TODO : Absolute and Percentage Options as applicable 
+  if (this->UserDefinedParameters) 
   {
     // Set probability to miss the largest primitive at each iteration
     parameters.probability = this->Probability;
@@ -118,7 +123,11 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   // Efficient_ransac::shapes() provides
   // an iterator range to the detected shapes.
-  typename Efficient_ransac::Shape_range shapes = ransac.shapes();
+  Efficient_ransac::Plane_range planes = ransac.planes();
+  // TODO : Add to following to Doc 
+  //  Depending on the
+  //     chosen probability for the detection, the planes are ordered
+  //     with decreasing size.
 
   // Perform detection several times and choose result with the highest coverage
   FT best_coverage = 0;
@@ -129,14 +138,17 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     // Detect shapes
     ransac.detect(parameters);
 
+    // TODO : Understand vtkTimerLog
     vtkTimerLog::MarkEndEvent("Detection iteration");
+
+    Efficient_ransac::Plane_range iterationPlanes = ransac.planes();
 
     // Compute coverage, i.e. ratio of the points assigned to a shape
     FT coverage = FT(points.size() - ransac.number_of_unassigned_points()) / FT(points.size());
 
     // Print number of assigned shapes and unassigned points
     vtkWarningMacro(<< "Iteration #" << i << " | "
-                    << ransac.shapes().end() - ransac.shapes().begin() << " primitives"
+                    <<iterationPlanes.end() - iterationPlanes.begin() << " planes "
                     << " | " << coverage << " coverage");
 
     vtkWarningMacro("Probabilty=" << parameters.probability << ", MinPoints="
@@ -148,34 +160,38 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     if (coverage > best_coverage)
     {
       best_coverage = coverage;
-      shapes = ransac.shapes();
+      planes = iterationPlanes;
     }
   }
 
   // Print number of detected shapes
-  vtkWarningMacro(<< ransac.shapes().end() - ransac.shapes().begin() << " shapes detected.");
+  vtkWarningMacro(<< planes.end() -planes.begin() << " planes detected.");
 
   vtkTimerLog::MarkEndEvent("Detection");
 
   vtkIdType numPoints = input->GetNumberOfPoints();
 
   auto regionsArray = vtkIntArray::New();
-  regionsArray->SetName("regions");
+  regionsArray->SetName("RANSACRegions");
   regionsArray->SetNumberOfComponents(1);
   regionsArray->SetNumberOfTuples(numPoints);
   regionsArray->Fill(-1);
 
   auto distancesArray = vtkFloatArray::New();
-  distancesArray->SetName("distances");
+  distancesArray->SetName("RANSACDistances");
   distancesArray->SetNumberOfComponents(1);
   distancesArray->SetNumberOfTuples(numPoints);
   distancesArray->Fill(-1);
 
+  auto pointLocator = vtkSmartPointer<vtkStaticPointLocator>::New();
+  pointLocator->SetDataSet(input);
+  pointLocator->BuildLocator();
+
   int regionIndex = 0;
-  typename Efficient_ransac::Shape_range::iterator it = shapes.begin();
-  while (it != shapes.end())
+  typename Efficient_ransac::Plane_range::iterator it = planes.begin();
+  while (it != planes.end())
   {
-    boost::shared_ptr<CGALShape> shape = *it;
+    boost::shared_ptr<CGALShape> plane = *it;
 
     // Iterate through point indices assigned to each detected shape
     std::vector<std::size_t>::const_iterator index_it = (*it)->indices_of_assigned_points().begin();
@@ -184,12 +200,20 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     {
       // Retrieve point.
       const CGalOrientedPoint& p = *(points.begin() + (*index_it));
+      //const CGalOrientedPoint& p = *(points.begin() + (*index_it));
 
-      regionsArray->SetValue(static_cast<vtkIdType>(*index_it), regionIndex);
+      double detectedPoint[3] = {CGAL::to_double(p.first.x()),CGAL::to_double(p.first.y()),CGAL::to_double(p.first.z())};
+      auto locatedID = pointLocator->FindClosestPoint(detectedPoint);
 
-      // Set Euclidean distance between point and shape
-      distancesArray->SetValue(
-        static_cast<vtkIdType>(*index_it), CGAL::sqrt((*it)->squared_distance(p.first)));
+      double inputPoint[2] = {0.0};
+      output->GetPoint(locatedID,inputPoint);
+
+      if (vtkMath::Distance2BetweenPoints(detectedPoint,inputPoint) < 1.0e-6)
+      {
+        regionsArray->SetValue(locatedID, regionIndex);
+         // Set Euclidean distance between point and shape
+        distancesArray->SetValue(locatedID, CGAL::sqrt((*it)->squared_distance(p.first)));
+      }
 
       // Proceed with the next point
       index_it++;
@@ -200,12 +224,12 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     regionIndex++;
   }
 
-  output->GetPointData()->SetScalars(regionsArray);
-  regionsArray->Delete();
+  output->GetPointData()->AddArray(regionsArray);
+  regionsArray->Delete(); // TODO : Make it into a SmartPointer 
 
   // This array is here to help testing
   output->GetPointData()->AddArray(distancesArray);
-  distancesArray->Delete();
+  distancesArray->Delete(); // TODO : Make it into a SmartPointer 
 
   return 1;
 }
