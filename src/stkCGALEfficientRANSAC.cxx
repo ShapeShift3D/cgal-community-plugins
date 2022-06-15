@@ -11,6 +11,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkTimerLog.h>
 #include <vtkMath.h>
+#include <vtkBoundingBox.h>
 #include <vtkStaticPointLocator.h>
 
 // -- CGAL
@@ -37,8 +38,25 @@ int stkCGALEfficientRANSAC::RequestData(vtkInformation* vtkNotUsed(request),
   // Copy input data to the output
   output->DeepCopy(input);
 
-  // TODO : Explicitly ask for Normals array as an Input 
-  // Set Array to process 
+  if (!this->PointNormalsArrayName.empty())
+  {
+    auto pointNormalsArray = input->GetPointData()->GetArray(this->PointNormalsArrayName.c_str());
+
+    if (pointNormalsArray != nullptr)
+    {
+      input->GetPointData()->SetNormals(pointNormalsArray);
+    }
+    else
+    {
+      vtkErrorMacro("Selected Point Normals Array is not valid");
+      return 0;
+    }
+  }
+  else
+  {
+    vtkErrorMacro("Point Normals Array is not selected");
+    return 0;
+  }
 
   // TODO : Check if we can add various kernel options 
   return this->Detection<CGAL::Exact_predicates_inexact_constructions_kernel>(input, output);
@@ -73,26 +91,6 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   vtkTimerLog::MarkStartEvent("Preprocessing");
 
-  if (!this->PointNormalsArrayName.empty())
-  {
-    auto pointNormalsArray = input->GetPointData()->GetArray((this->PointNormalsArrayName.c_str()));
-
-    if (pointNormalsArray != nullptr)
-    {
-      input->GetPointData()->SetNormals(pointNormalsArray);
-    }
-    else
-    {
-      vtkErrorMacro("Selected Point Normals Array is not valid");
-      return 0;
-    }
-  }
-  else
-  {
-    vtkErrorMacro("Point Normals Array is not selected");
-    return 0;
-  }
-
   // Points with normals
   CGalOrientedPointVector points;
   if (!stkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints<CGalKernel, CGalOrientedPointVector>(
@@ -101,6 +99,8 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     vtkErrorMacro("Failed to convert input mesh. Make sure to supplied points normals array is valid.");
     return 0;
   }
+
+  vtkIdType numPoints = input->GetNumberOfPoints();
 
   // Instantiate shape detection engine
   Efficient_ransac ransac;
@@ -117,25 +117,66 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   // TODO : Make dropdown for Default/Custom in the UI
   // TODO : Absolute and Percentage Options as applicable 
 
-  if (this->UserDefinedParameters) 
+  vtkBoundingBox boundingBox;
+  boundingBox.SetBounds(input->GetBounds());
+  
+  double bbDiagonal = boundingBox.GetDiagonalLength();
+
+  // Set probability to miss the largest primitive at each iteration
+  parameters.probability = this->Probability;
+
+  // Detect shapes with at least a certain amount of points
+
+  if (this->MinPointsInputType == MinPointsInputTypes::MIN_POINTS_PERCENTAGE)
   {
-    // Set probability to miss the largest primitive at each iteration
-    parameters.probability = this->Probability;
-
-    // Detect shapes with at least a certain amount of points
+    if (this->MinPoints < 0 || this->MinPoints > 100)
+    {
+      vtkErrorMacro("MinPoints Percentage should be between 0 and 100 percent");
+      return 0;
+    }
+     parameters.min_points =  static_cast<int>((this->MinPoints/100.0)*numPoints); 
+  }
+  else if (this->MinPointsInputType == MinPointsInputTypes::MIN_POINTS_NUMBER)
+  {
     parameters.min_points = this->MinPoints;
-
-    // Set maximum Euclidean distance between a point and a shape
+  }
+ 
+  // Set maximum Euclidean distance between a point and a shape
+  if(this->EpsilonInputType == EpsilonInputTypes::EPSILON_PERCENTAGE)
+  {
+    if (this->Epsilon < 0 || this->Epsilon > 100)
+    {
+      vtkErrorMacro("Epsilon Percentage should be between 0 and 100 percent");
+      return 0;
+    }
+    parameters.epsilon = (this->Epsilon/100.0)*bbDiagonal;
+  }
+  else if (this->EpsilonInputType == EpsilonInputTypes::EPSILON_VALUE)
+  {
     parameters.epsilon = this->Epsilon;
-
-    // Set maximum Euclidean distance between points to be clustered
-    parameters.cluster_epsilon = this->ClusterEpsilon;
-
-    // Set maximum normal deviation.
-    // MaxNormalDeviation < dot(surface_normal, point_normal);
-    parameters.normal_threshold = this->MaxNormalDeviation;
   }
 
+  // Set maximum Euclidean distance between points to be clustered
+  if(this->ClusterEpsilonInputType == ClusterEpsilonInputTypes::CLUSTER_EPSILON_PERCENTAGE)
+  {
+    if (this->ClusterEpsilon < 0 || this->ClusterEpsilon > 100)
+    {
+      vtkErrorMacro("ClusterEpsilon Percentage should be between 0 and 100 percent");
+      return 0;
+    }
+    parameters.cluster_epsilon = (this->ClusterEpsilon/100.0)*bbDiagonal;
+  }
+  else if (this->ClusterEpsilonInputType == ClusterEpsilonInputTypes::CLUSTER_EPSILON_VALUE)
+  {
+    parameters.cluster_epsilon = this->ClusterEpsilon;
+  }
+
+
+
+  // Set maximum normal deviation.
+  // MaxNormalDeviation < dot(surface_normal, point_normal);
+  parameters.normal_threshold = this->MaxNormalThreshold;
+  
   // Build internal data structures
   ransac.preprocess();
 
@@ -143,8 +184,8 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   vtkTimerLog::MarkStartEvent("Detection");
 
-  // Efficient_ransac::shapes() provides
-  // an iterator range to the detected shapes.
+  // Efficient_ransac::planes() provides
+  // an iterator range to the detected planes.
   // TODO : Add to following to Doc 
   //  Depending on the
   //     chosen probability for the detection, the planes are ordered
@@ -161,7 +202,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     // Detect shapes
     ransac.detect(parameters);
 
-    // TODO : Remove Timer log, we are sending Logs anywhere 
+    // TODO : Remove Timer log, we are not sending Logs anywhere 
     vtkTimerLog::MarkEndEvent("Detection iteration");
 
     Efficient_ransac::Plane_range iterationPlanes = ransac.planes();
@@ -192,19 +233,20 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   vtkTimerLog::MarkEndEvent("Detection");
 
-  vtkIdType numPoints = input->GetNumberOfPoints();
-
-  auto regionsArray = vtkIntArray::New();
-  regionsArray->SetName("RANSACRegions");
+  auto regionsArray = vtkSmartPointer<vtkIntArray>::New();
+  regionsArray->SetName(this->RegionsArrayName.c_str());
   regionsArray->SetNumberOfComponents(1);
   regionsArray->SetNumberOfTuples(numPoints);
   regionsArray->Fill(-1);
 
-  auto distancesArray = vtkFloatArray::New();
-  distancesArray->SetName("RANSACDistances");
-  distancesArray->SetNumberOfComponents(1);
-  distancesArray->SetNumberOfTuples(numPoints);
-  distancesArray->Fill(-1);
+  auto distancesArray = vtkSmartPointer<vtkFloatArray>::New();
+  if (this->CalculateDistanceFromPlane)
+  {
+    distancesArray->SetName(this->DistanceFromPlaneArrayName.c_str());
+    distancesArray->SetNumberOfComponents(1);
+    distancesArray->SetNumberOfTuples(numPoints);
+    distancesArray->Fill(-1);
+  }
 
   auto pointLocator = vtkSmartPointer<vtkStaticPointLocator>::New();
   pointLocator->SetDataSet(input);
@@ -223,7 +265,6 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     {
       // Retrieve point.
       const CGalOrientedPoint& p = *(points.begin() + (*index_it));
-      //const CGalOrientedPoint& p = *(points.begin() + (*index_it));
 
       double detectedPoint[3] = {CGAL::to_double(p.first.x()),CGAL::to_double(p.first.y()),CGAL::to_double(p.first.z())};
       auto locatedID = pointLocator->FindClosestPoint(detectedPoint);
@@ -231,13 +272,15 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
       double inputPoint[2] = {0.0};
       output->GetPoint(locatedID,inputPoint);
 
-      // TODO : Expose Point Search Tolerance as an advanced Property 
-      // Squared the exposed property 
-      if (vtkMath::Distance2BetweenPoints(detectedPoint,inputPoint) < 1.0e-6)
+      auto squaredSearchTolerance = std::pow(this->PointSearchTolerance,2);
+      if (vtkMath::Distance2BetweenPoints(detectedPoint,inputPoint) < squaredSearchTolerance)
       {
         regionsArray->SetValue(locatedID, regionIndex);
          // Set Euclidean distance between point and shape
+        if(this->CalculateDistanceFromPlane)
+        {
         distancesArray->SetValue(locatedID, CGAL::sqrt((*it)->squared_distance(p.first)));
+        }
       }
 
       // Proceed with the next point
@@ -249,12 +292,13 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     regionIndex++;
   }
 
-  output->GetPointData()->AddArray(regionsArray); // TODO : Add option to change the name of the array
-  regionsArray->Delete(); // TODO : Make it into a SmartPointer 
+  output->GetPointData()->AddArray(regionsArray);
 
   // This array is here to help testing
-  output->GetPointData()->AddArray(distancesArray);// TODO : Add option to change the name of the array
-  distancesArray->Delete(); // TODO : Make it into a SmartPointer 
+  if (this->CalculateDistanceFromPlane)
+  {
+    output->GetPointData()->AddArray(distancesArray);      
+  }
 
   return 1;
 }

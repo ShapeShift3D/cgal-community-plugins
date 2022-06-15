@@ -53,9 +53,9 @@
                 name="NumberOfIterations"
                 command="SetNumberOfIterations"
                 number_of_elements="1"
-                default_values="1">
+                default_values="5">
                 <IntRangeDomain
-                    min="1"
+                    min="0"
                     name="range" />
                 <Documentation>
                 The algorithm will perform detection several times
@@ -63,37 +63,38 @@
                 (i.e. ratio of the points assigned to a shape).
             </Documentation>
             </IntVectorProperty>
+
             <IntVectorProperty
-                name="UserDefinedParameters"
-                command="SetUserDefinedParameters"
-                number_of_elements="1"
-                default_values="0">
-                <BooleanDomain name="bool" />
-                <Documentation>
-                If not checked, the algorithm will evaluate default
-                values based on the mesh parameters (size, ...).
-                Otherwise the user has the ability define detection parameters.
+            name="MinPointsInputType"
+            command="SetMinPointsInputType"
+            number_of_elements="1"
+            default_values="0">
+            <EnumerationDomain name="enum">
+                <Entry
+                    text="MIN_POINTS_PERCENTAGE"
+                    value="0" />
+                <Entry
+                    text="MIN_POINTS_NUMBER"
+                    value="1" />
+            </EnumerationDomain>
+            <Documentation>
+
             </Documentation>
             </IntVectorProperty>
-            <IntVectorProperty
+
+            <DoubleVectorProperty
                 name="MinPoints"
                 command="SetMinPoints"
                 number_of_elements="1"
-                default_values="200">
-                <IntRangeDomain
+                default_values="2.5">
+                <DoubleRangeDomain
                     min="0"
                     name="range" />
-                <Hints>
-                    <PropertyWidgetDecorator
-                        type="GenericDecorator"
-                        mode="visibility"
-                        property="UserDefinedParameters"
-                        value="1" />
-                </Hints>
                 <Documentation>
                 Set the minimum number of points in a shape.
             </Documentation>
-            </IntVectorProperty>
+            </DoubleVectorProperty>
+
             <DoubleVectorProperty
                 name="Probability"
                 command="SetProbability"
@@ -103,77 +104,165 @@
                     min="0.0"
                     max="1.0"
                     name="range" />
-                <Hints>
-                    <PropertyWidgetDecorator
-                        type="GenericDecorator"
-                        mode="visibility"
-                        property="UserDefinedParameters"
-                        value="1" />
-                </Hints>
                 <Documentation>
                 Set the probability to miss the largest primitive at each iteration. Probability to control search endurance.
                 A lower probability provides a higher reliability and determinism at the cost of longer running time due to a higher search endurance.
             </Documentation>
             </DoubleVectorProperty>
+
+            <IntVectorProperty
+            name="EpsilonInputType"
+            command="SetEpsilonInputType"
+            number_of_elements="1"
+            default_values="1">
+            <EnumerationDomain name="enum">
+                <Entry
+                    text="EPSILON_PERCENTAGE"
+                    value="0" />
+                <Entry
+                    text="EPSILON_VALUE"
+                    value="1" />
+            </EnumerationDomain>
+            <Documentation>
+
+            </Documentation>
+            </IntVectorProperty>
+
             <DoubleVectorProperty
                 name="Epsilon"
                 command="SetEpsilon"
                 number_of_elements="1"
-                default_values="0.002">
+                default_values="1">
                 <DoubleRangeDomain
                     min="0.0"
                     name="range" />
-                <Hints>
-                    <PropertyWidgetDecorator
-                        type="GenericDecorator"
-                        mode="visibility"
-                        property="UserDefinedParameters"
-                        value="1" />
-                </Hints>
                 <Documentation>
                 Set the maximum acceptable Euclidean distance between a point and a shape.
             </Documentation>
             </DoubleVectorProperty>
+
+            <IntVectorProperty
+            name="ClusterEpsilonInputType"
+            command="SetClusterEpsilonInputType"
+            number_of_elements="1"
+            default_values="1">
+            <EnumerationDomain name="enum">
+                <Entry
+                    text="CLUSTER_EPSILON_PERCENTAGE"
+                    value="0" />
+                <Entry
+                    text="CLUSTER_EPSILON_VALUE"
+                    value="1" />
+            </EnumerationDomain>
+            <Documentation>
+
+            </Documentation>
+            </IntVectorProperty>
+
             <DoubleVectorProperty
                 name="ClusterEpsilon"
                 command="SetClusterEpsilon"
                 number_of_elements="1"
-                default_values="0.01">
+                default_values="3">
                 <DoubleRangeDomain
                     min="0.0"
                     name="range" />
-                <Hints>
-                    <PropertyWidgetDecorator
-                        type="GenericDecorator"
-                        mode="visibility"
-                        property="UserDefinedParameters"
-                        value="1" />
-                </Hints>
                 <Documentation>
                 Set the maximum acceptable Euclidean distance between points, which are assumed to be neighbors.
             </Documentation>
             </DoubleVectorProperty>
+
             <DoubleVectorProperty
-                name="MaxNormalDeviation"
-                command="SetMaxNormalDeviation"
+                name="MaxNormalThreshold"
+                command="SetMaxNormalThreshold"
                 number_of_elements="1"
-                default_values="0.9">
+                default_values="0.95">
                 <DoubleRangeDomain
                     min="0.0"
                     max="1.0"
                     name="range" />
-                <Hints>
-                    <PropertyWidgetDecorator
-                        type="GenericDecorator"
-                        mode="visibility"
-                        property="UserDefinedParameters"
-                        value="1" />
-                </Hints>
                 <Documentation>
                 Set the maximum threshold on the dot product between the estimated shape's normal and
                 the point's normal, that is the cosine of the angle e.g (cos(25°) = 0.9).
             </Documentation>
             </DoubleVectorProperty>
+
+            <StringVectorProperty
+                name="RegionsArrayName"
+                label="Regions Array Name"
+                command="SetRegionsArrayName"
+                default_values="Regions"
+                number_of_elements="1"
+                panel_visibility="advanced">
+                
+                <Documentation>
+                
+                </Documentation>
+            </StringVectorProperty>
+
+            <IntVectorProperty
+            name="CalculateDistanceFromPlane"
+            command="SetCalculateDistanceFromPlane"
+            number_of_elements="1"
+            default_values="0"
+            panel_visibility="advanced">
+            <BooleanDomain name="bool" />
+            <Documentation>
+           
+            </Documentation>
+            </IntVectorProperty>
+
+            <StringVectorProperty
+            name="DistanceFromPlaneArrayName"
+            label="Distance From Plane Array Name"
+            command="SetDistanceFromPlaneArrayName"
+            default_values="DistanceFromPlane"
+            number_of_elements="1"
+            panel_visibility="advanced">
+            <Hints>
+                <PropertyWidgetDecorator
+                    type="GenericDecorator"
+                    mode="visibility"
+                    property="CalculateDistanceFromPlane"
+                    value="1" />
+            </Hints>
+            
+            <Documentation>
+            
+            </Documentation>
+            </StringVectorProperty>
+
+            <DoubleVectorProperty
+            name="PointSearchTolerance"
+            command="SetPointSearchTolerance"
+            number_of_elements="1"
+            default_values="0.001"
+            panel_visibility="advanced">
+            <DoubleRangeDomain
+                min="0.0"
+                name="range" />
+            <Documentation>
+            </Documentation>
+            </DoubleVectorProperty>
+
+            <PropertyGroup label="Efficient RANSAC Parameters">
+                <Property name="Probability" />
+                <Property name="MinPointsInputType" />
+                <Property name="MinPoints" />
+                <Property name="EpsilonInputType" />
+                <Property name="Epsilon" />
+                <Property name="ClusterEpsilonInputType" />
+                <Property name="ClusterEpsilon" />
+                <Property name="MaxNormalDeviation" />
+            </PropertyGroup>
+
+            <PropertyGroup label="Advanced">
+                <Property name="RegionsArrayName" />
+                <Property name="CalculateDistanceFromPlane" />
+                <Property name="DistanceFromPlaneArrayName" />
+                <Property name="PointSearchTolerance" />
+            </PropertyGroup>
+
         </Proxy>
     </ProxyGroup>
     <!-- ==================================================================== -->
