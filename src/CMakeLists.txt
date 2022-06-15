@@ -54,6 +54,7 @@ set(xml_files
   Resources/cgal_proxies.xml
   Resources/cgal_filters.xml
   Resources/stkCGALSurfaceMeshTopology.xml
+  Resources/stkCGALEfficientRANSAC.xml
 )
 
 paraview_add_server_manager_xmls(

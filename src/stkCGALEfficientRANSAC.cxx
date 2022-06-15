@@ -40,6 +40,7 @@ int stkCGALEfficientRANSAC::RequestData(vtkInformation* vtkNotUsed(request),
   // TODO : Explicitly ask for Normals array as an Input 
   // Set Array to process 
 
+  // TODO : Check if we can add various kernel options 
   return this->Detection<CGAL::Exact_predicates_inexact_constructions_kernel>(input, output);
 }
 
@@ -72,12 +73,32 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   vtkTimerLog::MarkStartEvent("Preprocessing");
 
+  if (!this->PointNormalsArrayName.empty())
+  {
+    auto pointNormalsArray = input->GetPointData()->GetArray((this->PointNormalsArrayName.c_str()));
+
+    if (pointNormalsArray != nullptr)
+    {
+      input->GetPointData()->SetNormals(pointNormalsArray);
+    }
+    else
+    {
+      vtkErrorMacro("Selected Point Normals Array is not valid");
+      return 0;
+    }
+  }
+  else
+  {
+    vtkErrorMacro("Point Normals Array is not selected");
+    return 0;
+  }
+
   // Points with normals
   CGalOrientedPointVector points;
   if (!stkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints<CGalKernel, CGalOrientedPointVector>(
         input, points))
   {
-    vtkErrorMacro("Failed to convert input mesh. Make sure to supply points normals.");
+    vtkErrorMacro("Failed to convert input mesh. Make sure to supplied points normals array is valid.");
     return 0;
   }
 
@@ -93,8 +114,9 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   // Set parameters for shape detection.
   typename Efficient_ransac::Parameters parameters;
   // TODO : Add default paramters values to the documentation
-  // TODO : Make dropsown for Default/Custom in the UI
+  // TODO : Make dropdown for Default/Custom in the UI
   // TODO : Absolute and Percentage Options as applicable 
+
   if (this->UserDefinedParameters) 
   {
     // Set probability to miss the largest primitive at each iteration
@@ -123,11 +145,12 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   // Efficient_ransac::shapes() provides
   // an iterator range to the detected shapes.
-  Efficient_ransac::Plane_range planes = ransac.planes();
   // TODO : Add to following to Doc 
   //  Depending on the
   //     chosen probability for the detection, the planes are ordered
   //     with decreasing size.
+  Efficient_ransac::Plane_range planes = ransac.planes();
+
 
   // Perform detection several times and choose result with the highest coverage
   FT best_coverage = 0;
@@ -138,7 +161,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     // Detect shapes
     ransac.detect(parameters);
 
-    // TODO : Understand vtkTimerLog
+    // TODO : Remove Timer log, we are sending Logs anywhere 
     vtkTimerLog::MarkEndEvent("Detection iteration");
 
     Efficient_ransac::Plane_range iterationPlanes = ransac.planes();
@@ -208,6 +231,8 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
       double inputPoint[2] = {0.0};
       output->GetPoint(locatedID,inputPoint);
 
+      // TODO : Expose Point Search Tolerance as an advanced Property 
+      // Squared the exposed property 
       if (vtkMath::Distance2BetweenPoints(detectedPoint,inputPoint) < 1.0e-6)
       {
         regionsArray->SetValue(locatedID, regionIndex);
@@ -224,11 +249,11 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     regionIndex++;
   }
 
-  output->GetPointData()->AddArray(regionsArray);
+  output->GetPointData()->AddArray(regionsArray); // TODO : Add option to change the name of the array
   regionsArray->Delete(); // TODO : Make it into a SmartPointer 
 
   // This array is here to help testing
-  output->GetPointData()->AddArray(distancesArray);
+  output->GetPointData()->AddArray(distancesArray);// TODO : Add option to change the name of the array
   distancesArray->Delete(); // TODO : Make it into a SmartPointer 
 
   return 1;
