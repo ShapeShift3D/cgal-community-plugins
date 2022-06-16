@@ -89,6 +89,7 @@ TEST_SUITE("TestCGALEfficientRANSAC")
     planeDetection->SetRegionsArrayName("DetectedCubePlanes");
     planeDetection->CalculateDistanceFromPlaneOff();
     planeDetection->SetPointSearchTolerance(0.001);
+    planeDetection->SetKernelValueToEPIC();
     planeDetection->Update();
 
     // All 6 planes of the cubes should have been detected by efficient RANSAC

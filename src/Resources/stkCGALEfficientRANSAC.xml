@@ -245,6 +245,29 @@
             </Documentation>
             </DoubleVectorProperty>
 
+            <IntVectorProperty
+            name="Kernel"
+            command="SetKernelValue"
+            number_of_elements="1"
+            default_values="1"
+            panel_visibility="advanced">
+            <EnumerationDomain name="enum">
+                <Entry
+                    text="EPIC"
+                    value="1" />
+                <Entry
+                    text="Cartesian"
+                    value="2" />
+                <Entry
+                    text="Simple_cartesian"
+                    value="3" />
+            </EnumerationDomain>
+            <Documentation>
+            Set the kernel. Depending on the CGAL kernel used,
+            the compute time and output regions may very.
+        </Documentation>
+        </IntVectorProperty>
+
             <PropertyGroup label="Efficient RANSAC Parameters">
                 <Property name="Probability" />
                 <Property name="MinPointsInputType" />
@@ -261,6 +284,7 @@
                 <Property name="CalculateDistanceFromPlane" />
                 <Property name="DistanceFromPlaneArrayName" />
                 <Property name="PointSearchTolerance" />
+                <Property name="Kernel" />
             </PropertyGroup>
 
         </Proxy>

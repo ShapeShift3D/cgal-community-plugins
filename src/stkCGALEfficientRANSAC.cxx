@@ -17,6 +17,8 @@
 
 // -- CGAL
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Cartesian.h>
+#include <CGAL/Simple_cartesian.h>
 #include <CGAL/Point_with_normal_3.h>
 #include <CGAL/property_map.h>
 
@@ -59,8 +61,26 @@ int stkCGALEfficientRANSAC::RequestData(vtkInformation* vtkNotUsed(request),
     return 0;
   }
 
-  // TODO : Check if we can add various kernel options 
-  return this->Detection<CGAL::Exact_predicates_inexact_constructions_kernel>(input, output);
+  switch (this->KernelValue)
+  {
+    case KernelEnum::EPIC:
+    {
+      return this->Detection<CGAL::Exact_predicates_inexact_constructions_kernel>(input, output);
+    }
+    case KernelEnum::Cartesian:
+    {
+      return this->Detection<CGAL::Cartesian<double> >(input, output);
+    }
+    case KernelEnum::Simple_cartesian:
+    {
+      return this->Detection<CGAL::Simple_cartesian<double> >(input, output);
+    }
+    default:
+    {
+      vtkErrorMacro("Wrong kernel value.");
+      return 0;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------
@@ -249,9 +269,9 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     boost::shared_ptr<CGALShape> plane = *it;
 
     // Iterate through point indices assigned to each detected shape
-    std::vector<std::size_t>::const_iterator index_it = (*it)->indices_of_assigned_points().begin();
+    std::vector<std::size_t>::const_iterator index_it = plane->indices_of_assigned_points().begin();
 
-    while (index_it != (*it)->indices_of_assigned_points().end())
+    while (index_it != plane->indices_of_assigned_points().end())
     {
       // Retrieve point.
       const CGalOrientedPoint& p = *(points.begin() + (*index_it));
@@ -269,10 +289,11 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
          // Set Euclidean distance between point and shape
         if(this->CalculateDistanceFromPlane)
         {
-        distancesArray->SetValue(locatedID, CGAL::sqrt((*it)->squared_distance(p.first)));
+          auto distance = CGAL::sqrt(plane->squared_distance(p.first));
+          distancesArray->SetValue(locatedID, static_cast<float>(distance));
         }
       }
-
+      
       // Proceed with the next point
       index_it++;
     }
