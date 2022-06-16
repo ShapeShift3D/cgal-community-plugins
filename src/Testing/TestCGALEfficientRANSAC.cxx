@@ -78,14 +78,12 @@ TEST_SUITE("TestCGALEfficientRANSAC")
     planeDetection->SetInputData(testInput);
     planeDetection->SetNumberOfRuns(3);
     planeDetection->SetPointNormalsArrayName("Normals");
-    planeDetection->SetMinPointsInputType(
-      stkCGALEfficientRANSAC::MinPointsInputTypes::MIN_POINTS_PERCENTAGE);
+    planeDetection->SetMinPointsInputTypeToPercentage();
     planeDetection->SetMinPoints(2.5);
     planeDetection->SetProbability(0.05);
-    planeDetection->SetEpsilonInputType(stkCGALEfficientRANSAC::EpsilonInputTypes::EPSILON_VALUE);
+    planeDetection->SetEpsilonInputTypeToValue();
     planeDetection->SetEpsilon(1);
-    planeDetection->SetClusterEpsilonInputType(
-      stkCGALEfficientRANSAC::ClusterEpsilonInputTypes::CLUSTER_EPSILON_VALUE);
+    planeDetection->SetClusterEpsilonInputTypeToValue();
     planeDetection->SetClusterEpsilon(3);
     planeDetection->SetMaxNormalThreshold(0.95);
     planeDetection->SetRegionsArrayName("DetectedCubePlanes");
