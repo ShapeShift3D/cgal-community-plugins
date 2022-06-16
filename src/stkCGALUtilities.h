@@ -22,6 +22,8 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
 
+#include <vtkPointData.h>
+
 class vtkPointSet;
 class vtkUnstructuredGrid;
 class vtkPolyData;
@@ -62,6 +64,10 @@ public:
   // Converters from VTK to CGAL
   static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, SurfaceMesh0& tmesh,
     vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
+
+  template<typename KernelType, typename Point_with_normal>
+  static bool vtkPolyDataToOrientedPoints(
+    vtkPolyData* polyData, Point_with_normal& orientedPoints);
 
   static bool vtkPolyDataToPolygonMesh(vtkPointSet* poly_data, Polyhedron0& tmesh,
     vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
@@ -112,3 +118,43 @@ private:
   static bool vtkPolyDataToPolygonMeshImpl(vtkPointSet* polyData, MeshType& tmesh,
     vtkIdTypeArray* cellOriginalIdsArray = nullptr, vtkIntArray* nullFaceMaskArray = nullptr);
 };
+
+//----------------------------------------------------------------------------
+/** @brief Convert a polydata to a CGAL compatible data structure
+ *
+ *  @param polyData                  input data structure with Point Normals
+ *  @param orientedPoints            output data structure
+ *  @tparam KernelType               must be a CGAL kernel compatible type
+ *  @tparam Point_with_normal        must be a vector of pairs { Point_3, Vector_3 }
+ *                                   using the corresponding CGAL kernel
+ *
+ *  @return bool Success (true) or failure (false)
+ */
+template<typename KernelType, typename Point_with_normal>
+bool stkCGALUtilities::vtkPolyDataToOrientedPoints(
+  vtkPolyData* polyData, Point_with_normal& orientedPoints)
+{
+  using Point = typename KernelType::Point_3;
+  using Vector = typename KernelType::Vector_3;
+
+  vtkDataArray* normals = polyData->GetPointData()->GetNormals();
+  if (!normals)
+  {
+    return false;
+  }
+
+  // Extract points and normals
+  double p[3], v[3];
+  vtkIdType num_points = polyData->GetNumberOfPoints();
+  for (vtkIdType i = 0; i < num_points; ++i)
+  {
+    polyData->GetPoint(i, p);
+    normals->GetTuple(i, v);
+
+    orientedPoints.push_back(std::make_pair(Point(p[0], p[1], p[2]), Vector(v[0], v[1], v[2])));
+  }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------

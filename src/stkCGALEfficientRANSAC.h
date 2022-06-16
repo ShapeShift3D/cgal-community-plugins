@@ -44,7 +44,4 @@ private:
   template<class CGalKernel>
   int Detection(vtkPolyData* input, vtkPolyData* output);
 
-  template<class CGalKernel, typename CGalOrientedPointVector>
-  static bool vtkPolyDataToOrientedPoints(
-    vtkPolyData* polyData, CGalOrientedPointVector& orientedPoints);
 };

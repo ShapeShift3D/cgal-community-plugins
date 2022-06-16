@@ -12,6 +12,9 @@
 #include <vtkBoundingBox.h>
 #include <vtkStaticPointLocator.h>
 
+// -- stkCGAL
+#include <stkCGALUtilities.h>
+
 // -- CGAL
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Point_with_normal_3.h>
@@ -89,7 +92,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   // Points with normals
   CGalOrientedPointVector points;
-  if (!stkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints<CGalKernel, CGalOrientedPointVector>(
+  if (!stkCGALUtilities::vtkPolyDataToOrientedPoints<CGalKernel, CGalOrientedPointVector>(
         input, points))
   {
     vtkErrorMacro("Failed to convert input mesh. Make sure to supplied points normals array is valid.");
@@ -290,40 +293,3 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   return 1;
 }
 
-//----------------------------------------------------------------------------
-/** @brief Convert a polydata to a CGAL compatible data structure
- *
- *  @param polyData                  input data structure with Point Normals
- *  @param orientedPoints            output data structure
- *  @tparam CGalKernel               must be a CGAL kernel compatible type
- *  @tparam CGalOrientedPointVector  must be a vector of pairs { Point_3, Vector_3 }
- *                                   using the corresponding CGAL kernel
- *
- *  @return bool Success (true) or failure (false)
- */
-template<class CGalKernel, typename CGalOrientedPointVector>
-bool stkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints(
-  vtkPolyData* polyData, CGalOrientedPointVector& orientedPoints)
-{
-  using Point = typename CGalKernel::Point_3;
-  using Vector = typename CGalKernel::Vector_3;
-
-  vtkDataArray* normals = polyData->GetPointData()->GetNormals();
-  if (!normals)
-  {
-    return false;
-  }
-
-  // Extract points and normals
-  double p[3], v[3];
-  vtkIdType num_points = polyData->GetNumberOfPoints();
-  for (vtkIdType i = 0; i < num_points; ++i)
-  {
-    polyData->GetPoint(i, p);
-    normals->GetTuple(i, v);
-
-    orientedPoints.push_back(std::make_pair(Point(p[0], p[1], p[2]), Vector(v[0], v[1], v[2])));
-  }
-
-  return true;
-}
