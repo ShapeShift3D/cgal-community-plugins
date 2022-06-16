@@ -2,14 +2,12 @@
 
 // -- VTK
 #include <vtkCellData.h>
-#include <vtkFieldData.h>
 #include <vtkFloatArray.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkIntArray.h>
 #include <vtkPointData.h>
 #include <vtkSmartPointer.h>
-#include <vtkTimerLog.h>
 #include <vtkMath.h>
 #include <vtkBoundingBox.h>
 #include <vtkStaticPointLocator.h>
@@ -89,8 +87,6 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   typedef CGAL::Shape_detection::Plane<Traits> CGALPlane;
   typedef CGAL::Shape_detection::Shape_base<Traits> CGALShape;
 
-  vtkTimerLog::MarkStartEvent("Preprocessing");
-
   // Points with normals
   CGalOrientedPointVector points;
   if (!stkCGALEfficientRANSAC::vtkPolyDataToOrientedPoints<CGalKernel, CGalOrientedPointVector>(
@@ -113,9 +109,6 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   // Set parameters for shape detection.
   typename Efficient_ransac::Parameters parameters;
-  // TODO : Add default paramters values to the documentation
-  // TODO : Make dropdown for Default/Custom in the UI
-  // TODO : Absolute and Percentage Options as applicable 
 
   vtkBoundingBox boundingBox;
   boundingBox.SetBounds(input->GetBounds());
@@ -180,10 +173,6 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   // Build internal data structures
   ransac.preprocess();
 
-  vtkTimerLog::MarkEndEvent("Preprocessing");
-
-  vtkTimerLog::MarkStartEvent("Detection");
-
   // Efficient_ransac::planes() provides
   // an iterator range to the detected planes.
   // TODO : Add to following to Doc 
@@ -197,13 +186,8 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   FT best_coverage = 0;
   for (std::size_t i = 0; i < this->NumberOfIterations; ++i)
   {
-    vtkTimerLog::MarkStartEvent("Detection iteration");
-
     // Detect shapes
     ransac.detect(parameters);
-
-    // TODO : Remove Timer log, we are not sending Logs anywhere 
-    vtkTimerLog::MarkEndEvent("Detection iteration");
 
     Efficient_ransac::Plane_range iterationPlanes = ransac.planes();
 
@@ -230,8 +214,6 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   // Print number of detected shapes
   vtkWarningMacro(<< planes.end() -planes.begin() << " planes detected.");
-
-  vtkTimerLog::MarkEndEvent("Detection");
 
   auto regionsArray = vtkSmartPointer<vtkIntArray>::New();
   regionsArray->SetName(this->RegionsArrayName.c_str());
