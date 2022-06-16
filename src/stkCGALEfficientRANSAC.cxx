@@ -52,7 +52,7 @@ int stkCGALEfficientRANSAC::RequestData(vtkInformation* vtkNotUsed(request),
   }
   else
   {
-    vtkErrorMacro("Point Normals Array is not selected");
+    vtkErrorMacro("Point Normals Array Name is not selected");
     return 0;
   }
 
@@ -181,22 +181,27 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   //     with decreasing size.
   Efficient_ransac::Plane_range planes = ransac.planes();
 
+  if (this->NumberOfRuns == 0 )
+  {
+    vtkErrorMacro("Efficient RANSAC not executed becayse Number of Runs is set to 0");
+    return 0;
+  }
 
   // Perform detection several times and choose result with the highest coverage
   FT best_coverage = 0;
-  for (std::size_t i = 0; i < this->NumberOfIterations; ++i)
+  for (std::size_t i = 0; i < this->NumberOfRuns; ++i)
   {
     // Detect shapes
     ransac.detect(parameters);
 
-    Efficient_ransac::Plane_range iterationPlanes = ransac.planes();
+    Efficient_ransac::Plane_range ithRunPlanes = ransac.planes();
 
     // Compute coverage, i.e. ratio of the points assigned to a shape
     FT coverage = FT(points.size() - ransac.number_of_unassigned_points()) / FT(points.size());
 
     // Print number of assigned shapes and unassigned points
-    vtkWarningMacro(<< "Iteration #" << i << " | "
-                    <<iterationPlanes.end() - iterationPlanes.begin() << " planes "
+    vtkWarningMacro(<< "Run #" << i << " | "
+                    <<ithRunPlanes.end() - ithRunPlanes.begin() << " planes "
                     << " | " << coverage << " coverage");
 
     vtkWarningMacro("Probabilty=" << parameters.probability << ", MinPoints="
@@ -208,7 +213,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     if (coverage > best_coverage)
     {
       best_coverage = coverage;
-      planes = iterationPlanes;
+      planes = ithRunPlanes;
     }
   }
 
@@ -288,7 +293,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 //----------------------------------------------------------------------------
 /** @brief Convert a polydata to a CGAL compatible data structure
  *
- *  @param polyData                  input data structure
+ *  @param polyData                  input data structure with Point Normals
  *  @param orientedPoints            output data structure
  *  @tparam CGalKernel               must be a CGAL kernel compatible type
  *  @tparam CGalOrientedPointVector  must be a vector of pairs { Point_3, Vector_3 }

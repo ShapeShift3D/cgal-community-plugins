@@ -50,8 +50,8 @@
             </StringVectorProperty>
 
             <IntVectorProperty
-                name="NumberOfIterations"
-                command="SetNumberOfIterations"
+                name="NumberOfRuns"
+                command="SetNumberOfRuns"
                 number_of_elements="1"
                 default_values="5">
                 <IntRangeDomain
@@ -253,7 +253,7 @@
                 <Property name="Epsilon" />
                 <Property name="ClusterEpsilonInputType" />
                 <Property name="ClusterEpsilon" />
-                <Property name="MaxNormalDeviation" />
+                <Property name="MaxNormalThreshold" />
             </PropertyGroup>
 
             <PropertyGroup label="Advanced">
