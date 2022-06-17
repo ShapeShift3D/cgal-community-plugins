@@ -27,6 +27,37 @@
 vtkStandardNewMacro(stkCGALEfficientRANSAC);
 
 //----------------------------------------------------------------------------
+struct Timeout_callback
+{
+  stkCGALEfficientRANSAC* CGALEfficientRANSAC;
+  double progress;
+  double progress_per_run;
+  mutable int segment;
+  Timeout_callback(stkCGALEfficientRANSAC* CGALEfficientRANSAC, double& progress_per_run)
+    : CGALEfficientRANSAC(CGALEfficientRANSAC)
+    , progress_per_run(progress_per_run)
+  {
+  }
+  void SetProgress(double curr_progress)
+  {
+    segment = 1;
+    progress = curr_progress;
+  }
+  bool operator()(double advancement) const
+  {
+    if (advancement >= segment * 0.1)
+    {
+      CGALEfficientRANSAC->UpdateProgress(progress + advancement * progress_per_run);
+      while (advancement > segment * 0.1)
+      {
+        segment++;
+      }
+    }
+    return true;
+  }
+};
+
+//----------------------------------------------------------------------------
 int stkCGALEfficientRANSAC::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
@@ -187,8 +218,6 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     parameters.cluster_epsilon = this->ClusterEpsilon;
   }
 
-
-
   // Set maximum normal deviation.
   // MaxNormalDeviation < dot(surface_normal, point_normal);
   parameters.normal_threshold = this->MaxNormalThreshold;
@@ -210,27 +239,30 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     return 0;
   }
 
+  double progress = 0.0;
+  double progress_per_run = (1.0/this->NumberOfRuns);
+  this->SetProgressText("Plane Detection");
+  Timeout_callback timeout_callback(this,progress_per_run);
+
+  vtkWarningMacro("Probabilty=" << parameters.probability << ", MinPoints="
+                                  << parameters.min_points << ", epsilon=" << parameters.epsilon
+                                  << ", cluster_epsilon=" << parameters.cluster_epsilon
+                                  << ", normal_threshold=" << parameters.normal_threshold);
+
   // Perform detection several times and choose result with the highest coverage
   FT best_coverage = 0;
+
   for (std::size_t i = 0; i < this->NumberOfRuns; ++i)
   {
+    progress= i*progress_per_run;
+    timeout_callback.SetProgress(progress);
     // Detect shapes
-    ransac.detect(parameters);
-
+    ransac.detect(parameters,timeout_callback);
+  
     Efficient_ransac::Plane_range ithRunPlanes = ransac.planes();
 
     // Compute coverage, i.e. ratio of the points assigned to a shape
     FT coverage = FT(points.size() - ransac.number_of_unassigned_points()) / FT(points.size());
-
-    // Print number of assigned shapes and unassigned points
-    vtkWarningMacro(<< "Run #" << i << " | "
-                    <<ithRunPlanes.end() - ithRunPlanes.begin() << " planes "
-                    << " | " << coverage << " coverage");
-
-    vtkWarningMacro("Probabilty=" << parameters.probability << ", MinPoints="
-                                  << parameters.min_points << ", epsilon=" << parameters.epsilon
-                                  << ", cluster_epsilon=" << parameters.cluster_epsilon
-                                  << ", normal_threshold=" << parameters.normal_threshold);
 
     // Choose result with the highest coverage
     if (coverage > best_coverage)
@@ -241,7 +273,10 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   }
 
   // Print number of detected shapes
+  vtkWarningMacro(<< "Best Run Coverage"  << " | " << best_coverage );
   vtkWarningMacro(<< planes.end() -planes.begin() << " planes detected.");
+
+  this->UpdateProgress(1.0);
 
   auto regionsArray = vtkSmartPointer<vtkIntArray>::New();
   regionsArray->SetName(this->RegionsArrayName.c_str());
