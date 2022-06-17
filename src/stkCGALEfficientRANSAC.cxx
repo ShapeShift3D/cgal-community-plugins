@@ -227,10 +227,6 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   // Efficient_ransac::planes() provides
   // an iterator range to the detected planes.
-  // TODO : Add to following to Doc 
-  //  Depending on the
-  //     chosen probability for the detection, the planes are ordered
-  //     with decreasing size.
   Efficient_ransac::Plane_range planes = ransac.planes();
 
   if (this->NumberOfRuns == 0 )

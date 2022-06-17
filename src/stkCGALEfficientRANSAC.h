@@ -10,7 +10,10 @@
  * In addition, a point data array "distances" filled with the distances to the
  * corresponding plane will be added to the output point data.
  * 
- * @warning The input dataset must contain point normals.
+ * @warning 
+ * The input dataset must contain point normals.
+ * 
+ * This algorithm is not deterministic
  *
  * @sa
  * stkCGALEfficientRANSAC

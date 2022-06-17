@@ -6,7 +6,7 @@
             name="CGALRegionGrowingProxy">
 
             <Documentation
-                long_help="CGAL region growing method appenda a cell data array regions filled with the detected
+                long_help="CGAL region growing method appends a cell data array regions filled with the detected
             region indices or -1 if the cell is not assigned to a region."
                 short_help="Detects plane shaped regions within a vtkPolyData" />
 

@@ -6,8 +6,10 @@
             name="CGALEfficientRANSACProxy">
 
             <Documentation
-                long_help="todo."
-                short_help="todo." />
+            short_help="Detects plane shaped regions within a vtkPolyData"
+            long_help="CGAL efficient RANSAC method appends a point data array regions filled with the detected
+                region indices or -1 if the point is not assigned to a region. 
+                Note : This algorithm is not deterministic" />
 
             <InputProperty
                 name="Input"
@@ -45,7 +47,7 @@
                     </RequiredProperties>
                 </ArrayListDomain>
                 <Documentation>
-                    Point Normal Array. Must be called Normals  
+                    Point Normal Array used for Shape Detection  
                 </Documentation>
             </StringVectorProperty>
 
@@ -78,7 +80,7 @@
                     value="1" />
             </EnumerationDomain>
             <Documentation>
-
+                Set the Method for calculation of MinPoints
             </Documentation>
             </IntVectorProperty>
 
@@ -124,7 +126,7 @@
                     value="1" />
             </EnumerationDomain>
             <Documentation>
-
+                Set the Method for calculation of Epsilon
             </Documentation>
             </IntVectorProperty>
 
@@ -155,7 +157,7 @@
                     value="1" />
             </EnumerationDomain>
             <Documentation>
-
+                Set the Method for calculation of ClusterEpsilon
             </Documentation>
             </IntVectorProperty>
 
@@ -194,9 +196,8 @@
                 default_values="Regions"
                 number_of_elements="1"
                 panel_visibility="advanced">
-                
                 <Documentation>
-                
+                    Set Regions Array Name
                 </Documentation>
             </StringVectorProperty>
 
@@ -208,7 +209,8 @@
             panel_visibility="advanced">
             <BooleanDomain name="bool" />
             <Documentation>
-           
+                Enable/Disable Distance from Plane Calculations for points assigned to detected planes.
+                For ussinged points, distance values is -1.
             </Documentation>
             </IntVectorProperty>
 
@@ -226,9 +228,8 @@
                     property="CalculateDistanceFromPlane"
                     value="1" />
             </Hints>
-            
             <Documentation>
-            
+                Set Distance From Plane Array Name
             </Documentation>
             </StringVectorProperty>
 
@@ -242,6 +243,7 @@
                 min="0.0"
                 name="range" />
             <Documentation>
+                Set Point Search Tolerance used for mapping the detected points to the input mesh. This should be very close to 0.
             </Documentation>
             </DoubleVectorProperty>
 
@@ -263,8 +265,8 @@
                     value="3" />
             </EnumerationDomain>
             <Documentation>
-            Set the kernel. Depending on the CGAL kernel used,
-            the compute time and output regions may very.
+                Set KernelEnum. Depending on the CGAL kernel chosen,
+                the compute time and the output regions may vary.
         </Documentation>
         </IntVectorProperty>
 
