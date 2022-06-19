@@ -23,10 +23,11 @@
 #include <CGAL/Surface_mesh.h>
 
 #include <vtkPointData.h>
+#include <vtkPolyData.h>
+#include <vtkDataArray.h>
 
 class vtkPointSet;
 class vtkUnstructuredGrid;
-class vtkPolyData;
 class vtkIdTypeArray;
 class vtkIntArray;
 
