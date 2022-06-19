@@ -227,7 +227,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   // Efficient_ransac::planes() provides
   // an iterator range to the detected planes.
-  Efficient_ransac::Plane_range planes = ransac.planes();
+  typename Efficient_ransac::Plane_range planes = ransac.planes();
 
   if (this->NumberOfRuns == 0 )
   {
@@ -255,7 +255,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
     // Detect shapes
     ransac.detect(parameters,timeout_callback);
   
-    Efficient_ransac::Plane_range ithRunPlanes = ransac.planes();
+    typename Efficient_ransac::Plane_range ithRunPlanes = ransac.planes();
 
     // Compute coverage, i.e. ratio of the points assigned to a shape
     FT coverage = FT(points.size() - ransac.number_of_unassigned_points()) / FT(points.size());
