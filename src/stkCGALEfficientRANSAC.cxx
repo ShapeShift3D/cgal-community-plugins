@@ -231,7 +231,7 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
 
   if (this->NumberOfRuns == 0 )
   {
-    vtkErrorMacro("Efficient RANSAC not executed becayse Number of Runs is set to 0");
+    vtkErrorMacro("Efficient RANSAC not executed because Number of Runs is set to 0");
     return 0;
   }
 
