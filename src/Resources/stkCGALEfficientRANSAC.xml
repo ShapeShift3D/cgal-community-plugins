@@ -61,7 +61,7 @@
                     name="range" />
                 <Documentation>
                 The algorithm will perform detection several times
-                and choose resultwith the highest coverage
+                and choose the result with the highest coverage
                 (i.e. ratio of the points assigned to a shape).
             </Documentation>
             </IntVectorProperty>
