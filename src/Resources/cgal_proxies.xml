@@ -115,7 +115,7 @@
     <ProxyGroup name="boolean_meshers">
         <Proxy name="CGALBoolean3DMesher"
                      class="stkCGALBoolean3DMesher"
-                     label="Boolean 3D #2">
+                     label="CGAL Boolean">
             <Documentation long_help="Applies a boolean operation on two PolyData inputs."
                            short_help="Applies a boolean operation on two PolyData inputs."> </Documentation>
 
