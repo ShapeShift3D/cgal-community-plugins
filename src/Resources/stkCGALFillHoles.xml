@@ -1,0 +1,43 @@
+<ServerManagerConfiguration>
+    <!-- ==================================================================== -->
+    <ProxyGroup name="cgal_polygon_mesh_processing">
+        <Proxy
+            class="stkCGALFillHoles"
+            name="CGALFillHolesProxy">
+
+            <Documentation
+                long_help=""
+                short_help="" />
+
+            <InputProperty
+                name="Input"
+                port_index="0"
+                command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources" />
+                    <Group name="filters" />
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData" />
+                </DataTypeDomain>
+            </InputProperty>
+
+
+        </Proxy>
+    </ProxyGroup>
+    <!-- ==================================================================== -->
+    <ProxyGroup name="filters">
+        <SourceProxy
+            name="CGALFillHoles"
+            class="stkCGALFillHoles"
+            label="CGAL Fill Holes"
+            base_proxygroup="cgal_polygon_mesh_processing"
+            base_proxyname="CGALFillHolesProxy">
+
+            <Hints>
+                <ShowInMenu category="CGAL" />
+            </Hints>
+
+        </SourceProxy>
+    </ProxyGroup>
+</ServerManagerConfiguration>
