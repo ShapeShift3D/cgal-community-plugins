@@ -22,6 +22,91 @@
                 </DataTypeDomain>
             </InputProperty>
 
+            <IntVectorProperty
+                name="UseDelaunayTriangulation"
+                command="SetUseDelaunayTriangulation"
+                number_of_elements="1"
+                default_values="1"
+                panel_visibility="advanced">
+                <BooleanDomain name="bool" />
+                <Documentation />
+            </IntVectorProperty>
+
+            <IntVectorProperty
+                name="FillingType"
+                command="SetFillingType"
+                number_of_elements="1"
+                default_values="2">
+                <EnumerationDomain name="enum">
+                    <Entry
+                        text="Fill Holes"
+                        value="0" />
+                    <Entry
+                        text="Fill Holes + Refinement"
+                        value="1" />
+                    <Entry
+                        text="Fill Holes + Refinement + Fairing"
+                        value="2" />
+                </EnumerationDomain>
+                <Documentation />
+            </IntVectorProperty>
+
+            <DoubleVectorProperty
+                name="DensityControlFactor"
+                command="SetDensityControlFactor"
+                number_of_elements="1"
+                default_values="1.414">
+                <DoubleRangeDomain
+                    min="0.0"
+                    name="range" />
+                <Documentation />
+                <Hints>
+                    <PropertyWidgetDecorator type="CompositeDecorator">
+                        <Expression type="or">
+                            <PropertyWidgetDecorator
+                                type="GenericDecorator"
+                                mode="visibility"
+                                property="FillingType"
+                                value="1" />
+                            <PropertyWidgetDecorator
+                                type="GenericDecorator"
+                                mode="visibility"
+                                property="FillingType"
+                                value="2" />
+                        </Expression>
+                    </PropertyWidgetDecorator>
+                </Hints>
+            </DoubleVectorProperty>
+
+            <IntVectorProperty
+                name="FairingContinuity"
+                command="SetFairingContinuity"
+                number_of_elements="1"
+                default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry
+                        text="C1"
+                        value="1" />
+                    <Entry
+                        text="C2"
+                        value="2" />
+                </EnumerationDomain>
+                <Documentation />
+                <Hints>
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="FillingType"
+                        value="2" />
+                </Hints>
+            </IntVectorProperty>
+
+            <PropertyGroup label="Hole Filling Options">
+                <Property name="UseDelaunayTriangulation" />
+                <Property name="FillingType" />
+                <Property name="DensityControlFactor" />
+                <Property name="FairingContinuity" />
+            </PropertyGroup>
 
         </Proxy>
     </ProxyGroup>
