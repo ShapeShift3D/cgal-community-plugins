@@ -100,8 +100,6 @@ public:
 
   static bool SurfaceMeshToPolyData(const SurfaceMesh3& pmesh, vtkPolyData* poly);
 
-  static bool PolyhedronToPolyData(const Polyhedron2& pmesh, vtkPolyData* poly);
-
   template<typename MeshType>
   static bool SurfaceMeshToPolyDataImpl(const MeshType& pmesh, vtkPolyData* poly);
 
