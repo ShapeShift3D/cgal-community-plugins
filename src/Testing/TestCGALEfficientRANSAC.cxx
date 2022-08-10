@@ -2,7 +2,6 @@
 
 #include <vtkCylinderSource.h>
 #include <vtkLinearSubdivisionFilter.h>
-#include <vtkMath.h>
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataNormals.h>

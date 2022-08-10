@@ -117,10 +117,11 @@
                 command="SetEnableMaxHoleBBDiagonal"
                 label = "Enable Max Hole BB Diagonal"
                 number_of_elements="1"
-                default_values="0">
+                default_values="0"
+                panel_visibility="advanced">
                 <BooleanDomain name="bool" />
                 <Documentation>
-                    If Enabled,Only holes smaller than provided maximum hole bounding box diagonal value will be filled.
+                    If Enabled, Only holes smaller than provided maximum hole bounding box diagonal value will be filled.
                 </Documentation>
             </IntVectorProperty>
 
@@ -129,7 +130,8 @@
                 command="SetMaxHoleBBDiagonal"
                 label = "Max Hole BB Diagonal"
                 number_of_elements="1"
-                default_values="1.0e3">
+                default_values="1.0e3"
+                panel_visibility="advanced">
                 <DoubleRangeDomain
                 min="0.0"
                 name="range" />
@@ -149,7 +151,8 @@
                 name="SkipSelfIntersectingPatches"
                 command="SetSkipSelfIntersectingPatches"
                 number_of_elements="1"
-                default_values="0">
+                default_values="0"
+                panel_visibility="advanced">
                 <BooleanDomain name="bool" />
                 <Documentation>
                     Skip filling of holes that contain self-intersections.
