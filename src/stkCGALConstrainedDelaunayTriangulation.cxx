@@ -95,7 +95,6 @@ int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotU
        ++it)
   {
     p = it->point();
-    std::cout << p << std::endl;
     vtk_points->InsertNextPoint(
       CGAL::to_double(it->point().x()), CGAL::to_double(it->point().y()), 0);
     pointsMap[p] = i;
@@ -113,14 +112,12 @@ int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotU
       for (int k = 0; k < 3; k++)
       {
         P = f->vertex(k)->point();
-        std::cout << P << std::endl;
         cell->InsertNextId(pointsMap.find(P)->second);
       }
       vtk_cells->InsertNextCell(cell);
       cell->Delete();
     }
   }
-  std::cout << "There are " << count << " facets in the domain." << std::endl;
 
   outputUG->SetPoints(vtk_points);
   outputUG->SetCells(5, vtk_cells);
