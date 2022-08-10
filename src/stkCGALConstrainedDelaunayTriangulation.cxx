@@ -7,6 +7,8 @@
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkPolyData.h>
+#include <vtkPolyDataConnectivityFilter.h>
+#include <vtkSmartPointer.h>
 #include <vtkThreshold.h>
 #include <vtkTimerLog.h>
 #include <vtkUnstructuredGrid.h>
@@ -40,29 +42,44 @@ int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotU
 
   vtkPolyData* output = vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  // construct two non-intersecting nested polygons
-  Polygon_2 polygon1;
-  double x = 0;
-  double y = 0;
-  for (int n = 0; n < input->GetNumberOfPoints(); n++)
-  {
-    x = input->GetPoint(n)[0];
-    y = input->GetPoint(n)[1];
-    polygon1.push_back(Point(x, y));
-  }
-  // polygon1.push_back(Point(2, 0));
-  // polygon1.push_back(Point(2, 2));
-  // polygon1.push_back(Point(0, 2));
-  // Polygon_2 polygon2;
-  // polygon2.push_back(Point(0.5, 0.5));
-  // polygon2.push_back(Point(1.5, 0.5));
-  // polygon2.push_back(Point(1.5, 1.5));
-  // polygon2.push_back(Point(0.5, 1.5));
-  //  Insert the polygons into a constrained triangulation
-
   CDT cdt;
-  cdt.insert_constraint(polygon1.vertices_begin(), polygon1.vertices_end(), true);
-  // cdt.insert_constraint(polygon2.vertices_begin(), polygon2.vertices_end(), true);
+
+  vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
+  connectivityFilter->SetInputData(input);
+  connectivityFilter->SetExtractionModeToAllRegions();
+  connectivityFilter->Update();
+
+  int numberOfRegions = connectivityFilter->GetNumberOfExtractedRegions();
+
+  for (int l = 0; l < numberOfRegions; l++)
+  {
+    vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter2;
+    connectivityFilter2->SetInputData(input);
+    connectivityFilter2->SetExtractionModeToSpecifiedRegions();
+    connectivityFilter2->InitializeSpecifiedRegionList();
+    connectivityFilter2->AddSpecifiedRegion(l);
+    connectivityFilter2->Update();
+
+    vtkNew<vtkCleanPolyData> clean;
+    clean->SetInputData(connectivityFilter2->GetOutput());
+    clean->Update();
+
+    vtkNew<vtkPolyData> region_i;
+    region_i->DeepCopy(clean->GetOutput());
+
+    Polygon_2 polygon1;
+    double x = 0;
+    double y = 0;
+    for (int n = 0; n < region_i->GetNumberOfPoints(); n++)
+    {
+      x = region_i->GetPoint(n)[0];
+      y = region_i->GetPoint(n)[1];
+      polygon1.push_back(Point(x, y));
+    }
+
+    cdt.insert_constraint(polygon1.vertices_begin(), polygon1.vertices_end(), true);
+  }
+
   //  Mark facets that are inside the domain bounded by the polygon
   markDomains(cdt);
 
