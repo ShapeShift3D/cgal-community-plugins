@@ -57,6 +57,9 @@ typedef CGAL::Constrained_Delaunay_triangulation_2<K, TDS, Itag> CDT;
 typedef CDT::Point Point;
 typedef CGAL::Polygon_2<K> Polygon_2;
 typedef CDT::Face_handle Face_handle;
+typedef CDT::Vertex_handle Vertex_handle;
+
+
 
 /**
  * @ingroup stkCGAL

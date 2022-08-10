@@ -6,6 +6,9 @@
 #include <vtkInformationVector.h>
 #include <vtkThreshold.h>
 #include <vtkTimerLog.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkPolyData.h>
+#include <vtkGeometryFilter.h>
 
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_face_base_2.h>
@@ -20,6 +23,9 @@
 vtkStandardNewMacro(stkCGALConstrainedDelaunayTriangulation);
 
 namespace PMP = CGAL::Polygon_mesh_processing;
+
+typedef CDT::Finite_vertices_iterator Finite_vertices_iterator;
+typedef CDT::Finite_faces_iterator Finite_faces_iterator;
 
 //-----------------------------------------------------------------------------
 int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotUsed(request),
@@ -50,17 +56,54 @@ int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotU
   cdt.insert_constraint(polygon2.vertices_begin(), polygon2.vertices_end(), true);
   // Mark facets that are inside the domain bounded by the polygon
   markDomains(cdt);
+
+  vtkNew<vtkPoints> vtk_points;
+  vtkNew<vtkCellArray> vtk_cells;
+  vtkNew<vtkUnstructuredGrid> outputUG;
+
+  std::map<Point, vtkIdType> pointsMap;
+  vtkIdType i = 0;
+  Point p;
+
+  for (Finite_vertices_iterator it = cdt.finite_vertices_begin(); it != cdt.finite_vertices_end();
+       ++it)
+  {
+    p = it->point();
+    std::cout << p << std::endl;
+    vtk_points->InsertNextPoint(
+      CGAL::to_double(it->point().x()), CGAL::to_double(it->point().y()), 0);
+    pointsMap[p] = i;
+    i++;
+  }
+
   int count = 0;
-  for (Face_handle f : cdt.finite_face_handles())
+  Point P;
+  for (Finite_faces_iterator f = cdt.finite_faces_begin(); f != cdt.finite_faces_end(); ++f)
   {
     if (f->info().in_domain())
+    {
       ++count;
+      vtkIdList* cell = vtkIdList::New();
+      for (int k = 0; k < 3; k++)
+      {
+        P = f->vertex(k)->point();
+        std::cout << P << std::endl;
+        cell->InsertNextId(pointsMap.find(P)->second);
+      }
+      vtk_cells->InsertNextCell(cell);
+      cell->Delete();
+    }
   }
   std::cout << "There are " << count << " facets in the domain." << std::endl;
 
-  // output->SetPoints(vtk_points);
-  // output->SetPolys(vtk_cells);
-  output->Squeeze();
+  outputUG->SetPoints(vtk_points);
+  outputUG->SetCells(5, vtk_cells);
+
+  vtkNew<vtkGeometryFilter> UGToPolyFilter;
+	UGToPolyFilter->SetInputData(outputUG);
+	UGToPolyFilter->Update();
+
+  output->ShallowCopy(UGToPolyFilter->GetOutput());
 
   return 1;
 }
