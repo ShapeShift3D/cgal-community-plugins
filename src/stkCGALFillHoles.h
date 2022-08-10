@@ -1,6 +1,8 @@
 /**
  * @class stkCGALFillHoles
- * @brief 
+ * @brief
+ *
+ *  Fill the Holes of the Input Surface Mesh with the selected filling type.
  *
  *  Inputs: SurfaceMesh (port 0, vtkPolyData)
  *  Output: SurfaceMesh (port 0, vtkPolyData)
@@ -10,8 +12,8 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
 #include <stkCGALFillHolesInterface.h>
+#include <stkCGALModule.h>
 
 /**
  * @ingroup stkCGAL
