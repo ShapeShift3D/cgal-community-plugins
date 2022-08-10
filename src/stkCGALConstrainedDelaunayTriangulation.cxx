@@ -141,37 +141,6 @@ void stkCGALConstrainedDelaunayTriangulation::PrintSelf(std::ostream& os, vtkInd
 }
 
 //------------------------------------------------------------------------------
-/** @brief Computes the bbox's diagonal length to set the default target edge length.
- *
- *  @param vtkNotUsed(request)
- *  @param inputVector
- *  @tparam inputVector
- *
- *  @return int Success (1) or failure (0)
- */
-int stkCGALConstrainedDelaunayTriangulation::RequestInformation(vtkInformation* vtkNotUsed(request),
-  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
-{
-  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
-  vtkInformation* outInfo = outputVector->GetInformationObject(0);
-
-  // Sets the bounds of the output.
-  outInfo->Set(vtkDataObject::BOUNDING_BOX(), inInfo->Get(vtkDataObject::BOUNDING_BOX()), 6);
-
-  vtkPolyData* input = vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
-
-  // Computes the initial target length:
-  double* bounds = input->GetBounds();
-  double diagonal = std::sqrt((bounds[0] - bounds[1]) * (bounds[0] - bounds[1]) +
-    (bounds[2] - bounds[3]) * (bounds[2] - bounds[3]) +
-    (bounds[4] - bounds[5]) * (bounds[4] - bounds[5]));
-
-  this->TargetEdgeLengthInfo = 0.01 * diagonal;
-
-  return 1;
-}
-
-//------------------------------------------------------------------------------
 void stkCGALConstrainedDelaunayTriangulation::mark_domains(
   CDT& ct, Face_handle start, int index, std::list<CDT::Edge>& border)
 {
