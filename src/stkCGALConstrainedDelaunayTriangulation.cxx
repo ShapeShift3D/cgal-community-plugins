@@ -1,14 +1,15 @@
 #include <stkCGALConstrainedDelaunayTriangulation.h>
+#include <stkCGALUtilities.h>
 #include <vtkAppendPolyData.h>
 #include <vtkCleanPolyData.h>
 #include <vtkDataSetSurfaceFilter.h>
+#include <vtkGeometryFilter.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
+#include <vtkPolyData.h>
 #include <vtkThreshold.h>
 #include <vtkTimerLog.h>
 #include <vtkUnstructuredGrid.h>
-#include <vtkPolyData.h>
-#include <vtkGeometryFilter.h>
 
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_face_base_2.h>
@@ -41,20 +42,28 @@ int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotU
 
   // construct two non-intersecting nested polygons
   Polygon_2 polygon1;
-  polygon1.push_back(Point(0, 0));
-  polygon1.push_back(Point(2, 0));
-  polygon1.push_back(Point(2, 2));
-  polygon1.push_back(Point(0, 2));
-  Polygon_2 polygon2;
-  polygon2.push_back(Point(0.5, 0.5));
-  polygon2.push_back(Point(1.5, 0.5));
-  polygon2.push_back(Point(1.5, 1.5));
-  polygon2.push_back(Point(0.5, 1.5));
-  // Insert the polygons into a constrained triangulation
+  double x = 0;
+  double y = 0;
+  for (int n = 0; n < input->GetNumberOfPoints(); n++)
+  {
+    x = input->GetPoint(n)[0];
+    y = input->GetPoint(n)[1];
+    polygon1.push_back(Point(x, y));
+  }
+  // polygon1.push_back(Point(2, 0));
+  // polygon1.push_back(Point(2, 2));
+  // polygon1.push_back(Point(0, 2));
+  // Polygon_2 polygon2;
+  // polygon2.push_back(Point(0.5, 0.5));
+  // polygon2.push_back(Point(1.5, 0.5));
+  // polygon2.push_back(Point(1.5, 1.5));
+  // polygon2.push_back(Point(0.5, 1.5));
+  //  Insert the polygons into a constrained triangulation
+
   CDT cdt;
   cdt.insert_constraint(polygon1.vertices_begin(), polygon1.vertices_end(), true);
-  cdt.insert_constraint(polygon2.vertices_begin(), polygon2.vertices_end(), true);
-  // Mark facets that are inside the domain bounded by the polygon
+  // cdt.insert_constraint(polygon2.vertices_begin(), polygon2.vertices_end(), true);
+  //  Mark facets that are inside the domain bounded by the polygon
   markDomains(cdt);
 
   vtkNew<vtkPoints> vtk_points;
@@ -100,8 +109,8 @@ int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotU
   outputUG->SetCells(5, vtk_cells);
 
   vtkNew<vtkGeometryFilter> UGToPolyFilter;
-	UGToPolyFilter->SetInputData(outputUG);
-	UGToPolyFilter->Update();
+  UGToPolyFilter->SetInputData(outputUG);
+  UGToPolyFilter->Update();
 
   output->ShallowCopy(UGToPolyFilter->GetOutput());
 
