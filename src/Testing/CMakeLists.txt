@@ -28,6 +28,7 @@ vtk_add_test_cxx(stkCGALModuleTests tests
   TestCGALEfficientRANSAC.cxx
   TestCGALRegionGrowing.cxx
   TestCGALFillHoles.cxx
+  TestCGALPolygonOffset.cxx
   # Alternative syntax to specify the options per-file:
   # TestUtils.cxx,NO_DATA,NO_VALID,NO_OUTPUT
 

@@ -18,3 +18,4 @@ PRIVATE_DEPENDS
 TEST_DEPENDS
   VTK::FiltersSources
   VTK::TestingCore
+  VTK::FiltersParallel
