@@ -1,31 +1,16 @@
+#include <CGAL/Polygon_2.h>
 #include <stkCGALConstrainedDelaunayTriangulation.h>
-#include <stkCGALUtilities.h>
-#include <vtkAppendPolyData.h>
 #include <vtkCleanPolyData.h>
-#include <vtkDataSetSurfaceFilter.h>
 #include <vtkGeometryFilter.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataConnectivityFilter.h>
 #include <vtkSmartPointer.h>
-#include <vtkThreshold.h>
 #include <vtkTimerLog.h>
 #include <vtkUnstructuredGrid.h>
 
-#include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Constrained_triangulation_face_base_2.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Polygon_2.h>
-#include <CGAL/Polygon_mesh_processing/remesh.h>
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/Surface_mesh.h>
-#include <CGAL/Triangulation_face_base_with_info_2.h>
-#include <iostream>
-
 vtkStandardNewMacro(stkCGALConstrainedDelaunayTriangulation);
-
-namespace PMP = CGAL::Polygon_mesh_processing;
 
 typedef CDT::Finite_vertices_iterator Finite_vertices_iterator;
 typedef CDT::Finite_faces_iterator Finite_faces_iterator;
@@ -41,6 +26,24 @@ int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotU
   vtkPolyData* input = vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   vtkPolyData* output = vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+  if (input == nullptr)
+  {
+    vtkErrorMacro("Input is empty.");
+    return 0;
+  }
+
+  if (input->GetPoints() == nullptr)
+  {
+    vtkErrorMacro("Input does not contain any point structure.");
+    return 0;
+  }
+
+  if ((input->GetBounds()[4] != 0) || (input->GetBounds()[5] != 0))
+  {
+    vtkErrorMacro("Input is not in XY plane.");
+    return 0;
+  }
 
   CDT cdt;
 
