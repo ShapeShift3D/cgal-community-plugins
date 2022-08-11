@@ -1,12 +1,12 @@
 /**
- * @class stkCGALConstrainedDelaunayTriangulation
+ * @class stkCGAL2DConstrainedDelaunayTriangulationMesher
  * @brief Generates Constrained Delaunay Triangulation From 2D Input Curves.
  *
  *  Inputs: 2D Polylines (port 0, vtkPolyData)
  *  Output: 2D Mesh (port 0, vtkPolyData)
  *
  * @sa
- * stkCGALConstrainedDelaunayTriangulationInterface
+ * stkCGAL2DConstrainedDelaunayTriangulationMesherInterface
  */
 
 #pragma once
@@ -16,7 +16,7 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Triangulation_face_base_with_info_2.h>
-#include <stkCGALConstrainedDelaunayTriangulationInterface.h>
+#include <stkCGAL2DConstrainedDelaunayTriangulationMesherInterface.h>
 #include <stkCGALModule.h>
 
 struct FaceInfo2
@@ -41,24 +41,24 @@ typedef CDT::Face_handle Face_handle;
  * @ingroup stkCGAL
  *
  */
-class STKCGAL_EXPORT stkCGALConstrainedDelaunayTriangulation
-  : public stkCGALConstrainedDelaunayTriangulationInterface
+class STKCGAL_EXPORT stkCGAL2DConstrainedDelaunayTriangulationMesher
+  : public stkCGAL2DConstrainedDelaunayTriangulationMesherInterface
 {
 public:
-  static stkCGALConstrainedDelaunayTriangulation* New();
+  static stkCGAL2DConstrainedDelaunayTriangulationMesher* New();
   vtkTypeMacro(
-    stkCGALConstrainedDelaunayTriangulation, stkCGALConstrainedDelaunayTriangulationInterface);
+    stkCGAL2DConstrainedDelaunayTriangulationMesher, stkCGAL2DConstrainedDelaunayTriangulationMesherInterface);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
-  stkCGALConstrainedDelaunayTriangulation() = default;
-  ~stkCGALConstrainedDelaunayTriangulation() = default;
+  stkCGAL2DConstrainedDelaunayTriangulationMesher() = default;
+  ~stkCGAL2DConstrainedDelaunayTriangulationMesher() = default;
 
   virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  stkCGALConstrainedDelaunayTriangulation(const stkCGALConstrainedDelaunayTriangulation&) = delete;
-  void operator=(const stkCGALConstrainedDelaunayTriangulation&) = delete;
+  stkCGAL2DConstrainedDelaunayTriangulationMesher(const stkCGAL2DConstrainedDelaunayTriangulationMesher&) = delete;
+  void operator=(const stkCGAL2DConstrainedDelaunayTriangulationMesher&) = delete;
   void markDomains(CDT& cdt);
   void mark_domains(CDT& ct, Face_handle start, int index, std::list<CDT::Edge>& border);
 };

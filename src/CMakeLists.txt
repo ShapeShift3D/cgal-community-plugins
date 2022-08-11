@@ -9,7 +9,7 @@ endif ()
 set(classes
   stkCGAL3DPolyhedralMesher
   stkCGALARAPUVParametrization
-  stkCGALConstrainedDelaunayTriangulation
+  stkCGAL2DConstrainedDelaunayTriangulationMesher
   stkCGALLSCMUVParametrization
   stkCGALUVParametrizationUtilities
   stkCGALBoolean2DMesher

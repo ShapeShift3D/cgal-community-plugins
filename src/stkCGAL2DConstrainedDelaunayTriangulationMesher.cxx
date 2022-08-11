@@ -1,5 +1,5 @@
 #include <CGAL/Polygon_2.h>
-#include <stkCGALConstrainedDelaunayTriangulation.h>
+#include <stkCGAL2DConstrainedDelaunayTriangulationMesher.h>
 #include <vtkCleanPolyData.h>
 #include <vtkGeometryFilter.h>
 #include <vtkInformation.h>
@@ -10,13 +10,13 @@
 #include <vtkTimerLog.h>
 #include <vtkUnstructuredGrid.h>
 
-vtkStandardNewMacro(stkCGALConstrainedDelaunayTriangulation);
+vtkStandardNewMacro(stkCGAL2DConstrainedDelaunayTriangulationMesher);
 
 typedef CDT::Finite_vertices_iterator Finite_vertices_iterator;
 typedef CDT::Finite_faces_iterator Finite_faces_iterator;
 
 //-----------------------------------------------------------------------------
-int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotUsed(request),
+int stkCGAL2DConstrainedDelaunayTriangulationMesher::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   // Get the input and output data objects.
@@ -135,13 +135,13 @@ int stkCGALConstrainedDelaunayTriangulation::RequestData(vtkInformation* vtkNotU
 }
 
 //-----------------------------------------------------------------------------
-void stkCGALConstrainedDelaunayTriangulation::PrintSelf(std::ostream& os, vtkIndent indent)
+void stkCGAL2DConstrainedDelaunayTriangulationMesher::PrintSelf(std::ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
 //------------------------------------------------------------------------------
-void stkCGALConstrainedDelaunayTriangulation::mark_domains(
+void stkCGAL2DConstrainedDelaunayTriangulationMesher::mark_domains(
   CDT& ct, Face_handle start, int index, std::list<CDT::Edge>& border)
 {
   if (start->info().nesting_level != -1)
@@ -174,7 +174,7 @@ void stkCGALConstrainedDelaunayTriangulation::mark_domains(
 }
 
 //------------------------------------------------------------------------------
-void stkCGALConstrainedDelaunayTriangulation::markDomains(CDT& cdt)
+void stkCGAL2DConstrainedDelaunayTriangulationMesher::markDomains(CDT& cdt)
 {
   for (CDT::Face_handle f : cdt.all_face_handles())
   {
