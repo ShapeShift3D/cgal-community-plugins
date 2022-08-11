@@ -23,6 +23,7 @@ vtk_add_test_cxx(stkCGALModuleTests tests
   NO_OUTPUT # For all test files
 
   TestCGALInit.cxx
+  TestCGAL2DConstrainedDelaunayTriangulationMesher.cxx
   TestCGALSurfaceMeshTopology.cxx
   TestCGALEfficientRANSAC.cxx
   TestCGALRegionGrowing.cxx
