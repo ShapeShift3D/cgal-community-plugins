@@ -1,6 +1,7 @@
 #include <CGAL/Polygon_2.h>
 #include <stkCGAL2DConstrainedDelaunayTriangulationMesher.h>
 #include <vtkCleanPolyData.h>
+#include <vtkContourLoopExtraction.h>
 #include <vtkGeometryFilter.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
@@ -16,8 +17,9 @@ typedef CDT::Finite_vertices_iterator Finite_vertices_iterator;
 typedef CDT::Finite_faces_iterator Finite_faces_iterator;
 
 //-----------------------------------------------------------------------------
-int stkCGAL2DConstrainedDelaunayTriangulationMesher::RequestData(vtkInformation* vtkNotUsed(request),
-  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
+int stkCGAL2DConstrainedDelaunayTriangulationMesher::RequestData(
+  vtkInformation* vtkNotUsed(request), vtkInformationVector** inputVector,
+  vtkInformationVector* outputVector)
 {
   // Get the input and output data objects.
   vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
@@ -41,10 +43,16 @@ int stkCGAL2DConstrainedDelaunayTriangulationMesher::RequestData(vtkInformation*
     return 0;
   }
 
+  vtkNew<vtkContourLoopExtraction> loopExtractionFilter;
+  loopExtractionFilter->SetInputData(input);
+  loopExtractionFilter->SetLoopClosureToBoundary();
+  loopExtractionFilter->SetOutputModeToPolylines();
+  loopExtractionFilter->Update();
+
   CDT cdt;
 
   vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
-  connectivityFilter->SetInputData(input);
+  connectivityFilter->SetInputData(loopExtractionFilter->GetOutput());
   connectivityFilter->SetExtractionModeToAllRegions();
   connectivityFilter->Update();
 
@@ -53,7 +61,7 @@ int stkCGAL2DConstrainedDelaunayTriangulationMesher::RequestData(vtkInformation*
   for (int l = 0; l < numberOfRegions; l++)
   {
     vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter2;
-    connectivityFilter2->SetInputData(input);
+    connectivityFilter2->SetInputData(loopExtractionFilter->GetOutput());
     connectivityFilter2->SetExtractionModeToSpecifiedRegions();
     connectivityFilter2->InitializeSpecifiedRegionList();
     connectivityFilter2->AddSpecifiedRegion(l);
