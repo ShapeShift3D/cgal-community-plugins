@@ -651,6 +651,10 @@
                     port_index="2"
                     command="SetInputConnection"
                     optional="1">
+                <Hints>
+                    <Optional />
+                    <!-- No input selection dialog at instantiation -->
+                </Hints>
                 <Documentation>
                     Point cloud with scalar values
                 </Documentation>
