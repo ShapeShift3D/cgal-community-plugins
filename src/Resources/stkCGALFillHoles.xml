@@ -159,6 +159,98 @@
                 </Documentation>
             </IntVectorProperty>
 
+            <IntVectorProperty
+                name="PointArrayFillValueType"
+                command="SetPointArrayFillValueType"
+                number_of_elements="1"
+                default_values="1"
+                panel_visibility="advanced">
+                <EnumerationDomain name="enum">
+                    <Entry
+                        text="NAN"
+                        value="1" />
+                    <Entry
+                        text="INF"
+                        value="2" />
+                    <Entry
+                        text="NEGINF"
+                        value="3" />
+                    <Entry
+                        text="CUSTOM"
+                        value="4" />
+                </EnumerationDomain>
+                <Documentation>
+                    Select the default value type for Point Arrays.
+                </Documentation>
+            </IntVectorProperty>
+
+            <DoubleVectorProperty
+                name="PointArrayFillValue"
+                command="SetPointArrayFillValue"
+                number_of_elements="1"
+                default_values="-1.0e4"
+                panel_visibility="advanced">
+                <DoubleRangeDomain
+                    min="0.0"
+                    name="range" />
+                <Documentation>
+                    et the Default Fill Value for Point Arrays
+                </Documentation>
+                <Hints>
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="PointArrayFillValueType"
+                        value="4" />
+                </Hints>
+            </DoubleVectorProperty>
+
+            <IntVectorProperty
+                name="CellArrayFillValueType"
+                command="SetCellArrayFillValueType"
+                number_of_elements="1"
+                default_values="1"
+                panel_visibility="advanced">
+                <EnumerationDomain name="enum">
+                    <Entry
+                        text="NAN"
+                        value="1" />
+                    <Entry
+                        text="INF"
+                        value="2" />
+                    <Entry
+                        text="NEGINF"
+                        value="3" />
+                    <Entry
+                        text="CUSTOM"
+                        value="4" />
+                </EnumerationDomain>
+                <Documentation>
+                Select the default value type for Point Arrays.
+            </Documentation>
+            </IntVectorProperty>
+
+            <DoubleVectorProperty
+                name="CellArrayFillValue"
+                command="SetCellArrayFillValue"
+                number_of_elements="1"
+                default_values="-1.0e4"
+                panel_visibility="advanced">
+                <DoubleRangeDomain
+                    min="0.0"
+                    name="range" />
+                <Documentation>
+                et the Default Fill Value for Point Arrays
+            </Documentation>
+                <Hints>
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="CellArrayFillValueType"
+                        value="4" />
+                </Hints>
+            </DoubleVectorProperty>
+
             <PropertyGroup label="Hole Filling Options">
                 <Property name="UseDelaunayTriangulation" />
                 <Property name="FillingType" />
@@ -167,6 +259,13 @@
                 <Property name="EnableMaxHoleBBDiagonal" />
                 <Property name="MaxHoleBBDiagonal" />
                 <Property name="SkipSelfIntersectingPatches" />
+            </PropertyGroup>
+
+            <PropertyGroup label="Array Passing Options">
+                <Property name="PointArrayFillValueType" />
+                <Property name="PointArrayFillValue" />
+                <Property name="CellArrayFillValueType" />
+                <Property name="CellArrayFillValue" />
             </PropertyGroup>
 
         </Proxy>

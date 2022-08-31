@@ -4,7 +4,11 @@
 #include <vtkCellTypes.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
+#include <vtkDataArray.h>
+#include <vtkPointData.h>
+#include <vtkCellData.h>
 #include <vtkSmartPointer.h>
+#include <vtkMath.h>
 
 //---------CGAL---------------------------------
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -158,6 +162,86 @@ int stkCGALFillHoles::RequestData(vtkInformation* vtkNotUsed(request),
 
   // Convert Polyhedron to Output PolyData
   stkCGALUtilities::SurfaceMeshToPolyData(mesh, output);
+
+  // Transfer Point Ids
+  for (int pointArrayID = 0; pointArrayID < input->GetPointData()->GetNumberOfArrays(); pointArrayID++)
+  {
+    auto sourcePointArray = input->GetPointData()->GetArray(pointArrayID);
+
+    vtkSmartPointer<vtkDataArray> targetPointArray;
+    targetPointArray.TakeReference(sourcePointArray->NewInstance());
+    targetPointArray->SetName(sourcePointArray->GetName());
+    targetPointArray->SetNumberOfComponents(sourcePointArray->GetNumberOfComponents());
+    targetPointArray->SetNumberOfTuples(output->GetNumberOfPoints());
+
+    switch (this->PointArrayFillValueType)
+    {
+      case ArrayFillValueTypes::NOT_A_NUMBER:
+        targetPointArray->Fill(vtkMath::Nan());
+        break;
+      case ArrayFillValueTypes::INF:
+        targetPointArray->Fill(vtkMath::Inf());
+        break;
+      case ArrayFillValueTypes::NEG_INF:
+        targetPointArray->Fill(vtkMath::NegInf());
+        break;
+      case ArrayFillValueTypes::CUSTOM:
+        targetPointArray->Fill(this->PointArrayFillValue);
+        break;
+
+      default:
+        targetPointArray->Fill(vtkMath::Nan());
+        break;
+    }
+
+    for (int pointID = 0 ;pointID < input->GetNumberOfPoints() ; pointID++)
+    {
+      targetPointArray->SetTuple(pointID,sourcePointArray->GetTuple(pointID));
+    }
+
+    output->GetPointData()->AddArray(targetPointArray);
+  }
+
+  //  Transfer Cells Ids 
+  for (int cellArrayID = 0; cellArrayID < input->GetCellData()->GetNumberOfArrays(); cellArrayID++)
+  {
+    auto sourceCellArray = input->GetCellData()->GetArray(cellArrayID);
+
+    vtkSmartPointer<vtkDataArray> targetCellArray;
+    targetCellArray.TakeReference(sourceCellArray->NewInstance());
+    targetCellArray->SetName(sourceCellArray->GetName());
+    targetCellArray->SetNumberOfComponents(sourceCellArray->GetNumberOfComponents());
+    targetCellArray->SetNumberOfTuples(output->GetNumberOfCells());
+    switch (this->CellArrayFillValueType)
+    {
+      case ArrayFillValueTypes::NOT_A_NUMBER:
+        targetCellArray->Fill(vtkMath::Nan());
+        break;
+      case ArrayFillValueTypes::INF:
+        targetCellArray->Fill(vtkMath::Inf());
+        break;
+      case ArrayFillValueTypes::NEG_INF:
+        targetCellArray->Fill(vtkMath::NegInf());
+        break;
+      case ArrayFillValueTypes::CUSTOM:
+        targetCellArray->Fill(this->CellArrayFillValue);
+        break;
+
+      default:
+        targetCellArray->Fill(vtkMath::Nan());
+        break;
+    }
+
+    for (int cellID = 0 ;cellID < input->GetNumberOfCells() ; cellID++)
+    {
+      targetCellArray->SetTuple(cellID,sourceCellArray->GetTuple(cellID));
+    }
+
+    output->GetCellData()->AddArray(targetCellArray);
+  }
+
+  // Transfer Field Data 
+  output->GetFieldData()->PassData(input->GetFieldData());
 
   return 1;
 }
