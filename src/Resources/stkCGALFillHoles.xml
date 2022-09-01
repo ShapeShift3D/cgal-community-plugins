@@ -9,18 +9,46 @@
                 long_help="Fill the Holes of the Input Surface Mesh with the selected filling type."
                 short_help="Fill Holes of Surface Mesh" />
 
-            <InputProperty
-                name="Input"
-                port_index="0"
-                command="SetInputConnection">
-                <ProxyGroupDomain name="groups">
-                    <Group name="sources" />
-                    <Group name="filters" />
-                </ProxyGroupDomain>
-                <DataTypeDomain name="input_type">
-                    <DataType value="vtkPolyData" />
-                </DataTypeDomain>
-            </InputProperty>
+            <IntVectorProperty
+                name="BoundaryCycleSelectionMethod"
+                command="SetBoundaryCycleSelectionMethod"
+                number_of_elements="1"
+                default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry
+                        text="All Cycles"
+                        value="1" />
+                    <Entry
+                        text="Fill Specified Cycles"
+                        value="2" />
+                    <Entry
+                        text="Not Fill Specified Cycles"
+                        value="3" />
+                </EnumerationDomain>
+                <Documentation>
+                    Set the method of boundary cycle selection to be considered for hole filling. Point Set containg the specified cycles are provided through the optional Input Port.
+                </Documentation>
+            </IntVectorProperty>
+
+            <DoubleVectorProperty
+                name="SearchTolerance"
+                command="SetSearchTolerance"
+                number_of_elements="1"
+                default_values="1.0e-4">
+                <DoubleRangeDomain
+                    min="0.0"
+                    name="range" />
+                <Documentation>
+                Set the search Tolerance for specified cycle boundary selection method.This should be a very small positive value.
+            </Documentation>
+                <Hints>
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="BoundaryCycleSelectionMethod"
+                        value="2" />
+                </Hints>
+            </DoubleVectorProperty>
 
             <IntVectorProperty
                 name="UseDelaunayTriangulation"
@@ -252,6 +280,8 @@
             </DoubleVectorProperty>
 
             <PropertyGroup label="Hole Filling Options">
+                <Property name="BoundaryCycleSelectionMethod" />
+                <Property name="SearchTolerance" />
                 <Property name="UseDelaunayTriangulation" />
                 <Property name="FillingType" />
                 <Property name="DensityControlFactor" />
@@ -278,6 +308,43 @@
             label="CGAL Fill Holes"
             base_proxygroup="cgal_polygon_mesh_processing"
             base_proxyname="CGALFillHolesProxy">
+
+            <InputProperty
+                name="InputSurfaceMesh"
+                port_index="0"
+                command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources" />
+                    <Group name="filters" />
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData" />
+                </DataTypeDomain>
+                <Documentation>
+                    Set the Input Surface Mesh
+                </Documentation>
+            </InputProperty>
+
+            <InputProperty
+                name="SpecifiedBoundariesPointSet"
+                port_index="1"
+                command="SetInputConnection"
+                optional="1">
+				<Hints>
+					<Optional />
+					<!-- No input selection dialog at instantiation -->
+				</Hints>
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources" />
+                    <Group name="filters" />
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPointSet" />
+                </DataTypeDomain>
+                <Documentation>
+                    Set the Point Set containing the Specified Boundaries Points
+                </Documentation>
+            </InputProperty>
 
             <Hints>
                 <ShowInMenu category="CGAL" />

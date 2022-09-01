@@ -1,14 +1,16 @@
 #include "stkCGALFillHoles.h"
 
 //---------VTK----------------------------------
+#include <vtkCellData.h>
 #include <vtkCellTypes.h>
+#include <vtkDataArray.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
-#include <vtkDataArray.h>
-#include <vtkPointData.h>
-#include <vtkCellData.h>
-#include <vtkSmartPointer.h>
 #include <vtkMath.h>
+#include <vtkPointData.h>
+#include <vtkPointSet.h>
+#include <vtkSmartPointer.h>
+#include <vtkStaticPointLocator.h>
 
 //---------CGAL---------------------------------
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -17,6 +19,9 @@
 #include <CGAL/Polygon_mesh_processing/border.h>
 #include <CGAL/Polygon_mesh_processing/self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_hole.h>
+
+#include <CGAL/boost/graph/helpers.h>
+#include <CGAL/boost/graph/iterator.h>
 
 //--------Module-----------------------------
 #include "stkCGALUtilities.h"
@@ -34,14 +39,14 @@ typedef boost::graph_traits<Mesh>::vertex_descriptor vertex_descriptor;
 vtkStandardNewMacro(stkCGALFillHoles);
 
 // ----------------------------------------------------------------------------
-bool IsSmallHole(halfedge_descriptor h, Mesh mesh, double max_hole_diam)
+bool IsSmallHole(halfedge_descriptor h, Mesh& mesh, double max_hole_diam)
 {
   CGAL::Bbox_3 hole_bbox;
   for (halfedge_descriptor hc : CGAL::halfedges_around_face(h, mesh))
   {
     const Point& p = mesh.point(CGAL::target(hc, mesh));
     hole_bbox += p.bbox();
-    
+
     // Exit early, to avoid unnecessary traversal of large holes
     double bb_diagonal = std::pow(hole_bbox.xmax() - hole_bbox.xmin(), 2) +
       std::pow(hole_bbox.ymax() - hole_bbox.ymin(), 2) +
@@ -56,41 +61,143 @@ bool IsSmallHole(halfedge_descriptor h, Mesh mesh, double max_hole_diam)
 }
 
 // ----------------------------------------------------------------------------
+void ExtractSpecifiedBoundaryCycles(Mesh& mesh, int boundaryCycleSelectionMethod,
+  vtkPointSet* specifiedPoints, const double& tol, std::vector<halfedge_descriptor>& border_cycles)
+{
+  auto pointLocator = vtkSmartPointer<vtkStaticPointLocator>::New();
+  pointLocator->SetDataSet(specifiedPoints);
+  pointLocator->BuildLocator();
+
+  auto iter = std::back_inserter(border_cycles);
+  boost::unordered_set<halfedge_descriptor> hedge_handled;
+
+  for (halfedge_descriptor h : CGAL::halfedges(mesh))
+  {
+    if (CGAL::is_border(h, mesh) && hedge_handled.insert(h).second)
+    {
+      bool containsSpecifiedPoints = true;
+      for (halfedge_descriptor h2 : CGAL::halfedges_around_face(h, mesh))
+      {
+        const Point& p = mesh.point(CGAL::target(h2, mesh));
+        double point_coords[3];
+        point_coords[0] = p.x();
+        point_coords[1] = p.y();
+        point_coords[2] = p.z();
+
+        double dist2 = 0.0;
+        if (pointLocator->FindClosestPointWithinRadius(tol, point_coords, dist2) == -1)
+        {
+          containsSpecifiedPoints = false;
+          break;
+        }
+
+        hedge_handled.insert(h2);
+      }
+
+      switch (boundaryCycleSelectionMethod)
+      {
+          // FILL_SPECIFIED_CYCLES
+        case 2:
+          if (containsSpecifiedPoints)
+          {
+            *iter++ = h;
+          }
+          break;
+          // NOT_FILL_SPECIFIED_CYCLES
+        case 3:
+          if (!containsSpecifiedPoints)
+          {
+            *iter++ = h;
+          }
+          break;
+
+        default:
+          *iter++ = h;
+          break;
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
 int stkCGALFillHoles::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
 {
-  vtkPolyData* input = this->GetInputPolyData();
+  vtkPolyData* inputSurface = this->GetInputSurfaceMesh();
 
-  vtkPolyData* output = vtkPolyData::GetData(outputVector, 0);
+  vtkPolyData* outputSurface = vtkPolyData::GetData(outputVector, 0);
 
-  if (input == nullptr)
+  if (inputSurface == nullptr)
   {
-    vtkErrorMacro("Input is empty");
+    vtkErrorMacro("Input Surface Mesh is NULL");
+    return 0;
+  }
+
+  if (inputSurface->GetNumberOfPoints() == 0)
+  {
+    vtkErrorMacro("Input Surface Mesh contains 0 Points");
+    return 0;
+  }
+
+  if (inputSurface->GetNumberOfCells() == 0)
+  {
+    vtkErrorMacro("Input Surface Mesh contains 0 Cells");
     return 0;
   }
 
   auto cellsType = vtkSmartPointer<vtkCellTypes>::New();
-  input->GetCellTypes(cellsType);
+  inputSurface->GetCellTypes(cellsType);
   int numCellTypes = cellsType->GetNumberOfTypes();
 
   if (numCellTypes > 1 || numCellTypes == 0)
   {
-    vtkErrorMacro("Invalid Input. It should consist of only Triangle Cells");
+    vtkErrorMacro("Invalid Input Surface. It should consist of only Triangle Cells");
     return 0;
   }
   else if (cellsType->GetCellType(0) != VTK_TRIANGLE)
   {
-    vtkErrorMacro("Input must be a Triangular Surface Mesh (PolyData with only Triangle Cells)");
+    vtkErrorMacro(
+      "Input Surface must be a Triangular Surface Mesh (PolyData with only Triangle Cells)");
     return 0;
   }
 
   // Convert Input PolyData to Surface Mesh
   Mesh mesh;
-  stkCGALUtilities::vtkPolyDataToPolygonMesh(input, mesh);
+  stkCGALUtilities::vtkPolyDataToPolygonMesh(inputSurface, mesh);
 
   std::vector<halfedge_descriptor> border_cycles;
   // collect one halfedge per boundary cycle
-  CGAL::Polygon_mesh_processing::extract_boundary_cycles(mesh, std::back_inserter(border_cycles));
+
+  if (this->BoundaryCycleSelectionMethod == BoundaryCycleSelectionMethods::ALL_CYCLES)
+  {
+    CGAL::Polygon_mesh_processing::extract_boundary_cycles(mesh, std::back_inserter(border_cycles));
+  }
+  else if (this->BoundaryCycleSelectionMethod ==
+      BoundaryCycleSelectionMethods::FILL_SPECIFIED_CYCLES ||
+    this->BoundaryCycleSelectionMethod == BoundaryCycleSelectionMethods::NOT_FILL_SPECIFIED_CYCLES)
+  {
+    vtkPointSet* specifiedBoundariesPoints = this->GetSpecifiedBoundariesPointSet();
+
+    if (specifiedBoundariesPoints == nullptr)
+    {
+      vtkErrorMacro("Specified Boundaired Point Set is NULL");
+      return 0;
+    }
+
+    if (specifiedBoundariesPoints->GetNumberOfPoints() == 0)
+    {
+      vtkErrorMacro("Specified Boundaired Point Set contains 0 Points");
+      return 0;
+    }
+
+    ExtractSpecifiedBoundaryCycles(mesh, this->BoundaryCycleSelectionMethod,
+      specifiedBoundariesPoints, this->SearchTolerance, border_cycles);
+  }
+  else
+  {
+    vtkErrorMacro("Select Boundary Cycle Selection Method");
+    return 0;
+  }
 
   Mesh temp_Mesh;
   unsigned int num_patch_skipped = 0;
@@ -161,18 +268,19 @@ int stkCGALFillHoles::RequestData(vtkInformation* vtkNotUsed(request),
   }
 
   // Convert Polyhedron to Output PolyData
-  stkCGALUtilities::SurfaceMeshToPolyData(mesh, output);
+  stkCGALUtilities::SurfaceMeshToPolyData(mesh, outputSurface);
 
   // Transfer Point Ids
-  for (int pointArrayID = 0; pointArrayID < input->GetPointData()->GetNumberOfArrays(); pointArrayID++)
+  for (int pointArrayID = 0; pointArrayID < inputSurface->GetPointData()->GetNumberOfArrays();
+       pointArrayID++)
   {
-    auto sourcePointArray = input->GetPointData()->GetArray(pointArrayID);
+    auto sourcePointArray = inputSurface->GetPointData()->GetArray(pointArrayID);
 
     vtkSmartPointer<vtkDataArray> targetPointArray;
     targetPointArray.TakeReference(sourcePointArray->NewInstance());
     targetPointArray->SetName(sourcePointArray->GetName());
     targetPointArray->SetNumberOfComponents(sourcePointArray->GetNumberOfComponents());
-    targetPointArray->SetNumberOfTuples(output->GetNumberOfPoints());
+    targetPointArray->SetNumberOfTuples(outputSurface->GetNumberOfPoints());
 
     switch (this->PointArrayFillValueType)
     {
@@ -194,24 +302,25 @@ int stkCGALFillHoles::RequestData(vtkInformation* vtkNotUsed(request),
         break;
     }
 
-    for (int pointID = 0 ;pointID < input->GetNumberOfPoints() ; pointID++)
+    for (int pointID = 0; pointID < inputSurface->GetNumberOfPoints(); pointID++)
     {
-      targetPointArray->SetTuple(pointID,sourcePointArray->GetTuple(pointID));
+      targetPointArray->SetTuple(pointID, sourcePointArray->GetTuple(pointID));
     }
 
-    output->GetPointData()->AddArray(targetPointArray);
+    outputSurface->GetPointData()->AddArray(targetPointArray);
   }
 
-  //  Transfer Cells Ids 
-  for (int cellArrayID = 0; cellArrayID < input->GetCellData()->GetNumberOfArrays(); cellArrayID++)
+  //  Transfer Cells Ids
+  for (int cellArrayID = 0; cellArrayID < inputSurface->GetCellData()->GetNumberOfArrays();
+       cellArrayID++)
   {
-    auto sourceCellArray = input->GetCellData()->GetArray(cellArrayID);
+    auto sourceCellArray = inputSurface->GetCellData()->GetArray(cellArrayID);
 
     vtkSmartPointer<vtkDataArray> targetCellArray;
     targetCellArray.TakeReference(sourceCellArray->NewInstance());
     targetCellArray->SetName(sourceCellArray->GetName());
     targetCellArray->SetNumberOfComponents(sourceCellArray->GetNumberOfComponents());
-    targetCellArray->SetNumberOfTuples(output->GetNumberOfCells());
+    targetCellArray->SetNumberOfTuples(outputSurface->GetNumberOfCells());
     switch (this->CellArrayFillValueType)
     {
       case ArrayFillValueTypes::NOT_A_NUMBER:
@@ -232,16 +341,16 @@ int stkCGALFillHoles::RequestData(vtkInformation* vtkNotUsed(request),
         break;
     }
 
-    for (int cellID = 0 ;cellID < input->GetNumberOfCells() ; cellID++)
+    for (int cellID = 0; cellID < inputSurface->GetNumberOfCells(); cellID++)
     {
-      targetCellArray->SetTuple(cellID,sourceCellArray->GetTuple(cellID));
+      targetCellArray->SetTuple(cellID, sourceCellArray->GetTuple(cellID));
     }
 
-    output->GetCellData()->AddArray(targetCellArray);
+    outputSurface->GetCellData()->AddArray(targetCellArray);
   }
 
-  // Transfer Field Data 
-  output->GetFieldData()->PassData(input->GetFieldData());
+  // Transfer Field Data
+  outputSurface->GetFieldData()->PassData(inputSurface->GetFieldData());
 
   return 1;
 }
