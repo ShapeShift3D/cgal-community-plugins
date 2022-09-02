@@ -80,9 +80,9 @@ void ExtractSpecifiedBoundaryCycles(Mesh& mesh, int boundaryCycleSelectionMethod
       {
         const Point& p = mesh.point(CGAL::target(h2, mesh));
         double point_coords[3];
-        point_coords[0] = p.x();
-        point_coords[1] = p.y();
-        point_coords[2] = p.z();
+        point_coords[0] = CGAL::to_double(p.x());
+        point_coords[1] = CGAL::to_double(p.y());
+        point_coords[2] = CGAL::to_double(p.z());
 
         double dist2 = 0.0;
         if (pointLocator->FindClosestPointWithinRadius(tol, point_coords, dist2) == -1)

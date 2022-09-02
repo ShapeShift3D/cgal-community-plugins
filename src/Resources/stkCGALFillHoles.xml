@@ -9,6 +9,13 @@
                 long_help="Fill the Holes of the Input Surface Mesh with the selected filling type."
                 short_help="Fill Holes of Surface Mesh" />
 
+            <Property
+                name="Update"
+                command="Modified"
+                label="Update"
+                panel_widget="command_button"
+                panel_visibility="advanced" />
+
             <IntVectorProperty
                 name="BoundaryCycleSelectionMethod"
                 command="SetBoundaryCycleSelectionMethod"
@@ -26,7 +33,7 @@
                         value="3" />
                 </EnumerationDomain>
                 <Documentation>
-                    Set the method of boundary cycle selection to be considered for hole filling. Point Set containg the specified cycles are provided through the optional Input Port.
+                    Set the method of boundary cycle selection to be considered for hole filling. Point Set containing the specified cycles are provided through the optional Input Port.
                 </Documentation>
             </IntVectorProperty>
 
@@ -208,7 +215,8 @@
                         value="4" />
                 </EnumerationDomain>
                 <Documentation>
-                    Select the default value type for Point Arrays.
+                    Select the default value type for Point Arrays. 1: Not A Number, 2: Positive Infinity, 3:
+                    Negative Infinity, 4: User Defined Custom Value
                 </Documentation>
             </IntVectorProperty>
 
@@ -268,8 +276,9 @@
                     min="0.0"
                     name="range" />
                 <Documentation>
-                et the Default Fill Value for Point Arrays
-            </Documentation>
+                Select the default value type for Point Arrays. 1: Not A Number, 2: Positive Infinity, 3:
+                Negative Infinity, 4: User Defined Custom Value
+                </Documentation>
                 <Hints>
                     <PropertyWidgetDecorator
                         type="GenericDecorator"
