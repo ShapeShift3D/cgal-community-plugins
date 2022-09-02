@@ -4,7 +4,6 @@
 #include <vtkCleanPolyData.h>
 #include <vtkConnectivityFilter.h>
 #include <vtkCylinderSource.h>
-#include <vtkDataArray.h>
 #include <vtkFeatureEdges.h>
 #include <vtkLinearSubdivisionFilter.h>
 #include <vtkPointData.h>
@@ -105,7 +104,7 @@ TEST_SUITE("TestCGALFillHoles")
     featureEdges->Update();
 
     REQUIRE_MESSAGE(featureEdges->GetOutput()->GetNumberOfCells() != 0,
-      "Generated Tube Input contains boundary edges");
+      "Generated Tube Input must contain boundary edges");
   }
 
   TEST_CASE("Close Tube")
@@ -127,24 +126,24 @@ TEST_SUITE("TestCGALFillHoles")
     auto outputDummyPointArray =
       outputSurfaceMesh->GetPointData()->GetArray(dummyPointArrayName.c_str());
 
-    CHECK_MESSAGE(outputDummyPointArray != nullptr, "Output must pass point Array");
+    CHECK_MESSAGE(outputDummyPointArray != nullptr, "Output Point Array is NULL");
 
-    CHECK_MESSAGE(
-      outputDummyPointArray->GetRange()[1] == dummyFillValue, "Output must pass point Array");
+    CHECK_MESSAGE(outputDummyPointArray->GetRange()[1] == dummyFillValue,
+      "Output Point Array Fill Value is not correct");
 
     auto outputDummyCellArray =
       outputSurfaceMesh->GetCellData()->GetArray(dummyCellArrayName.c_str());
 
-    CHECK_MESSAGE(outputDummyCellArray != nullptr, "Output must pass cell Array");
+    CHECK_MESSAGE(outputDummyCellArray != nullptr, "Output Cell Array is NULL");
 
     CHECK_MESSAGE(
-      outputDummyCellArray->GetRange()[1] == dummyFillValue, "Output must pass cell Array");
+      outputDummyCellArray->GetRange()[1] == dummyFillValue, "Output Cell Array Fill Value is not correct");
 
     featureEdges->SetInputData(cgalFillHoles->GetOutput());
     featureEdges->Update();
 
     CHECK_MESSAGE(featureEdges->GetOutput()->GetNumberOfCells() == 0,
-      "Output must not contain any boundary edges");
+      "Output should not contain any boundary edges");
   }
 
   TEST_CASE("Close Tube at the Specified Boundary")
@@ -182,7 +181,7 @@ TEST_SUITE("TestCGALFillHoles")
     connectivity->Update();
 
     CHECK_MESSAGE(connectivity->GetNumberOfExtractedRegions() == 1,
-      "Output must not contain 1 boundary loop");
+      "Output should contain 1 boundary loop");
   }
 }
 }
