@@ -19,21 +19,22 @@
             <IntVectorProperty
                 name="BoundaryCycleSelectionMethod"
                 command="SetBoundaryCycleSelectionMethod"
+                label="Hole Selection Method"
                 number_of_elements="1"
                 default_values="1">
                 <EnumerationDomain name="enum">
                     <Entry
-                        text="All Cycles"
+                        text="All Holes"
                         value="1" />
                     <Entry
-                        text="Fill Specified Cycles"
+                        text="Fill Specified Holes"
                         value="2" />
                     <Entry
-                        text="Not Fill Specified Cycles"
+                        text="Not Fill Specified Holes"
                         value="3" />
                 </EnumerationDomain>
                 <Documentation>
-                    Set the method of boundary cycle selection to be considered for hole filling. Point Set containing the specified cycles are provided through the optional Input Port.
+                    Set the method of selection to be considered for hole filling. Point Set containing the specified holes are provided through the optional Input Port.
                 </Documentation>
             </IntVectorProperty>
 
@@ -336,6 +337,7 @@
 
             <InputProperty
                 name="SpecifiedBoundariesPointSet"
+                label="Specified Hole Point Set"
                 port_index="1"
                 command="SetInputConnection"
                 optional="1">
@@ -351,7 +353,7 @@
                     <DataType value="vtkPointSet" />
                 </DataTypeDomain>
                 <Documentation>
-                    Set the Point Set containing the Specified Boundaries Points
+                    Set the Point Set containing the Specified Hole Boundaries Points
                 </Documentation>
             </InputProperty>
 
