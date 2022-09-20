@@ -29,10 +29,10 @@
 #include <stkCGALUtilities.h>
 #include <stkPointCloudScalarSizingField.h>
 
-#ifdef CGAL_LINKED_WITH_TBB
-typedef CGAL::Parallel_tag Concurrency_tag;
-#else
+#ifdef CGAL_KEEP_SEQUENTIAL
 typedef CGAL::Sequential_tag Concurrency_tag;
+#else
+typedef CGAL::Parallel_if_available_tag Concurrency_tag;
 #endif
 
 vtkStandardNewMacro(stkCGAL3DPolyhedralMesher);

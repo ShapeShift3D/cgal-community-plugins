@@ -26,6 +26,7 @@ vtk_add_test_cxx(stkCGALModuleTests tests
   TestCGAL2DConstrainedDelaunayTriangulationMesher.cxx
   TestCGALSurfaceMeshTopology.cxx
   TestCGALEfficientRANSAC.cxx
+  TestCGALPoissonReconstructionMesher.cxx
   TestCGALRegionGrowing.cxx
   TestCGALFillHoles.cxx
   TestCGALPolygonOffset.cxx

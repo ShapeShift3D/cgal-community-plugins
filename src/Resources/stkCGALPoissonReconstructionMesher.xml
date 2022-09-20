@@ -1,0 +1,247 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="meshers">
+    <Proxy
+      name="CGALPoissonReconstructionMesher"
+      class="stkCGALPoissonReconstructionMesher">
+      <Documentation
+        short_help="Remeshes datasets."
+        long_help="Reconstruct a surface from a input point sets.">
+          Surface reconstruction method which takes as input point sets 
+          with oriented normals and computes an implicit function
+      </Documentation>
+
+      <IntVectorProperty
+        name="UseNormalEstimation"
+        command="SetUseNormalEstimation"
+        label="Estimate Normals"
+        default_values="0"
+        number_of_elements="1">
+        <Documentation>
+          Poisson Surface Reconstruction requires points with oriented normal vectors. 
+          To apply the algorithm to a raw point cloud, normals must be estimated first.
+        </Documentation>
+        <BooleanDomain name="bool" />
+      </IntVectorProperty>
+
+      <StringVectorProperty
+        name="PointNormalsArrayName"
+        label="Point Normals"
+        command="SetPointNormalsArrayName"
+        default_values="Normals"
+        number_of_elements="1">
+        <ArrayListDomain
+          name="normals_array_list"
+          none_string="None"
+          input_domain_name="PointNormalsArray">
+          <RequiredProperties>
+            <Property
+              name="Input"
+              function="Input" />
+          </RequiredProperties>
+        </ArrayListDomain>
+        <Hints>
+          <PropertyWidgetDecorator
+            type="GenericDecorator"
+            mode="visibility"
+            property="UseNormalEstimation"
+            value="0" />
+        </Hints>
+        <Documentation>
+          Point Normals Array Name.  
+        </Documentation>
+      </StringVectorProperty>
+
+      <IntVectorProperty
+        name="NormalEstimationFunction"
+        command="SetNormalEstimationFunction"
+        label="Estimation Function"
+        number_of_elements="1"
+        default_values="1">
+        <EnumerationDomain name="enum">
+          <Entry
+            text="PCA"
+            value="1" />
+          <Entry
+            text="JET"
+            value="2" />
+        </EnumerationDomain>
+        <Documentation>
+          PCA is faster but jet is more accurate in the presence of high curvatures.
+          These function only estimates the direction of the normals, not their orientation (the orientation of the vectors might not be locally consistent).
+
+          PCA: Estimates normal directions of the range of points by linear least squares fitting of a plane over the nearest neighbors.
+          JET: Estimates normal directions of the range of points using jet fitting on the nearest neighbors.
+        </Documentation>
+        <Hints>
+          <PropertyWidgetDecorator
+            type="GenericDecorator"
+            mode="visibility"
+            property="UseNormalEstimation"
+            value="1" />
+        </Hints>
+      </IntVectorProperty>
+
+      <IntVectorProperty
+        name="NormalOrientationFunction"
+        command="SetNormalOrientationFunction"
+        label="Orientation Function"
+        number_of_elements="1"
+        default_values="1">
+        <EnumerationDomain name="enum">
+          <Entry
+            text="MST"
+            value="1"
+            info="" />
+        </EnumerationDomain>
+        <Documentation>
+          The first one uses a minimum spanning tree to consistently propagate the orientation of normals in an increasingly large neighborhood. 
+          In the case of data with many sharp features and occlusions (which are common in airborne LIDAR data, for example), 
+          the second algorithm may produce better results: it takes advantage of point clouds which are ordered into scanlines to estimate 
+          the line of sight of each point and thus to orient normals accordingly.             
+          MST: Orients the normals of the range of points using the propagation of a seed orientation through a minimum spanning tree of the Riemannian graph.
+        </Documentation>
+        <Hints>
+          <PropertyWidgetDecorator
+            type="GenericDecorator"
+            mode="visibility"
+            property="UseNormalEstimation"
+            value="1" />
+        </Hints>
+      </IntVectorProperty>
+
+      <IntVectorProperty
+        name="NumberOfNeighbors"
+        command="SetNumberOfNeighbors"
+        label="Number of Estimation Neighbors"
+        number_of_elements="1"
+        default_values="24">
+        <Documentation>
+          Number of neighbors for normals estimation.
+        </Documentation>
+        <Hints>
+          <PropertyWidgetDecorator
+            type="GenericDecorator"
+            mode="visibility"
+            property="UseNormalEstimation"
+            value="1" />
+        </Hints>
+      </IntVectorProperty>
+
+      <PropertyGroup label="Normals">
+        <Property name="UseNormalEstimation" />
+        <Property name="PointNormalsArrayName" />
+        <Property name="NormalEstimationFunction" />
+        <Property name="NormalOrientationFunction" />
+        <Property name="NumberOfNeighbors" />
+    </PropertyGroup>
+
+      <DoubleVectorProperty
+        name="MaxTriangleSizeMultiplier"
+        command="SetMaxTriangleSizeMultiplier"
+        label="Hmax Multiplier"
+        number_of_elements="1"
+        default_values="100">
+        <Documentation>
+          Defines the maximum triangle size as a multiplier to the input point set's average spacing. 
+          A value larger than 1 can give larger triangles than neighborhood triangles.
+        </Documentation>
+      </DoubleVectorProperty>
+
+      <DoubleVectorProperty
+        name="ApproximationErrorMultiplier"
+        command="SetApproximationErrorMultiplier"
+        label="Distance Multiplier"
+        number_of_elements="1"
+        default_values="0.25">
+        <Documentation>
+          Define the surface approximation error as a multiplier to the input point set's average spacing.
+          A value larger than 1 means the error is greater than the size of neighborhood triangles.
+        </Documentation>
+      </DoubleVectorProperty>
+
+      <DoubleVectorProperty
+        name="MinTriangleAngle"
+        command="SetMinTriangleAngle"
+        label="Min Angle, °"
+        number_of_elements="1"
+        default_values="20.0">
+        <Documentation>
+          Minimum triangle angle in degrees.
+        </Documentation>
+      </DoubleVectorProperty>
+
+      <IntVectorProperty
+        name="TopologicalSpace"
+        command="SetTopologicalSpace"
+        label="Topological Space"
+        number_of_elements="1"
+        default_values="1">
+        <EnumerationDomain name="enum">
+          <Entry
+            text="Manifold"
+            value="1" />
+          <Entry
+            text="Manifold With Boundary"
+            value="2" />
+        </EnumerationDomain>
+        <Documentation>
+          Manifold: the output mesh is guaranteed to be a manifold surface without boundary.
+          ManifoldWithBoundary: the output mesh is guaranteed to be manifold but may have boundaries.
+        </Documentation>
+      </IntVectorProperty>
+
+      <PropertyGroup label="Mesh Quality">
+        <Property name="MinTriangleAngle" />
+        <Property name="MaxTriangleSizeMultiplier" />
+        <Property name="ApproximationErrorMultiplier" />
+        <Property name="TopologicalSpace" />
+      </PropertyGroup>
+
+    </Proxy>
+  </ProxyGroup>
+  <!-- ==================================================================== -->
+  <ProxyGroup name="filters">
+    <SourceProxy
+      name="CGALPoissonReconstructionMesher"
+      class="stkCGALPoissonReconstructionMesher"
+      label="CGAL Poisson Reconstruction Mesher"
+      base_proxygroup="meshers"
+      base_proxyname="CGALPoissonReconstructionMesher">
+
+      <InputProperty
+        name="Input"
+        port_index="0"
+        command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources" />
+          <Group name="filters" />
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkPolyData" />
+        </DataTypeDomain>
+        <InputArrayDomain
+          name="PointNormalsArray"
+          attribute_type="point"
+          number_of_components="3"
+          optional="1" />
+        <Documentation>
+          The input Mesh.
+        </Documentation>
+      </InputProperty>
+
+      <Property
+        name="Update"
+        command="Modified"
+        label="Update"
+        panel_widget="command_button" />
+
+      <OutputPort
+        name="Output"
+        index="0" />
+
+      <Hints>
+        <ShowInMenu category="Meshers" />
+      </Hints>
+    </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>

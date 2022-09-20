@@ -22,6 +22,7 @@ set(classes
   stkCGALPolygonSetToPolyLineSet
   stkCGALPolygonUtilities
   stkCGALPolyLineSetToPolygonSet
+  stkCGALPoissonReconstructionMesher
   stkCGALRegionGrowing
   stkCGALSelfIntersectionMeasurer
   stkCGALSurfaceMeshTopology
@@ -59,6 +60,7 @@ set(xml_files
   Resources/stkCGALEfficientRANSAC.xml
   Resources/stkCGALRegionGrowing.xml
   Resources/stkCGALFillHoles.xml
+  Resources/stkCGALPoissonReconstructionMesher.xml
 )
 
 paraview_add_server_manager_xmls(
@@ -82,7 +84,7 @@ if(CGAL_FOUND)
   # Add debug flag for the ARAP algorithm
   option(CGAL_DEBUG_SMP_ARAP "Enables debugging mode for CGAL's ARAP" OFF)
   if(CGAL_DEBUG_SMP_ARAP)
-    vtk_module_definitions(${NAMESPACE}::stkCGAL PRIVATE CGAL_SMP_ARAP_DEBUG CGAL_PARAMETERIZATION_ARAP_VERBOSE)
+    vtk_module_definitions(${NAMESPACE}::stkCGAL PRIVATE CGAL_KEEP_SEQUENTIAL CGAL_SMP_ARAP_DEBUG CGAL_PARAMETERIZATION_ARAP_VERBOSE)
   endif(CGAL_DEBUG_SMP_ARAP)
   
   # Link with CGAL
