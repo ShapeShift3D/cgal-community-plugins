@@ -200,6 +200,18 @@
                 </Hints>
             </StringVectorProperty>
 
+            <IntVectorProperty
+                name="Verbose"
+                command="SetVerbose"
+                number_of_elements="1"
+                default_values="0"
+                panel_visibility="advanced">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    Output Debug Messages.
+                </Documentation>
+            </IntVectorProperty>
+
             <PropertyGroup label="Measure Self-Intersections">
                 <Property name="SelfIntersectionsArrayName" />
                 <Property name="IterateByConnectivity" />
@@ -220,6 +232,7 @@
             <PropertyGroup label="Debugging">
                 <Property name="OutputNullFaceMaskArray" />
                 <Property name="NullFaceMaskArrayName" />
+                <Property name="Verbose" />
             </PropertyGroup>
 
         </Proxy>

@@ -77,7 +77,10 @@ int stkCGALSelfIntersectionMeasurer::RequestData(vtkInformation* vtkNotUsed(requ
       if (polyData->GetNumberOfCells() == 0)
         continue;
 
-      std::cout << "====== Region " << i << " ======" << std::endl;
+      if (this->Verbose)
+      {
+        std::cout << "====== Region " << i << " ======" << std::endl;
+      }
 
       vtkNew<vtkPolyData> singlePoly;
       vtkNew<vtkPolyData> tempPoly;
@@ -177,21 +180,30 @@ int stkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(
 
   if (intersected_tris.size() == 0)
   {
-    vtkWarningMacro("No Self-Intersections were found in the mesh. "
-      << intersected_tris.size() << " pairs of triangles intersect.");
+    if (this->Verbose)
+    {
+      vtkWarningMacro("No Self-Intersections were found in the mesh. "
+        << intersected_tris.size() << " pairs of triangles intersect.");
+    }
   }
   else
   {
-    vtkWarningMacro("Self-Intersections were found in the mesh. "
-      << intersected_tris.size() << " pairs of triangles intersect.");
+    if (this->Verbose)
+    {
+      vtkWarningMacro("Self-Intersections were found in the mesh. "
+        << intersected_tris.size() << " pairs of triangles intersect.");
+    }
   }
 
   if (this->PrintSelfIntersectingPairs)
   {
     for (auto i = 0; i < intersected_tris.size(); ++i)
     {
-      vtkWarningMacro("Triangle " << intersected_tris[i].first.idx() << " is intersecting with "
-                                  << intersected_tris[i].second.idx() << ".");
+      if (this->Verbose)
+      {
+        vtkWarningMacro("Triangle " << intersected_tris[i].first.idx() << " is intersecting with "
+                                    << intersected_tris[i].second.idx() << ".");
+      }
     }
   }
 
@@ -226,8 +238,10 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
 
   if (intersecting)
   {
-    vtkWarningMacro("Found some Self-Intersections.Trying to Repair Self-Intersections");
-
+    if (this->Verbose)
+    {
+      vtkWarningMacro("Found some Self-Intersections.Trying to Repair Self-Intersections");
+    }
     vtkNew<vtkIdTypeArray> OrginalIDArray;
 
     // Most of the code below is replicated from the experimental remove_self_intersections method
@@ -303,7 +317,10 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
       topology_issue = result_pair.second;
     }
 
-    vtkWarningMacro(<< "Done Repairing. Measuring Self-intersection in the repaired mesh");
+    if (this->Verbose)
+    {
+      vtkWarningMacro(<< "Done Repairing. Measuring Self-intersection in the repaired mesh");
+    }
 
     stkCGALUtilities::SurfaceMeshToPolyData(surfaceMesh, polyDataOut);
 
