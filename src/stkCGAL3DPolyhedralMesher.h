@@ -17,10 +17,6 @@
 #include <stkCGALModule.h>
 
 /**
- * @defgroup stkCGAL stkCGAL
- *
- */
-/**
  * @ingroup stkCGAL
  *
  */
