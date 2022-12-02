@@ -30,6 +30,7 @@ set(classes
   stkCGALPolygonOffset
   stkCGAL3DConvexHull
   stkCGALFillHoles
+  stkCGALRegionFairingOperator
 )
 
 set(private_headers
@@ -62,6 +63,7 @@ set(xml_files
   Resources/stkCGALRegionGrowing.xml
   Resources/stkCGALSelfIntersectionMeasurer.xml
   Resources/stkCGALSurfaceMeshTopology.xml
+  Resources/stkCGALRegionFairing.xml
 )
 
 paraview_add_server_manager_xmls(

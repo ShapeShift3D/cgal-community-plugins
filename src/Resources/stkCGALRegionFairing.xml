@@ -1,0 +1,237 @@
+<ServerManagerConfiguration>
+    <ProxyGroup name="operators">
+
+        <Proxy
+            class="stkCGALRegionFairingOperator"
+            name="CGALRegionFairingOperatorProxyBase">
+
+            <Documentation
+                short_help="Fairs a region on a triangle mesh."
+                long_help="The points of the selected vertices are relocated to yield an as-smooth-as-possible surface patch. The parameter fairing_continuity gives the ability to control the tangential continuity Cn of the output mesh.">
+                The points of the selected vertices are relocated to yield an as-smooth-as-possible
+                surface patch. The parameter fairing_continuity gives the ability to control the
+                tangential continuity Cn of the output mesh.
+                The region described by vertices might contain multiple disconnected components.
+                Note that the mesh connectivity is not altered in any way, only vertex locations get
+                updated.
+                Fairing might fail if fixed vertices, which are used as boundary conditions, do not
+                suffice to solve constructed linear system.
+                Note that if the vertex range to which fairing is applied contains all the vertices
+                of the triangle mesh, fairing does not fail, but the mesh gets shrinked to origin.
+            </Documentation>
+
+            <IntVectorProperty
+                name="FairingContinuity"
+                command="SetFairingContinuity"
+                number_of_elements="1"
+                default_values="1">
+                <EnumerationDomain name="enum">
+                    <Entry
+                        text="C0 (No Tangential Continuity)"
+                        value="0" />
+                    <Entry
+                        text="C1 (First Derivative Tangential Continuity)"
+                        value="1" />
+                    <Entry
+                        text="C2 (Second Derivative Tangential Continuity)"
+                        value="2" />
+                </EnumerationDomain>
+                <Documentation>
+                    Set the tangential continuity of the output surface for fairing.
+                    The possible values are 0, 1 and 2, refering to the C0, C1 and C2 continuity.
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty
+                name="GenerateFairedMaskArrays"
+                command="SetGenerateFairedMaskArrays"
+                label="Generate Faired Mask Arrays"
+                number_of_elements="1"
+                default_values="0">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, mask array indicating faired points and cells will be generated.
+                </Documentation>
+            </IntVectorProperty>
+
+
+            <StringVectorProperty
+                name="FairedPointMaskArrayName"
+                label="Faired Point Mask Array Name"
+                command="SetFairedPointMaskArrayName"
+                default_values="FairedPointMask"
+                number_of_elements="1"
+                panel_visibility="advanced">
+                <Documentation>
+                    Set the Name of the Point Mask Array for faired cells.
+                </Documentation>
+                <Hints>
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="GenerateFairedMaskArrays"
+                        value="1" />
+                </Hints>
+            </StringVectorProperty>
+
+            <StringVectorProperty
+                name="FairedCellMaskArrayName"
+                label="Faired Cell Mask Array Name"
+                command="SetFairedCellMaskArrayName"
+                default_values="FairedCellMask"
+                number_of_elements="1"
+                panel_visibility="advanced">
+                <Documentation>
+                    Set the Name of the Point Mask Array for faired cells.
+                </Documentation>
+                <Hints>
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="GenerateFairedMaskArrays"
+                        value="1" />
+                </Hints>
+            </StringVectorProperty>
+
+            <IntVectorProperty
+                name="PassAllArrays"
+                command="SetPassAllArrays"
+                label="Pass All Arrays"
+                number_of_elements="1"
+                default_values="1">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, all the Arrays of Input will passed to the Output of the Filter without any change.
+                </Documentation>
+            </IntVectorProperty>
+
+            <IntVectorProperty
+                name="ConsumeInputMaskArray"
+                command="SetConsumeInputMaskArray"
+                label="Consume Input Mask Array"
+                number_of_elements="1"
+                default_values="1">
+                <BooleanDomain name="bool" />
+                <Documentation>
+                    If true, the Input Mask Array will not be passed to the Output of the Filter. 
+                </Documentation>
+                <Hints>
+                    <PropertyWidgetDecorator
+                        type="GenericDecorator"
+                        mode="visibility"
+                        property="PassAllArrays"
+                        value="1" />
+                </Hints>
+            </IntVectorProperty>
+
+        </Proxy>
+        <!-- ==================================================================== -->
+        <Proxy
+            class="stkCGALRegionFairingOperator"
+            name="CGALRegionFairingOperatorProxy"
+            base_proxygroup="operators"
+            base_proxyname="CGALRegionFairingOperatorProxyBase">
+
+            <!-- Dummy Input for Proxy. -->
+            <InputProperty
+                is_internal="1"
+                name="DummyInput">
+                <InputArrayDomain
+                    name="PointRegionArray"
+                    attribute_type="point"
+                    number_of_components="1" />
+                <!-- Used when this source is added to a proxy list domain. -->
+            </InputProperty>
+
+            <StringVectorProperty
+                name="RegionArrayName"
+                label="Region Array Name"
+                command="SetRegionArrayName"
+                default_values="None"
+                number_of_elements="1">
+                <ArrayListDomain
+                    name="point_array_list"
+                    none_string="None"
+                    input_domain_name="PointRegionArray">
+                    <RequiredProperties>
+                        <Property
+                            name="DummyInput"
+                            function="Input" />
+                    </RequiredProperties>
+                </ArrayListDomain>
+                <Documentation>
+                    Point Mask Array Used for defining the Region to be Faired. Positive value means
+                    region will be faired.
+                </Documentation>
+            </StringVectorProperty>
+
+            <!-- Link Dummy Input for Input Property of Source Proxy. -->
+            <Hints>
+                <ProxyList>
+                    <Link
+                        name="DummyInput"
+                        with_property="Input" />
+                </ProxyList>
+            </Hints>
+
+        </Proxy>
+    </ProxyGroup>
+    <!-- ==================================================================== -->
+    <ProxyGroup name="filters">
+        <SourceProxy
+            name="CGALRegionFairingOperator"
+            class="stkCGALRegionFairingOperator"
+            label="CGAL Region Fairing"
+            base_proxygroup="operators"
+            base_proxyname="CGALRegionFairingOperatorProxyBase">
+
+            <InputProperty
+                name="Input"
+                command="SetInputConnection"
+                port_index="0">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources" />
+                    <Group name="filters" />
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPolyData" />
+                </DataTypeDomain>
+                <InputArrayDomain
+                    name="PointRegionArray"
+                    attribute_type="point"
+                    number_of_components="1"
+                    optional="1" />
+                <!-- Optional flag is assigned so that we can instantiate the class -->
+                <Documentation>
+                    Set the Input Surface Mesh
+                </Documentation>
+            </InputProperty>
+
+            <StringVectorProperty
+                name="RegionArrayName"
+                label="Region Array Name"
+                command="SetRegionArrayName"
+                default_values="None"
+                number_of_elements="1">
+                <ArrayListDomain
+                    name="point_array_list"
+                    none_string="None"
+                    input_domain_name="PointRegionArray">
+                    <RequiredProperties>
+                        <Property
+                            name="Input"
+                            function="Input" />
+                    </RequiredProperties>
+                </ArrayListDomain>
+                <Documentation> Point Mask Array Used for defining the Region to be Faired. Positive
+                    value means region will be faired. </Documentation>
+            </StringVectorProperty>
+
+            <Hints>
+                <ShowInMenu category="CGAL" />
+            </Hints>
+
+        </SourceProxy>
+    </ProxyGroup>
+
+</ServerManagerConfiguration>

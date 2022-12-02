@@ -61,7 +61,7 @@ TEST_SUITE("TestCGALSurfaceMeshTopology")
     auto testInput = vtkSmartPointer<vtkPolyData>::New();
     testInput->ShallowCopy(subdivideFilter->GetOutput());
 
-    auto vertexMaskArray = vtkDoubleArray::New();
+    auto vertexMaskArray = vtkSmartPointer<vtkIntArray>::New();
     vertexMaskArray->SetNumberOfComponents(1);
     vertexMaskArray->SetNumberOfTuples(testInput->GetNumberOfPoints());
     vertexMaskArray->SetName("Base Point Mask Array");
