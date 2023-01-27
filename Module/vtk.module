@@ -19,3 +19,5 @@ TEST_DEPENDS
   VTK::FiltersSources
   VTK::TestingCore
   VTK::FiltersParallel
+  VTK::FiltersVerdict
+  VTK::IOXML

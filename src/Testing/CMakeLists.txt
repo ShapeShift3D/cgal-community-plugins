@@ -17,25 +17,29 @@ Options:
 
 #]==]
 
+vtk_module_test_data(
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/self-intersectionsData.vtp
+)
+
 vtk_add_test_cxx(stkCGALModuleTests tests
-  NO_DATA # For all test files
-  NO_VALID # For all test files
-  NO_OUTPUT # For all test files
-
-  TestCGALInit.cxx
-  TestCGAL2DConstrainedDelaunayTriangulationMesher.cxx
-  TestCGALSurfaceMeshTopology.cxx
-  TestCGALEfficientRANSAC.cxx
-  TestCGALPoissonReconstructionMesher.cxx
-  TestCGALRegionGrowing.cxx
-  TestCGALFillHoles.cxx
-  TestCGALPolygonOffset.cxx
-  TestCGAL3DConvexHull.cxx
-  TestCGALRegionFairingOperator.cxx
-  # Alternative syntax to specify the options per-file:
-  # TestUtils.cxx,NO_DATA,NO_VALID,NO_OUTPUT
-
-  # Add more test files here:
-  )
+  TestCGALInit.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGAL2DConstrainedDelaunayTriangulationMesher.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALSurfaceMeshTopology.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALEfficientRANSAC.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALPoissonReconstructionMesher.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALRegionGrowing.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALFillHoles.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALPolygonOffset.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGAL3DConvexHull.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALRegionFairingOperator.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGAL3DPolyhedralMesher.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALUVParametrization.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALBoolean2DMesher.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALBoolean3DMesher.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALIsotropicRemeshing.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALPolygonOrientOperator.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALPolygonSetOrientedSideClassifier.cxx,NO_DATA,NO_VALID,NO_OUTPUT
+  TestCGALSelfIntersectionMeasurer.cxx,NO_VALID,NO_OUTPUT
+)
 
 vtk_test_cxx_executable(stkCGALModuleTests tests)
