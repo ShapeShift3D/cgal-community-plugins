@@ -21,6 +21,8 @@
 #include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/self_intersections.h>
 
+#include <CGAL/boost/graph/helpers.h>
+
 //---------Module-------------------------------
 #include <stkCGALUtilities.h>
 
@@ -152,9 +154,6 @@ int stkCGALSelfIntersectionMeasurer::ExecuteSelfIntersect(
     return 0;
   }
 
-  bool intersecting = PMP::does_self_intersect(
-    surfaceMesh, PMP::parameters::vertex_point_map(get(CGAL::vertex_point, surfaceMesh)));
-
   std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
   PMP::self_intersections(surfaceMesh, std::back_inserter(intersected_tris));
 
@@ -227,9 +226,21 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
   Surface_Mesh surfaceMesh;
   stkCGALUtilities::vtkPolyDataToPolygonMesh(polyDataIn, surfaceMesh);
 
+  polyDataOut->ShallowCopy(polyDataIn);
+
   if (!CGAL::is_triangle_mesh(surfaceMesh))
   {
     vtkErrorMacro("Mesh is not triangular.");
+    return 0;
+  }
+
+  if (!CGAL::is_valid_polygon_mesh(surfaceMesh))
+  {
+    // checks the integrity of graph.
+    // graph is valid if it is a valid FaceListGraph and it has distinct faces on each side of an
+    // edge
+    vtkErrorMacro("Mesh is not a Valid Mesh. It doesn't have Valid FaceListGraph or doesn'has "
+                  "distinct faces on each side of an edge");
     return 0;
   }
 
@@ -244,77 +255,28 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
     }
     vtkNew<vtkIdTypeArray> OrginalIDArray;
 
-    // Most of the code below is replicated from the experimental remove_self_intersections method
-    // PMP::experimental::remove_self_intersections(surfaceMesh);
-
-    auto face_range = CGAL::faces(surfaceMesh);
-    std::set<face_descriptor> working_face_range(face_range.begin(), face_range.end());
-
-    std::pair<bool, bool> result_pair;
-
-    // Look for self-intersections in the mesh and remove them
-    bool all_fixed = true; // indicates if the filling of all created holes went fine
-    bool topology_issue =
-      false; // indicates if some boundary cycles of edges are blocking the fixing
-    std::set<face_descriptor> faces_to_remove;
-
-    int step = -1;
-    int maxStep = this->MaxStep;
-    bool preserve_genus = this->PreserveGenus;
-    bool only_treat_self_intersections_locally = this->OnlyTreatSelfIntersectionsLocally;
-    const double strong_dihedral_angle = this->StrongDihedralAngle;
+    // Unused for now. There will be Named parameter for this once repair_self_intersection is
+    // included in PMP package
     const double weak_dihedral_angle = this->WeakDihedralAngle;
 
-    typedef CGAL::Named_function_parameters<bool, CGAL::internal_np::all_default_t,
-      CGAL::internal_np::No_property>
-      NamedParameters;
+    auto parameters = PMP::parameters::number_of_iterations(this->MaxStep)
+                        .preserve_genus(this->PreserveGenus)
+                        .apply_per_connected_component(this->OnlyTreatSelfIntersectionsLocally)
+                        .with_dihedral_angle(this->StrongDihedralAngle);
 
-    NamedParameters np;
-
-    typedef typename CGAL::GetVertexPointMap<Surface_Mesh, NamedParameters>::type VertexPointMap;
-
-    VertexPointMap vpm = CGAL::parameters::choose_parameter(
-      CGAL::parameters::get_parameter(np, CGAL::internal_np::vertex_point),
-      CGAL::get_property_map(CGAL::vertex_point, surfaceMesh));
-
-    typedef typename CGAL::GetGeomTraits<Surface_Mesh, NamedParameters>::type GeomTraits;
-
-    GeomTraits gt = CGAL::parameters::choose_parameter<GeomTraits>(
-      CGAL::parameters::get_parameter(np, CGAL::internal_np::geom_traits));
-
-    if (!this->PreserveGenus)
+    // We need to remove the experimental namespace once the feature is included in PMP package
+    try
     {
-      PMP::duplicate_non_manifold_vertices(surfaceMesh, np);
+      PMP::experimental::remove_self_intersections(
+        CGAL::faces(surfaceMesh), surfaceMesh, parameters);
     }
-
-    while (++step < maxStep)
+    catch (const std::exception& e)
     {
-      if (faces_to_remove
-            .empty()) // the previous round might have been blocked due to topological constraints
+      if (this->Verbose)
       {
-        typedef std::pair<face_descriptor, face_descriptor> Face_pair;
-
-        std::vector<Face_pair> intersected_tris;
-        PMP::self_intersections(surfaceMesh, std::back_inserter(intersected_tris));
-
-        for (const Face_pair& fp : intersected_tris)
-        {
-          faces_to_remove.insert(fp.first);
-          faces_to_remove.insert(fp.second);
-        }
+        vtkWarningMacro(<< "Failed to Repair Self-Intersections");
+        std::cerr << e.what() << '\n';
       }
-
-      if (faces_to_remove.empty() && all_fixed)
-      {
-        break;
-      }
-
-      result_pair = PMP::internal::remove_self_intersections_one_step(faces_to_remove,
-        working_face_range, surfaceMesh, step, preserve_genus,
-        only_treat_self_intersections_locally, strong_dihedral_angle, weak_dihedral_angle, vpm, gt);
-
-      all_fixed = result_pair.first;
-      topology_issue = result_pair.second;
     }
 
     if (this->Verbose)
@@ -354,10 +316,6 @@ int stkCGALSelfIntersectionMeasurer::ExecuteRepairSelfIntersect(
       }
       polyDataOut->GetPointData()->AddArray(OrginalIDArray);
     }
-  }
-  else
-  {
-    polyDataOut->ShallowCopy(polyDataIn);
   }
 
   return 1;
