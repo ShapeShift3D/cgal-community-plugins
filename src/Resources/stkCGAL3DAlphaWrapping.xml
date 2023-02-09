@@ -1,0 +1,88 @@
+<ServerManagerConfiguration>
+    <!-- ==================================================================== -->
+    <ProxyGroup name="wrapping">
+        <Proxy
+            class="stkCGALAlphaWrapping"
+            name="CGALAlphaWrappingProxy">
+
+            <Documentation
+                short_help="Generate a valid triangulated surface mesh that strictly contains the input"
+                long_help="Generate a valid triangulated surface mesh that strictly contains the input (watertight, intersection-free and 2-manifold).
+                ">
+                Two user-defined parameters, alpha and offset, offer control over the maximum size
+                of cavities
+                where the shrink-wrapping process can enter, and the tightness of the final surface
+                mesh to the
+                input, respectively. Once combined, these parameters provide a means to trade
+                fidelity to the
+                input for complexity of the output.
+            </Documentation>
+
+            <DoubleVectorProperty
+                name="Alpha"
+                command="SetAlpha"
+                number_of_elements="1"
+                default_values="10.0">
+                <DoubleRangeDomain
+                    min="0.0"
+                    name="range" />
+                <Documentation>
+                    Parameter to control the size(diameter) of the cavaties to appear in the Output.
+                    The algorithm can only shrink-wrap through straits or holes with diameters
+                    larger than alpha.
+                    This parameter thus also behaves like a sizing criterion on the triangle facets
+                    of the output.
+                </Documentation>
+            </DoubleVectorProperty>
+
+
+            <DoubleVectorProperty
+                name="Offset"
+                command="SetOffset"
+                number_of_elements="1"
+                default_values="1.0">
+                <DoubleRangeDomain
+                    min="0.0"
+                    name="range" />
+                <Documentation>
+                    Parameter to control the distance of output mesh vertuces from the input.
+                    Recommend to set the offset parameter to a small fraction of alpha, so that
+                    alpha becomes the
+                    main parameter that controls the final level of detail.
+                </Documentation>
+            </DoubleVectorProperty>
+
+
+        </Proxy>
+    </ProxyGroup>
+    <!-- ==================================================================== -->
+    <ProxyGroup name="filters">
+        <SourceProxy
+            name="CGALAlphaWrapping"
+            class="stkCGALAlphaWrapping"
+            label="CGAL Alpha Wrapping"
+            base_proxygroup="wrapping"
+            base_proxyname="CGALAlphaWrappingProxy">
+
+            <InputProperty
+                name="InputPointSet"
+                port_index="0"
+                command="SetInputConnection">
+                <ProxyGroupDomain name="groups">
+                    <Group name="sources" />
+                    <Group name="filters" />
+                </ProxyGroupDomain>
+                <DataTypeDomain name="input_type">
+                    <DataType value="vtkPointSet" />
+                </DataTypeDomain>
+                <Documentation>
+                    Set the source point set.
+                </Documentation>
+            </InputProperty>
+
+            <Hints>
+                <ShowInMenu category="CGAL" />
+            </Hints>
+        </SourceProxy>
+    </ProxyGroup>
+</ServerManagerConfiguration>

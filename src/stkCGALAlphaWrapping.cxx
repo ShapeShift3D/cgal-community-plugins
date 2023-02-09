@@ -1,4 +1,4 @@
-#include "stkCGAL3DConvexHull.h"
+#include "stkCGALAlphaWrapping.h"
 
 //---------VTK----------------------------------
 #include <vtkInformation.h>
@@ -9,27 +9,21 @@
 //---------CGAL---------------------------------
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Surface_mesh.h>
-#include <CGAL/convex_hull_3.h>
-#include <CGAL/Delaunay_triangulation_3.h>
-#include <CGAL/convex_hull_3_to_face_graph.h>
+#include <CGAL/alpha_wrap_3.h>
 
 //---------Module-------------------------------
 #include <stkCGALUtilities.h>
 
-#include <list>
 #include <vector>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::Point_3 Point_3;
 typedef CGAL::Surface_mesh<Point_3> Surface_Mesh;
 
-typedef CGAL::Delaunay_triangulation_3<K> Delaunay;
-typedef Delaunay::Vertex_handle Vertex_handle;
-
-vtkStandardNewMacro(stkCGAL3DConvexHull);
+vtkStandardNewMacro(stkCGALAlphaWrapping);
 
 // ----------------------------------------------------------------------------
-int stkCGAL3DConvexHull::RequestData(vtkInformation* vtkNotUsed(request),
+int stkCGALAlphaWrapping::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
 {
   vtkPointSet* inputPointSet = this->GetInputPointSet();
@@ -50,28 +44,31 @@ int stkCGAL3DConvexHull::RequestData(vtkInformation* vtkNotUsed(request),
     points.emplace_back(vtkPoint[0], vtkPoint[1], vtkPoint[2]);
   }
 
-  Surface_Mesh convexHull;
-
-  if (this->ConvexHullMethod == ConvexHullMethods::QUICKHULL)
+  if (this->Alpha <= 0.0)
   {
-    CGAL::convex_hull_3(points.begin(), points.end(), convexHull);
-  }
-  else if (this->ConvexHullMethod == ConvexHullMethods::DELAUNAY3D)
-  {
-    Delaunay T;
-    T.insert(points.begin(), points.end());
-
-    std::list<Vertex_handle> vertices;
-    T.incident_vertices(T.infinite_vertex(), std::back_inserter(vertices));
-    CGAL::convex_hull_3_to_face_graph(T, convexHull);
-  }
-  else
-  {
-    vtkErrorMacro("Method to generate convex hull is not selected");
+    vtkErrorMacro("Alpha value must be strictly positive");
     return 0;
   }
 
-  stkCGALUtilities::SurfaceMeshToPolyData(convexHull, outputMesh);
+  if (this->Offset <= 0.0)
+  {
+    vtkErrorMacro("Offset value must be strictly positive");
+    return 0;
+  }
+
+  Surface_Mesh wrap;
+
+  try
+  {
+    CGAL::alpha_wrap_3(points, this->Alpha, this->Offset, wrap);
+  }
+  catch(...)
+  {
+    vtkErrorMacro("Failed to create Alpha Wrapping");
+    return 0;
+  }
+  
+  stkCGALUtilities::SurfaceMeshToPolyData(wrap, outputMesh);
 
   return 1;
 }
