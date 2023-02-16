@@ -11,6 +11,7 @@
 #include <vtkPointSet.h>
 #include <vtkSmartPointer.h>
 #include <vtkStaticPointLocator.h>
+#include <vtkFeatureEdges.h>
 
 //---------CGAL---------------------------------
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -158,6 +159,21 @@ int stkCGALFillHoles::RequestData(vtkInformation* vtkNotUsed(request),
   {
     vtkErrorMacro(
       "Input Surface must be a Triangular Surface Mesh (PolyData with only Triangle Cells)");
+    return 0;
+  }
+
+  auto nonManifoldEdges = vtkSmartPointer<vtkFeatureEdges>::New();
+  nonManifoldEdges->SetInputData(inputSurface);
+  nonManifoldEdges->FeatureEdgesOff();
+  nonManifoldEdges->BoundaryEdgesOff();
+  nonManifoldEdges->ManifoldEdgesOff();
+  nonManifoldEdges->NonManifoldEdgesOn();
+  nonManifoldEdges->Update();
+
+  if(nonManifoldEdges->GetOutput()->GetNumberOfCells() != 0)
+  {
+    vtkErrorMacro(
+      "Input Surface must not contain any Non-manifold edges");
     return 0;
   }
 

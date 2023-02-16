@@ -32,6 +32,7 @@ set(classes
   stkCGALFillHoles
   stkCGALRegionFairingOperator
   stkCGALAlphaWrapping
+  stkCGALDuplicateNonManifoldVertices
 )
 
 set(private_headers
@@ -66,6 +67,7 @@ set(xml_files
   Resources/stkCGALSurfaceMeshTopology.xml
   Resources/stkCGALRegionFairing.xml
   Resources/stkCGAL3DAlphaWrapping.xml
+  Resources/stkCGALDuplicateNonManifoldVertices.xml
 )
 
 paraview_add_server_manager_xmls(

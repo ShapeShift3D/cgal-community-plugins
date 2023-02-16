@@ -1,5 +1,3 @@
-#include "doctest.h"
-
 #include <vtkCellData.h>
 #include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
