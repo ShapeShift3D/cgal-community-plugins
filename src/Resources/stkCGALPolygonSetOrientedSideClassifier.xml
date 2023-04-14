@@ -1,0 +1,111 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="filters">
+    <SourceProxy
+      name="CGALPolygonSetOrientedSideClassifier"
+      class="stkCGALPolygonSetOrientedSideClassifier"
+      label="CGAL Polygon Set Oriented Side Classifier"
+      base_proxygroup="point_classifiers"
+      base_proxyname="CGALPolygonSetOrientedSideClassifier">
+
+      <Documentation
+        long_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set."
+        short_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set." />
+
+      <Property
+        name="Update"
+        command="Modified"
+        label="Update"
+        panel_widget="command_button" />
+
+      <Hints>
+        <ShowInMenu category="CGAL" />
+      </Hints>
+
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- ==================================================================== -->
+  <ProxyGroup name="point_classifiers">
+    <Proxy name="CGALPolygonSetOrientedSideClassifier"
+      class="stkCGALPolygonSetOrientedSideClassifier"
+      label="Polygon Set Oriented Side Classifier">
+
+      <Documentation
+        long_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set."
+        short_help="Classifies sets of points by checking if it's inside, outside or on the boundary of a polygon set.">
+      </Documentation>
+
+      <InputProperty name="InputPointSet"
+        port_index="0"
+        command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources" />
+          <Group name="filters" />
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkDataSet" />
+        </DataTypeDomain>
+        <Documentation>
+          Set the PointSet
+        </Documentation>
+      </InputProperty>
+
+      <InputProperty name="InputPolyLineSet"
+        port_index="1"
+        command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources" />
+          <Group name="filters" />
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkDataSet" />
+        </DataTypeDomain>
+        <Documentation>
+          Set the polyLine set
+        </Documentation>
+      </InputProperty>
+
+      <IntVectorProperty name="Plane"
+        command="SetPlane"
+        number_of_elements="1"
+        default_values="1">
+        <EnumerationDomain name="enum">
+          <Entry value="1"
+            text="XY" />
+          <Entry value="2"
+            text="YZ" />
+          <Entry value="3"
+            text="XZ" />
+        </EnumerationDomain>
+        <Documentation>
+          This property which plane to consider
+        </Documentation>
+      </IntVectorProperty>
+
+      <StringVectorProperty name="PwhIdArrayName"
+        command="SetPwhIdArrayName"
+        number_of_elements="1"
+        animateable="0"
+        default_values="PolygonWithHolesId">
+        <Documentation>
+          Name of the Polygon With Holes Id Array Name
+        </Documentation>
+      </StringVectorProperty>
+
+      <StringVectorProperty name="OrientedSideArrayName"
+        command="SetOrientedSideArrayName"
+        number_of_elements="1"
+        animateable="0"
+        default_values="OrientedSide">
+        <Documentation>
+          Name of the array storing the oriented side results. -1 for outside, 0 for boundary and +1
+          for inside.
+        </Documentation>
+      </StringVectorProperty>
+
+      <Hints>
+        <ShowInMenu category="CGAL" />
+      </Hints>
+
+    </Proxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>

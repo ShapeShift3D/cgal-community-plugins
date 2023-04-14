@@ -1,0 +1,118 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="filters">
+    <SourceProxy
+      name="CGALPolygonOrientOperator"
+      class="stkCGALPolygonOrientOperator"
+      label="CGAL Polygon Orient Operator"
+      base_proxygroup="loop_operators"
+      base_proxyname="CGALPolygonOrientOperator">
+      <Documentation
+        long_help="Orders a polygon clockwise or counterclockwise."
+        short_help="Orders a polygon clockwise or counterclockwise." />
+
+      <Property
+        name="Update"
+        command="Modified"
+        label="Update"
+        panel_widget="command_button" />
+
+      <Hints>
+        <ShowInMenu category="CGAL" />
+      </Hints>
+
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- ==================================================================== -->
+  <ProxyGroup name="loop_operators">
+    <Proxy name="CGALPolygonOrientOperator"
+      class="stkCGALPolygonOrientOperator"
+      label="CGAL Polygon Orient Operator">
+
+      <Documentation long_help="Orders a polygon clockwise or counterclockwise."
+        short_help="Orders a polygon clockwise or counterclockwise.">
+      </Documentation>
+
+      <InputProperty name="InputPolyLine"
+        port_index="0"
+        command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources" />
+          <Group name="filters" />
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkDataSet" />
+        </DataTypeDomain>
+        <Documentation>
+          Set the PolyLine A data set.
+        </Documentation>
+      </InputProperty>
+
+      <IntVectorProperty name="Plane"
+        command="SetPlane"
+        number_of_elements="1"
+        default_values="1">
+        <EnumerationDomain name="enum">
+          <Entry value="1"
+            text="XY" />
+          <Entry value="2"
+            text="YZ" />
+          <Entry value="3"
+            text="XZ" />
+        </EnumerationDomain>
+        <Documentation>
+          This property which plane to consider
+        </Documentation>
+      </IntVectorProperty>
+
+      <IntVectorProperty name="InvertPolyLineOrientation"
+        command="SetInvertPolyLineOrientation"
+        label="Invert PolyLine Orientation"
+        number_of_elements="1"
+        default_values="0">
+        <BooleanDomain name="bool" />
+        <Documentation>
+          Inverts the PolyLine A orientation
+        </Documentation>
+      </IntVectorProperty>
+
+      <IntVectorProperty name="ForcePolyLineOrientation"
+        command="SetForcePolyLineOrientation"
+        label="Force PolyLine Orientation"
+        number_of_elements="1"
+        default_values="0">
+        <BooleanDomain name="bool" />
+        <Documentation>
+          Forces the PolyLine A orientation
+        </Documentation>
+      </IntVectorProperty>
+
+      <IntVectorProperty name="PolyLineOrientation"
+        command="SetPolyLineOrientation"
+        label="Orientation"
+        number_of_elements="1"
+        default_values="1">
+        <EnumerationDomain name="enum">
+          <Entry value="1"
+            text="Clockwise" />
+          <Entry value="2"
+            text="Counterclockwise" />
+        </EnumerationDomain>
+        <Hints>
+          <PropertyWidgetDecorator type="GenericDecorator"
+            mode="visibility"
+            property="ForcePolyLineOrientation"
+            value="1">
+          </PropertyWidgetDecorator>
+        </Hints>
+        <Documentation>
+          Choose the orientation to force
+        </Documentation>
+      </IntVectorProperty>
+
+      <Hints>
+        <ShowInMenu category="CGAL" />
+      </Hints>
+
+    </Proxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>

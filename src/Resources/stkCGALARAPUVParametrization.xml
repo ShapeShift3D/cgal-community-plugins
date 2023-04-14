@@ -1,0 +1,56 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="uv_parametrizations">
+    <Proxy name="CGALARAPUVParametrization"
+      class="stkCGALARAPUVParametrization"
+      label="ARAP #2"
+      base_proxygroup="uv_parametrizations"
+      base_proxyname="CGALAbstractUVParametrization">
+
+      <Documentation long_help="Applies an ARAP UV Parametrization on a polygonal mesh."
+        short_help="Applies an ARAP UV Parametrization on a polygonal mesh.">
+      </Documentation>
+
+      <DoubleVectorProperty name="Lambda"
+        command="SetLambda"
+        number_of_elements="1"
+        animateable="0"
+        default_values="1000">
+        <Documentation>
+          Parameter to give importance to shape or angle preservation.
+        </Documentation>
+      </DoubleVectorProperty>
+
+      <DoubleVectorProperty name="Tolerance"
+        command="SetTolerance"
+        number_of_elements="1"
+        default_values="1e-6">
+        <Documentation>
+          Minimal energy difference between two iterations for the minimization process to continue.
+        </Documentation>
+      </DoubleVectorProperty>
+
+      <IntVectorProperty name="MaximumNumberOfIterations"
+        command="SetMaximumNumberOfIterations"
+        label="Maximum Number Of Iterations"
+        number_of_elements="1"
+        default_values="50">
+        <Documentation>
+          Maximal number of iterations in the energy minimization process.
+        </Documentation>
+      </IntVectorProperty>
+
+      <IntVectorProperty command="SetSkipPostprocess"
+        name="SkipPostprocess"
+        label="Skip Postprocess"
+        default_values="0"
+        number_of_elements="1"
+        panel_visibility="advanced">
+        <Documentation>
+          Removes postprocess of ARAP parametrization. Helpful when unwrap result has overlaps.
+        </Documentation>
+        <BooleanDomain name="bool" />
+      </IntVectorProperty>
+
+    </Proxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>

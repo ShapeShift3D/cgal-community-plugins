@@ -1,0 +1,67 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="filters">
+    <SourceProxy
+      name="CGALPolygonOffset"
+      class="stkCGALPolygonOffset"
+      label="CGAL Polygon Offset">
+
+      <Documentation
+        long_help="Offset a Polygon."
+        short_help="Offset a Polygon.">
+        Offset the edges of a simple 2D polygon (closed curve) to interior or exterior regions
+        formed by the
+        polygon.The polygon must belong to XY plane and input must be a closed curve.
+      </Documentation>
+
+      <InputProperty
+        name="Input"
+        port_index="0"
+        command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources" />
+          <Group name="filters" />
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkPolyData" />
+        </DataTypeDomain>
+      </InputProperty>
+
+      <IntVectorProperty
+        name="OffsetType"
+        command="SetOffsetType"
+        number_of_elements="1"
+        default_values="1">
+        <EnumerationDomain name="enum">
+          <Entry
+            text="INTERIOR"
+            value="0" />
+          <Entry
+            text="EXTERIOR"
+            value="1" />
+        </EnumerationDomain>
+        <Documentation>
+          The direction of polygon offset. Interior means bounded region and Exterior means
+          unbounded region formed by the polygon.
+        </Documentation>
+      </IntVectorProperty>
+
+      <DoubleVectorProperty
+        name="Offset"
+        command="SetOffset"
+        number_of_elements="1"
+        default_values="2.0">
+        <DoubleRangeDomain
+          min="0.0"
+          name="range" />
+        <Documentation>
+          The value used to offset the polygon.
+        </Documentation>
+      </DoubleVectorProperty>
+
+      <Hints>
+        <ShowInMenu category="CGAL" />
+      </Hints>
+      
+    </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>
