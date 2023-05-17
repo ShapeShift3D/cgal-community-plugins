@@ -17,12 +17,7 @@ Options:
 
 #]==]
 
-vtk_module_test_data(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Data/self-intersectionsData.vtp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Data/non-manifold-mesh.vtp
-)
-
-vtk_add_test_cxx(stkCGALModuleTests tests
+stk_add_test_cxx(stkCGALModuleTests tests
   TestCGALInit.cxx,NO_DATA,NO_VALID,NO_OUTPUT
   TestCGAL2DConstrainedDelaunayTriangulationMesher.cxx,NO_DATA,NO_VALID,NO_OUTPUT
   TestCGALSurfaceMeshTopology.cxx,NO_DATA,NO_VALID,NO_OUTPUT
@@ -40,9 +35,9 @@ vtk_add_test_cxx(stkCGALModuleTests tests
   TestCGALIsotropicRemeshing.cxx,NO_DATA,NO_VALID,NO_OUTPUT
   TestCGALPolygonOrientOperator.cxx,NO_DATA,NO_VALID,NO_OUTPUT
   TestCGALPolygonSetOrientedSideClassifier.cxx,NO_DATA,NO_VALID,NO_OUTPUT
-  TestCGALSelfIntersectionMeasurer.cxx,NO_VALID,NO_OUTPUT
+  TestCGALSelfIntersectionMeasurer.cxx,NO_VALID,NO_OUTPUT,DIRECT_DATA
   TestCGALAlphaWrapping.cxx,NO_DATA,NO_VALID,NO_OUTPUT
-  TestCGALDuplicateNonManifoldVertices.cxx,NO_VALID,NO_OUTPUT
+  TestCGALDuplicateNonManifoldVertices.cxx,NO_VALID,NO_OUTPUT,DIRECT_DATA
 )
 
 vtk_test_cxx_executable(stkCGALModuleTests tests)

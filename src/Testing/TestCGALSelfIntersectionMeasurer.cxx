@@ -15,8 +15,7 @@
 int TestCGALSelfIntersectionMeasurer(int argc, char** const argv)
 {
   auto reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
-  char* inFile = vtkTestUtilities::ExpandDataFileName(
-    argc, argv, "STKCopyLeft/CGAL/src/Testing/Data/self-intersectionsData.vtp");
+  char* inFile = vtkTestUtilities::ExpandDataFileName(argc, argv, "/self-intersectionsData.vtp");
   reader->SetFileName(inFile);
   delete[] inFile;
   reader->Update();

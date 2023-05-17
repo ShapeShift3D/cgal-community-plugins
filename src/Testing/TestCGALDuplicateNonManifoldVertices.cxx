@@ -14,8 +14,7 @@
 int TestCGALDuplicateNonManifoldVertices(int argc, char** const argv)
 {
   auto reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
-  char* inFile = vtkTestUtilities::ExpandDataFileName(
-    argc, argv, "STKCopyLeft/CGAL/src/Testing/Data/non-manifold-mesh.vtp");
+  char* inFile = vtkTestUtilities::ExpandDataFileName(argc, argv, "/non-manifold-mesh.vtp");
   reader->SetFileName(inFile);
   delete[] inFile;
   reader->Update();
