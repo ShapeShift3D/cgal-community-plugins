@@ -172,7 +172,7 @@ int stkCGAL3DPolyhedralMesher::RequestData(vtkInformation* vtkNotUsed(request),
   Mesh_domain domain(*interiorSurfaces, *boundingDomain);
 
   // Sizing Field
-  stk::PointCloudScalarSizingField size;
+  stkCGAL::PointCloudScalarSizingField size;
 
   if (this->UseCustomSizingField)
   {

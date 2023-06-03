@@ -24,7 +24,7 @@
  * @ingroup stkCGAL
  *
  */
-namespace stk
+namespace stkCGAL
 {
 struct PointCloudScalarSizingField
 {
