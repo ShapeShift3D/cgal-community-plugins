@@ -109,7 +109,9 @@ if(CGAL_FOUND)
   vtk_module_link(${NAMESPACE}::stkCGAL PUBLIC CGAL::CGAL)
 
   if(CGAL_ACTIVATE_CONCURRENCY)
-    find_package(TBB REQUIRED)
+    if (NOT TARGET TBB::tbb)
+      find_package(TBB REQUIRED)
+    endif ()
 
     if(TBB_FOUND)
       vtk_module_definitions(${NAMESPACE}::stkCGAL PRIVATE CGAL_LINKED_WITH_TBB)
