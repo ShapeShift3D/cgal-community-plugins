@@ -55,35 +55,6 @@ vtk_module_add_module(${NAMESPACE}::stkCGAL
   PRIVATE_HEADERS ${private_headers}
 )
 
-set(xml_files
-  Resources/stkCGAL2DConstrainedDelaunayTriangulationMesher.xml
-  Resources/stkCGAL3DAlphaWrapping.xml
-  Resources/stkCGAL3DConvexHull.xml
-  Resources/stkCGAL3DPolyhedralMesher.xml
-  Resources/stkCGALAbstractUVParametrization.xml
-  Resources/stkCGALARAPUVParametrization.xml
-  Resources/stkCGALBoolean2DMesher.xml
-  Resources/stkCGALBoolean3DMesher.xml
-  Resources/stkCGALDuplicateNonManifoldVertices.xml
-  Resources/stkCGALEfficientRANSAC.xml
-  Resources/stkCGALFillHoles.xml
-  Resources/stkCGALIsotropicRemeshingFilter.xml
-  Resources/stkCGALLSCMUVParametrization.xml
-  Resources/stkCGALPoissonReconstructionMesher.xml
-  Resources/stkCGALPolygonMeshSmoothingOperator.xml
-  Resources/stkCGALPolygonOffset.xml
-  Resources/stkCGALPolygonOrientOperator.xml
-  Resources/stkCGALPolygonSetOrientedSideClassifier.xml
-  Resources/stkCGALRegionFairing.xml
-  Resources/stkCGALRegionGrowing.xml
-  Resources/stkCGALSelfIntersectionMeasurer.xml
-  Resources/stkCGALSurfaceMeshTopology.xml
-)
-
-paraview_add_server_manager_xmls(
-  XMLS ${xml_files}
-)
-
 if(Eigen3_FOUND)
   vtk_module_link(${NAMESPACE}::stkCGAL PUBLIC Eigen3::Eigen)
 endif(Eigen3_FOUND)
