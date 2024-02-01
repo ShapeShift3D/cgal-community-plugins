@@ -1,11 +1,11 @@
 NAME
-  ParaView::stkCGAL
+  STK::CGALCopyleft
 LIBRARY_NAME
   stkCGAL
 DESCRIPTION
   CGAL sources and filters
 DEPENDS
-  ParaView::stkCGALInterface
+  STK::CGALCopyleftInterface
   VTK::FiltersCore
   VTK::FiltersModeling
 PRIVATE_DEPENDS

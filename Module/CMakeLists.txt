@@ -39,13 +39,13 @@ set(private_headers
   stkPointCloudScalarSizingField.h
 )
 
-vtk_module_add_module(ParaView::stkCGAL
+vtk_module_add_module(STK::CGALCopyleft
   CLASSES ${classes}
   PRIVATE_HEADERS ${private_headers}
 )
 
 if(Eigen3_FOUND)
-  vtk_module_link(ParaView::stkCGAL PUBLIC Eigen3::Eigen)
+  vtk_module_link(STK::CGALCopyleft PUBLIC Eigen3::Eigen)
 endif(Eigen3_FOUND)
 
 if(CGAL_FOUND)
@@ -56,17 +56,17 @@ if(CGAL_FOUND)
     "Enable concurrency"
     ON)
 
-  vtk_module_definitions(ParaView::stkCGAL PRIVATE NOMINMAX)
+  vtk_module_definitions(STK::CGALCopyleft PRIVATE NOMINMAX)
 
   # Add debug flag for the ARAP algorithm
   option(CGAL_DEBUG_SMP_ARAP "Enables debugging mode for CGAL's ARAP" OFF)
 
   if(CGAL_DEBUG_SMP_ARAP)
-    vtk_module_definitions(ParaView::stkCGAL PRIVATE CGAL_KEEP_SEQUENTIAL CGAL_SMP_ARAP_DEBUG CGAL_PARAMETERIZATION_ARAP_VERBOSE)
+    vtk_module_definitions(STK::CGALCopyleft PRIVATE CGAL_KEEP_SEQUENTIAL CGAL_SMP_ARAP_DEBUG CGAL_PARAMETERIZATION_ARAP_VERBOSE)
   endif(CGAL_DEBUG_SMP_ARAP)
 
   # Link with CGAL
-  vtk_module_link(ParaView::stkCGAL PUBLIC CGAL::CGAL)
+  vtk_module_link(STK::CGALCopyleft PUBLIC CGAL::CGAL)
 
   if(CGAL_ACTIVATE_CONCURRENCY)
     if (NOT TARGET TBB::tbb)
@@ -74,8 +74,8 @@ if(CGAL_FOUND)
     endif ()
 
     if(TBB_FOUND)
-      vtk_module_definitions(ParaView::stkCGAL PRIVATE CGAL_LINKED_WITH_TBB)
-      vtk_module_link(ParaView::stkCGAL PRIVATE TBB::tbbmalloc TBB::tbb)
+      vtk_module_definitions(STK::CGALCopyleft PRIVATE CGAL_LINKED_WITH_TBB)
+      vtk_module_link(STK::CGALCopyleft PRIVATE TBB::tbbmalloc TBB::tbb)
     endif(TBB_FOUND)
   endif(CGAL_ACTIVATE_CONCURRENCY)
 endif(CGAL_FOUND)
