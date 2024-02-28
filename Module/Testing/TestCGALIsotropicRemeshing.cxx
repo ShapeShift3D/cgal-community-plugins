@@ -12,7 +12,7 @@
 
 // Use the following command in Windows Powershell from SpecifX's Build folder to run this test:
 // .\bin\stkCGALModuleTests.exe TestCGALIsotropicRemeshing
-// CMake variable PARAVIEW_BUILD_TESTING must be set to ON to be able to run this test.
+// CMake variable STK_BUILD_TESTING must be set to ON to be able to run this test.
 
 int TestCGALIsotropicRemeshing(int argc, char** const argv)
 {

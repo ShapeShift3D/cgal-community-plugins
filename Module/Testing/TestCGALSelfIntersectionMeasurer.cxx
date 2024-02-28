@@ -10,7 +10,7 @@
 
 // Use one of the following commands in Windows Powershell from SpecifX's Build folder to run this
 // test: ctest -C RelWithDebInfo -R TestCGALSelfIntersectionMeasurer CMake variable
-// PARAVIEW_BUILD_TESTING must be set to ON to be able to run this test.
+// STK_BUILD_TESTING must be set to ON to be able to run this test.
 
 int TestCGALSelfIntersectionMeasurer(int argc, char** const argv)
 {

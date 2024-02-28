@@ -11,7 +11,7 @@
 
 // Use the following command in Windows Powershell from SpecifX's Build folder to run this test:
 // .\bin\stkCGALModuleTests.exe TestCGALBoolean3DMesher
-// CMake variable PARAVIEW_BUILD_TESTING must be set to ON to be able to run this test.
+// CMake variable STK_BUILD_TESTING must be set to ON to be able to run this test.
 
 int TestCGALBoolean3DMesher(int argc, char** const argv)
 {
