@@ -9,6 +9,7 @@
 #include <vtkPointData.h>
 #include <vtkSmartPointer.h>
 #include <vtkTimerLog.h>
+#include <vtkLogger.h>
 
 // -- CGAL
 #include <CGAL/Cartesian.h>
@@ -176,13 +177,15 @@ int stkCGALRegionGrowing::Detection(vtkPolyData* input, vtkPolyData* output)
   region_growing.unassigned_items(std::back_inserter(unassigned_cells));
 
   // Print number of detected shapes and algorithm coverage
-  vtkWarningMacro(<< regions.end() - regions.begin() << " shapes detected "
-                  << "|" << unassigned_cells.size() << " unassigned cells "
-                  << "|"
-                  << "Algorithm Coverage: "
-                  << ((input->GetNumberOfCells() - unassigned_cells.size()) /
-                       static_cast<double>(input->GetNumberOfCells()) * 100.00)
-                  << " %");
+  int shapes_detected = regions.end() - regions.begin();
+  std::string shape_summary = std::to_string(shapes_detected).append(" shapes detected");
+  std::string assignment_summary = std::to_string(unassigned_cells.size()).append(" unassigned cells");
+  double algo_coverage = ((input->GetNumberOfCells() - unassigned_cells.size()) / static_cast<double>(input->GetNumberOfCells())) * 100.00;
+  std::string coverage_summary = std::string("Algorithm Coverage: ").append(std::to_string(algo_coverage)).append(" %");
+
+  std::string info_summary = shape_summary.append(" | ").append(assignment_summary).append(" | ").append(coverage_summary);
+
+  vtkVLog(vtkLogger::VERBOSITY_INFO, <<info_summary);
 
   vtkTimerLog::MarkEndEvent("Detection");
 

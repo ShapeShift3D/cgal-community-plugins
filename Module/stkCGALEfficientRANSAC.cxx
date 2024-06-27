@@ -11,6 +11,7 @@
 #include <vtkMath.h>
 #include <vtkBoundingBox.h>
 #include <vtkStaticPointLocator.h>
+#include <vtkLogger.h>
 
 // -- stkCGAL
 #include <stkCGALUtilities.h>
@@ -240,10 +241,10 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   this->SetProgressText("Plane Detection");
   Timeout_callback timeout_callback(this,progress_per_run);
 
-  vtkWarningMacro("Probabilty=" << parameters.probability << ", MinPoints="
-                                  << parameters.min_points << ", epsilon=" << parameters.epsilon
-                                  << ", cluster_epsilon=" << parameters.cluster_epsilon
-                                  << ", normal_threshold=" << parameters.normal_threshold);
+  vtkVLog(vtkLogger::VERBOSITY_INFO, << "Probabilty=" << parameters.probability << ", MinPoints="
+                                     << parameters.min_points << ", epsilon=" << parameters.epsilon
+                                     << ", cluster_epsilon=" << parameters.cluster_epsilon
+                                     << ", normal_threshold=" << parameters.normal_threshold);
 
   // Perform detection several times and choose result with the highest coverage
   FT best_coverage = 0;
@@ -269,8 +270,12 @@ int stkCGALEfficientRANSAC::Detection(vtkPolyData* input, vtkPolyData* output)
   }
 
   // Print number of detected shapes
-  vtkWarningMacro(<< "Best Run Coverage"  << " | " << best_coverage );
-  vtkWarningMacro(<< planes.end() -planes.begin() << " planes detected.");
+  int planes_detected = planes.end() - planes.begin();
+  std::string plane_summary = std::to_string(planes_detected).append(" planes detected");
+  std::string coverage_summary = std::string("Best Run Coverage : ").append(std::to_string(best_coverage));
+
+  std::string info_summary = plane_summary.append(" | ").append(coverage_summary);
+  vtkVLog(vtkLogger::VERBOSITY_INFO, <<info_summary);
 
   this->UpdateProgress(1.0);
 
