@@ -19,14 +19,14 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <stkCGALPolygonMeshSmoothingOperatorInterface.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALPolygonMeshSmoothingOperator
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALPolygonMeshSmoothingOperator
   : public stkCGALPolygonMeshSmoothingOperatorInterface
 {
 public:

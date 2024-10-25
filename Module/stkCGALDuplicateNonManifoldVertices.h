@@ -16,13 +16,13 @@
 #pragma once
 
 #include <stkCGALDuplicateNonManifoldVerticesInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALDuplicateNonManifoldVertices
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALDuplicateNonManifoldVertices
   : public stkCGALDuplicateNonManifoldVerticesInterface
 {
 public:

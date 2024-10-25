@@ -16,13 +16,13 @@
 #pragma once
 
 #include <stkCGALPoissonReconstructionMesherInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALPoissonReconstructionMesher : public stkCGALPoissonReconstructionMesherInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALPoissonReconstructionMesher : public stkCGALPoissonReconstructionMesherInterface
 {
 public:
   static stkCGALPoissonReconstructionMesher* New();

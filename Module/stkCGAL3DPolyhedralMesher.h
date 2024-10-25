@@ -14,13 +14,13 @@
 #pragma once
 
 #include <stkCGAL3DPolyhedralMesherInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGAL3DPolyhedralMesher : public stkCGAL3DPolyhedralMesherInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGAL3DPolyhedralMesher : public stkCGAL3DPolyhedralMesherInterface
 {
 public:
   static stkCGAL3DPolyhedralMesher* New();

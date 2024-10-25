@@ -1,7 +1,7 @@
 NAME
-  STK::CGALCopyleft
+  STK::CGALCopyleftExtensionFilters
 LIBRARY_NAME
-  stkCGAL
+  stkCGALExtensionFilters
 DESCRIPTION
   CGAL sources and filters
 DEPENDS

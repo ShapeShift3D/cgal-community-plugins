@@ -15,13 +15,13 @@
 #pragma once
 
 #include <stkCGALBoolean3DMesherInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALBoolean3DMesher : public stkCGALBoolean3DMesherInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALBoolean3DMesher : public stkCGALBoolean3DMesherInterface
 {
 public:
   static stkCGALBoolean3DMesher* New();

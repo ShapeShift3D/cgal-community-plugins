@@ -21,7 +21,7 @@
 #include <string>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
 namespace stkCGAL

@@ -13,14 +13,14 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <stkCGAL3DConvexHullInterface.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGAL3DConvexHull
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGAL3DConvexHull
   : public stkCGAL3DConvexHullInterface
 {
 public:

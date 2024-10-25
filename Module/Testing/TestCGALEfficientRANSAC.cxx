@@ -11,7 +11,7 @@
 #include "stkCGALEfficientRANSAC.h"
 
 // Use the following command in Windows Powershell from SpecifX's Build folder to run this test:
-// .\bin\stkCGALModuleTests.exe TestCGALEfficientRANSAC
+// .\bin\stkCGALExtensionFiltersModuleTests.exe TestCGALEfficientRANSAC
 // CMake variable STK_BUILD_TESTING must be set to ON to be able to run this test.
 
 int TestCGALEfficientRANSAC(int argc, char** const argv)

@@ -16,13 +16,13 @@
 #pragma once
 
 #include <stkCGALARAPUVParametrizationInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALARAPUVParametrization : public stkCGALARAPUVParametrizationInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALARAPUVParametrization : public stkCGALARAPUVParametrizationInterface
 {
 public:
   static stkCGALARAPUVParametrization* New();

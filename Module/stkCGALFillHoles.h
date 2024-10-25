@@ -13,13 +13,13 @@
 #pragma once
 
 #include <stkCGALFillHolesInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALFillHoles : public stkCGALFillHolesInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALFillHoles : public stkCGALFillHolesInterface
 {
 public:
   static stkCGALFillHoles* New();

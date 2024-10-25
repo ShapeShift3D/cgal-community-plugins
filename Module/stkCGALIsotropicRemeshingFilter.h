@@ -28,13 +28,13 @@
 #pragma once
 
 #include <stkCGALIsotropicRemeshingFilterInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALIsotropicRemeshingFilter
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALIsotropicRemeshingFilter
   : public stkCGALIsotropicRemeshingFilterInterface
 {
 public:

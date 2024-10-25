@@ -17,7 +17,7 @@
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Triangulation_face_base_with_info_2.h>
 #include <stkCGAL2DConstrainedDelaunayTriangulationMesherInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 struct FaceInfo2
 {
@@ -38,10 +38,10 @@ typedef CGAL::Polygon_2<K> Polygon_2;
 typedef CDT::Face_handle Face_handle;
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGAL2DConstrainedDelaunayTriangulationMesher
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGAL2DConstrainedDelaunayTriangulationMesher
   : public stkCGAL2DConstrainedDelaunayTriangulationMesherInterface
 {
 public:

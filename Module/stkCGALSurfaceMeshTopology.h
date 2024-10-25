@@ -5,7 +5,7 @@
  *  Inputs: Surface Mesh (port 0, vtkPolyData)
  *  Output: PolyLines (port 0, vtkPolyData)
  * 
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  * @sa
  * stkCGALSurfaceMeshTopologyInterface
@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <stkCGALSurfaceMeshTopologyInterface.h>
 
-class STKCGAL_EXPORT stkCGALSurfaceMeshTopology : public stkCGALSurfaceMeshTopologyInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALSurfaceMeshTopology : public stkCGALSurfaceMeshTopologyInterface
 {
 public:
   static stkCGALSurfaceMeshTopology* New();

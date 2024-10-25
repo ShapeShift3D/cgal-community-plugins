@@ -22,13 +22,13 @@
 #pragma once
 
 #include <stkCGALEfficientRANSACInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALEfficientRANSAC : public stkCGALEfficientRANSACInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALEfficientRANSAC : public stkCGALEfficientRANSACInterface
 {
 public:
   static stkCGALEfficientRANSAC* New();

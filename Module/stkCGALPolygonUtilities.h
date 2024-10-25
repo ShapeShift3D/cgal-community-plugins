@@ -8,7 +8,7 @@
 #pragma once
 
 #include "vtkObject.h"
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
@@ -27,10 +27,10 @@ class vtkPointSet;
 class vtkUnstructuredGrid;
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALPolygonUtilities : public vtkObject
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALPolygonUtilities : public vtkObject
 {
 public:
   static stkCGALPolygonUtilities* New();

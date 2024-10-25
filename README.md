@@ -1,4 +1,4 @@
-CGAL                      {#STKCGALModuleDocumentation}
+CGALExtensionFilters                      {#stkCGALExtensionFiltersModuleDocumentation}
 ===============================
 
 @moduledoc CGAL Module (Cloud compute only)
@@ -7,5 +7,5 @@ CGAL                      {#STKCGALModuleDocumentation}
 
 - minimum version : CGAL 5.1.1
 
-@defgroup stkCGAL CGAL
+@defgroup stkCGALExtensionFiltersModule CGALExtensionFilters
 Algorithms requiring CGAL library.

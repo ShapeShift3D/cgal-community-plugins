@@ -10,7 +10,7 @@
 #pragma once
 
 #include "vtkPolyDataAlgorithm.h"
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
@@ -27,10 +27,10 @@ typedef std::list<Polygon_with_holes_2> Pwh_list_2;
 typedef CGAL::Polygon_set_2<K> Polygon_set_2;
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALPolyLineSetToPolygonSet : public vtkPolyDataAlgorithm
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALPolyLineSetToPolygonSet : public vtkPolyDataAlgorithm
 {
 public:
   static stkCGALPolyLineSetToPolygonSet* New();

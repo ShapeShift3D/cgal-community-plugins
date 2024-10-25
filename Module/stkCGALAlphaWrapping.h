@@ -18,13 +18,13 @@
 #pragma once
 
 #include <stkCGALAlphaWrappingInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALAlphaWrapping : public stkCGALAlphaWrappingInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALAlphaWrapping : public stkCGALAlphaWrappingInterface
 {
 public:
   static stkCGALAlphaWrapping* New();

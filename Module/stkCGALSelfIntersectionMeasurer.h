@@ -15,14 +15,14 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <stkCGALSelfIntersectionMeasurerInterface.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALSelfIntersectionMeasurer
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALSelfIntersectionMeasurer
   : public stkCGALSelfIntersectionMeasurerInterface
 {
 public:

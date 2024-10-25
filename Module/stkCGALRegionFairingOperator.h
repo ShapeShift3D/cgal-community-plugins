@@ -12,14 +12,14 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <stkCGALRegionFairingOperatorInterface.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALRegionFairingOperator : public stkCGALRegionFairingOperatorInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALRegionFairingOperator : public stkCGALRegionFairingOperatorInterface
 {
 public:
   static stkCGALRegionFairingOperator* New();

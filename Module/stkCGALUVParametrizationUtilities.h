@@ -7,16 +7,16 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <vtkObject.h>
 
 class vtkPolyData;
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALUVParametrizationUtilities : public vtkObject
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALUVParametrizationUtilities : public vtkObject
 {
 public:
   static stkCGALUVParametrizationUtilities* New();

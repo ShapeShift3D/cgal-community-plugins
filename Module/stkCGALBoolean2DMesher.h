@@ -17,13 +17,13 @@
 #pragma once
 
 #include <stkCGALBoolean2DMesherInterface.h>
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALBoolean2DMesher : public stkCGALBoolean2DMesherInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALBoolean2DMesher : public stkCGALBoolean2DMesherInterface
 {
 public:
   static stkCGALBoolean2DMesher* New();

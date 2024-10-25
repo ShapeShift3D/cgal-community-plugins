@@ -11,14 +11,14 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <stkCGALPolygonOffsetInterface.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALPolygonOffset : public stkCGALPolygonOffsetInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALPolygonOffset : public stkCGALPolygonOffsetInterface
 {
 public:
   static stkCGALPolygonOffset* New();

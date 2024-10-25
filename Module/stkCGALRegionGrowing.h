@@ -11,14 +11,14 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <stkCGALRegionGrowingInterface.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALRegionGrowing : public stkCGALRegionGrowingInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALRegionGrowing : public stkCGALRegionGrowingInterface
 {
 public:
   static stkCGALRegionGrowing* New();

@@ -14,14 +14,14 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <stkCGALPolygonOrientOperatorInterface.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALPolygonOrientOperator : public stkCGALPolygonOrientOperatorInterface
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALPolygonOrientOperator : public stkCGALPolygonOrientOperatorInterface
 {
 public:
   static stkCGALPolygonOrientOperator* New();

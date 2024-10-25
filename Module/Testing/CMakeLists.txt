@@ -1,5 +1,5 @@
 #[==[
-"stkCGALModuleTests" is the name of the executable.
+"stkCGALExtensionFiltersModuleTests" is the name of the executable.
 "tests" is the name of the variable used to store the list of tests.
 "TestUtils.css" is the name of one of the cpp files containing tests
 Options:
@@ -17,7 +17,7 @@ Options:
 
 #]==]
 
-stk_add_test_cxx(stkCGALModuleTests tests
+stk_add_test_cxx(stkCGALExtensionFiltersModuleTests tests
   TestCGALInit.cxx,NO_DATA,NO_VALID,NO_OUTPUT
   TestCGAL2DConstrainedDelaunayTriangulationMesher.cxx,NO_DATA,NO_VALID,NO_OUTPUT
   TestCGALSurfaceMeshTopology.cxx,NO_DATA,NO_VALID,NO_OUTPUT
@@ -40,4 +40,4 @@ stk_add_test_cxx(stkCGALModuleTests tests
   TestCGALDuplicateNonManifoldVertices.cxx,NO_VALID,NO_OUTPUT,DIRECT_DATA
 )
 
-vtk_test_cxx_executable(stkCGALModuleTests tests)
+vtk_test_cxx_executable(stkCGALExtensionFiltersModuleTests tests)

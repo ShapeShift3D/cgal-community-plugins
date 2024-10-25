@@ -14,14 +14,14 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <stkCGALPolygonSetOrientedSideClassifierInterface.h>
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALPolygonSetOrientedSideClassifier
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALPolygonSetOrientedSideClassifier
   : public stkCGALPolygonSetOrientedSideClassifierInterface
 {
 public:

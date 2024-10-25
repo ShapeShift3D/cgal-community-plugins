@@ -7,7 +7,7 @@
 #include "stkCGAL2DConstrainedDelaunayTriangulationMesher.h"
 
 // Use the following command in Windows Powershell from SpecifX's Build folder to run this test:
-// .\bin\stkCGALModuleTests.exe TestCGAL2DConstrainedDelaunayTriangulationMesher
+// .\bin\stkCGALExtensionFiltersModuleTests.exe TestCGAL2DConstrainedDelaunayTriangulationMesher
 // CMake variable STK_BUILD_TESTING must be set to ON to be able to run this test.
 
 int TestCGAL2DConstrainedDelaunayTriangulationMesher(int argc, char** const argv)

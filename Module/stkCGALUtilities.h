@@ -7,7 +7,7 @@
  */
 #pragma once
 
-#include <stkCGALModule.h>
+#include <stkCGALExtensionFiltersModule.h>
 #include <vtkObject.h>
 
 #include <CGAL/Exact_integer.h>
@@ -32,10 +32,10 @@ class vtkIdTypeArray;
 class vtkIntArray;
 
 /**
- * @ingroup stkCGAL
+ * @ingroup stkCGALExtensionFiltersModule
  *
  */
-class STKCGAL_EXPORT stkCGALUtilities : public vtkObject
+class STKCGALEXTENSIONFILTERS_EXPORT stkCGALUtilities : public vtkObject
 {
 public:
   static stkCGALUtilities* New();
